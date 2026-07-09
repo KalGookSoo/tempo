@@ -3,24 +3,59 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-import '@/global.css';
-
 import { Platform } from 'react-native';
+
+export const Palette = {
+  ink: '#111111',
+  paper: '#FFF8E8',
+  chalk: '#F7F7F2',
+  night: '#151515',
+  coal: '#222222',
+  steel: '#676767',
+  white: '#FFFFFF',
+  red: '#FF4D4D',
+  orange: '#FF9F1C',
+  yellow: '#FFD447',
+  green: '#21C55D',
+  cyan: '#00C2FF',
+  blue: '#3A86FF',
+  pink: '#FF5DA2',
+} as const;
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: Palette.ink,
+    textSecondary: Palette.steel,
+    background: Palette.paper,
+    backgroundElement: Palette.chalk,
+    backgroundSelected: Palette.yellow,
+    surface: Palette.chalk,
+    surfaceStrong: Palette.white,
+    border: Palette.ink,
+    shadow: Palette.ink,
+    primary: Palette.yellow,
+    work: Palette.green,
+    rest: Palette.cyan,
+    prepare: Palette.orange,
+    danger: Palette.red,
+    link: Palette.blue,
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: Palette.white,
+    textSecondary: '#B8B8B8',
+    background: Palette.night,
+    backgroundElement: Palette.coal,
+    backgroundSelected: Palette.yellow,
+    surface: Palette.coal,
+    surfaceStrong: '#2D2D2D',
+    border: Palette.white,
+    shadow: '#000000',
+    primary: Palette.yellow,
+    work: Palette.green,
+    rest: Palette.cyan,
+    prepare: Palette.orange,
+    danger: Palette.red,
+    link: Palette.blue,
   },
 } as const;
 

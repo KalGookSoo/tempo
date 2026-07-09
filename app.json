@@ -8,7 +8,11 @@
     "scheme": "tempo",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.dorffdoyevskyi.tempo",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -37,6 +41,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8886ed7d-5031-4c89-989d-2f888d5d7bf2"
+      }
+    },
+    "owner": "dorffdoyevskyi"
   }
 }

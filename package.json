@@ -2,6 +2,8 @@
   "name": "tempo",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "description": "Expo로 구현한 다목적 운동 프로그램 타이머.",
+  "license": "Apache-2.0",
   "dependencies": {
     "@expo/ui": "~57.0.4",
     "expo": "~57.0.4",

@@ -235,6 +235,18 @@ export default function TimerRoute() {
   };
 
   const handleModeChange = (nextMode: TimerMode) => {
+    if (nextMode === mode) {
+      return;
+    }
+
+    if (status === 'running' || status === 'paused') {
+      if (mode === 'countdown') {
+        setElapsedSeconds(configuredSeconds - remainingSeconds);
+      } else {
+        setRemainingSeconds(configuredSeconds - elapsedSeconds);
+      }
+    }
+
     setMode(nextMode);
     if (status === 'idle' || status === 'completed') {
       setRemainingSeconds(configuredSeconds);

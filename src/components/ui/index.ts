@@ -20,6 +20,9 @@ export {
   UnorderedList,
 } from './primitives';
 
+export { DurationPicker, TimePickerColumn, formatTimePart } from './time-picker';
+export type { DurationParts } from './time-picker';
+
 export type {
   ButtonProps,
   CardProps,

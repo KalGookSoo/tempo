@@ -7,7 +7,7 @@
 
 - 앱의 첫 화면은 `타이머`, `스톱워치`, `인터벌` 세 가지 핵심 실행 흐름에 집중한다.
 - `카운트다운`과 `카운트업`은 별도 라우트로 나누지 않고 `/timer` 안에서 토글로 전환한다.
-- 프리셋은 독립 최상위 메뉴가 아니라 `/interval` 하위 개념으로 둔다.
+- 저장된 인터벌 구성은 `프로그램 목록`에서 관리한다.
 - 실행 기록, 히스토리는 1차 MVP의 화면 IA에서 제외한다.
 - 실시간 시계와 하드웨어 전자시계 관련 화면은 제공하지 않는다.
 
@@ -17,7 +17,7 @@
 | --- | --- | --- |
 | 타이머 | `/timer` | 카운트다운과 카운트업을 토글로 전환해 실행 |
 | 스톱워치 | `/stopwatch` | 제한 시간 없이 경과 시간과 랩 측정 |
-| 인터벌 | `/interval` | 인터벌 프로그램 생성, 프리셋 선택, 도움말 확인 |
+| 인터벌 | `/interval` | 인터벌 프로그램 생성, 저장된 프로그램 선택, 도움말 확인 |
 
 홈 `/`은 위 진입점으로 이동하는 시작 화면이다.
 
@@ -40,26 +40,22 @@ flowchart TD
     S --> S2["랩 / 리셋"]
 
     I --> N["새 프로그램 /interval/new"]
-    I --> P["프리셋 /interval/presets"]
+    I --> P["프로그램 목록 /interval/programs"]
     I --> H["도움말 /interval/help"]
+    H --> H1["도움말 상세 /interval/help/:id"]
 
     N --> R["인터벌 실행 /interval/run"]
     N --> P
-    P --> P1["기본 프리셋 상세 /interval/presets/default/:id"]
-    P --> P2["사용자 프리셋 상세 /interval/presets/custom/:id"]
+    P --> P2["프로그램 상세 /interval/programs/:id"]
     P --> N
-    P1 --> R
-    P1 --> N
     P2 --> R
-    P2 --> P3["사용자 프리셋 편집 /interval/presets/custom/:id/edit"]
-    P3 --> R
-    H --> N
+    H1 --> N
 
     classDef primary fill:#FFF4BF,stroke:#111111,color:#111111;
     classDef screen fill:#FFFFFF,stroke:#111111,color:#111111;
     classDef done fill:#DDF8E8,stroke:#111111,color:#111111;
     class B,T,S,I,R primary;
-    class T1,T2,T3,S1,S2,N,P,H,P1,P2,P3 screen;
+    class T1,T2,T3,S1,S2,N,P,H,H1,P2 screen;
 ```
 
 ## 홈 `/`
@@ -116,12 +112,12 @@ flowchart TD
 목적:
 
 - 인터벌 프로그램 관련 흐름의 진입점이다.
-- `새 프로그램`, `프리셋`, `도움말` 세 가지 메뉴를 제공한다.
+- `새 프로그램`, `프로그램 목록`, `도움말` 세 가지 메뉴를 제공한다.
 
 주요 이동:
 
 - 새 프로그램: `/interval/new`
-- 프리셋: `/interval/presets`
+- 프로그램 목록: `/interval/programs`
 - 도움말: `/interval/help`
 
 ## 새 프로그램 `/interval/new`
@@ -130,77 +126,57 @@ flowchart TD
 
 - 이름, 구간 구성, 라운드, 알림 큐를 단계적으로 선택한다.
 - 우측 상단 저장 버튼으로 프로그램을 저장한다.
-- 최종 실행 버튼으로 인터벌 실행 화면으로 이동한다.
+- 저장 후 프로그램 상세 화면으로 이동한다.
 
 주요 이동:
 
-- 저장: `/interval/presets`
-- 최종 실행: `/interval/run`
+- 저장: `/interval/programs/:id`
 - 취소 또는 뒤로가기: `/interval`
 
-## 프리셋 `/interval/presets`
+## 프로그램 목록 `/interval/programs`
 
 목적:
 
-- 기본 제공 인터벌 프리셋과 사용자 인터벌 프로그램을 보여준다.
-- 프리셋 목록 안에서도 새 프로그램을 만들 수 있다.
-
-기본 제공 프리셋 예시:
-
-- Tabata
-- EMOM
-- FGB 스타일
+- 저장된 사용자 인터벌 프로그램을 목록으로 보여준다.
+- 저장된 프로그램이 없으면 fallback component를 보여준다.
+- 목록이 길어지면 페이지네이션 없이 스크롤로 탐색한다.
 
 주요 이동:
 
 - 새 프로그램: `/interval/new`
-- 기본 프리셋 상세: `/interval/presets/default/:id`
-- 사용자 프리셋 상세: `/interval/presets/custom/:id`
+- 도움말: `/interval/help`
+- 프로그램 상세: `/interval/programs/:id`
 
-## 기본 프리셋 상세 `/interval/presets/default/:id`
+## 프로그램 상세 `/interval/programs/:id`
 
 목적:
 
-- 기본 프리셋 설정을 확인한다.
-- 바로 실행한다.
-- 복제하여 새 사용자 프로그램으로 만든다.
+- 저장된 인터벌 프로그램 설정을 확인한다.
+- 실행하거나 목록으로 돌아간다.
 
 주요 이동:
 
 - 실행: `/interval/run`
-- 복제 후 편집: `/interval/new?from=:id`
-- 뒤로가기: `/interval/presets`
-
-## 사용자 프리셋 상세 `/interval/presets/custom/:id`
-
-목적:
-
-- 사용자가 만든 인터벌 프로그램 설정을 확인한다.
-- 실행하거나 편집한다.
-
-주요 이동:
-
-- 실행: `/interval/run`
-- 편집: `/interval/presets/custom/:id/edit`
-- 뒤로가기: `/interval/presets`
-
-## 사용자 프리셋 편집 `/interval/presets/custom/:id/edit`
-
-목적:
-
-- 기존 사용자 인터벌 프로그램의 이름, 구간, 라운드, 알림 큐를 수정한다.
-
-주요 이동:
-
-- 저장: `/interval/presets/custom/:id`
-- 실행: `/interval/run`
+- 목록으로가기: `/interval/programs`
 
 ## 도움말 `/interval/help`
 
 목적:
 
-- Tabata, EMOM, FGB 스타일 같은 프로그램을 tempo 인터벌로 만드는 방법을 설명한다.
-- 사용자가 도움말에서 바로 새 프로그램 생성으로 이동할 수 있다.
+- Tabata, EMOM, FGB 스타일, 사용자 커스텀 프로그램명을 목록으로 보여준다.
+- 상세 설명은 별도 상세 페이지에서 제공한다.
+
+주요 이동:
+
+- 도움말 상세: `/interval/help/:id`
+
+## 도움말 상세 `/interval/help/:id`
+
+목적:
+
+- 선택한 프로그램을 tempo 인터벌 입력값으로 만드는 방법을 설명한다.
+- EMOM은 일반적으로 1분짜리 구간을 n라운드 반복하거나 휴식 시간을 0으로 둔 프로그램으로 설명한다.
+- 40초 운동, 20초 휴식 같은 구성은 사용자 커스텀 인터벌 예시로 설명한다.
 
 주요 이동:
 

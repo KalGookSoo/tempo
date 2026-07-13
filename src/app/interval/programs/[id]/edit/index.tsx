@@ -1,23 +1,28 @@
 import { ArrowLeft, ArrowRight, Save } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card, Heading, Input, NumberInput, Paragraph } from '@/components/ui';
 import { DurationPicker, formatTimePart, type DurationParts } from '@/components/ui/time-picker';
 import { Fonts, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { createIntervalProgram, type CueMode } from '@/lib/interval-programs';
+import {
+  getIntervalProgram,
+  updateIntervalProgram,
+  type CueMode,
+  type IntervalProgram,
+} from '@/lib/interval-programs';
 
 const steps = [
   {
     title: '1. 프로그램 이름',
-    description: '예: Tabata 변형, 하체 EMOM, 파이트 곤 배드 스타일처럼 알아보기 쉬운 이름을 붙입니다.',
+    description: '알아보기 쉬운 이름으로 수정합니다.',
   },
   {
     title: '2. 준비 시간',
-    description: '운동 시작 전에 준비할 시간을 정합니다. 바로 시작하려면 00:00:00으로 둡니다.',
+    description: '운동 시작 전에 준비할 시간을 정합니다.',
   },
   {
     title: '3. 운동 시간',
@@ -25,7 +30,7 @@ const steps = [
   },
   {
     title: '4. 휴식 시간',
-    description: '각 라운드 사이에 쉬는 시간을 정합니다. EMOM처럼 매 분 반복할 때는 00:00:00으로 둘 수 있습니다.',
+    description: '각 라운드 사이에 쉬는 시간을 정합니다.',
   },
   {
     title: '5. 라운드',
@@ -33,7 +38,7 @@ const steps = [
   },
   {
     title: '6. 알림 큐',
-    description: '기본값은 비프음입니다. 휴대폰이 진동 모드일 때는 진동으로 대체하는 흐름을 기본으로 둡니다.',
+    description: '비프음 또는 진동을 선택합니다.',
   },
 ];
 
@@ -41,40 +46,65 @@ function formatTime(value: DurationParts) {
   return `${formatTimePart(value.hours)}:${formatTimePart(value.minutes)}:${formatTimePart(value.seconds)}`;
 }
 
-function timeToSeconds(value: DurationParts) {
-  return value.hours * 3600 + value.minutes * 60 + value.seconds;
-}
-
-function createInitialTime(minutes: number, seconds: number): DurationParts {
-  return { hours: 0, minutes, seconds };
-}
-
-function secondsToTimeValue(totalSeconds: number): DurationParts {
+function secondsToDurationParts(totalSeconds: number): DurationParts {
   return {
-    hours: 0,
-    minutes: Math.floor(totalSeconds / 60),
+    hours: Math.floor(totalSeconds / 3600),
+    minutes: Math.floor((totalSeconds % 3600) / 60),
     seconds: totalSeconds % 60,
   };
 }
 
-export default function NewIntervalProgramRoute() {
+function durationPartsToSeconds(value: DurationParts) {
+  return value.hours * 3600 + value.minutes * 60 + value.seconds;
+}
+
+export default function EditIntervalProgramRoute() {
   const router = useRouter();
   const theme = useTheme();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const programId = Number(Array.isArray(id) ? id[0] : id);
+  const [program, setProgram] = useState<IntervalProgram | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [name, setName] = useState('새 인터벌 프로그램');
-  const [prepareTime, setPrepareTime] = useState(() => createInitialTime(0, 10));
-  const [workTime, setWorkTime] = useState(() => createInitialTime(0, 20));
-  const [restTime, setRestTime] = useState(() => createInitialTime(0, 10));
+  const [name, setName] = useState('');
+  const [prepareSeconds, setPrepareSeconds] = useState(10);
+  const [workTime, setWorkTime] = useState<DurationParts>({ hours: 0, minutes: 0, seconds: 20 });
+  const [restTime, setRestTime] = useState<DurationParts>({ hours: 0, minutes: 0, seconds: 10 });
   const [rounds, setRounds] = useState('8');
   const [cueMode, setCueMode] = useState<CueMode>('beep');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!Number.isFinite(programId)) {
+      return;
+    }
+
+    let mounted = true;
+
+    void getIntervalProgram(programId).then((nextProgram) => {
+      if (!mounted || !nextProgram) {
+        return;
+      }
+
+      setProgram(nextProgram);
+      setName(nextProgram.name);
+      setPrepareSeconds(nextProgram.prepareSeconds === 5 ? 5 : 10);
+      setWorkTime(secondsToDurationParts(nextProgram.workSeconds));
+      setRestTime(secondsToDurationParts(nextProgram.restSeconds));
+      setRounds(String(nextProgram.rounds));
+      setCueMode(nextProgram.cueMode);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [programId]);
 
   const isLastStep = currentStep === steps.length - 1;
   const canMoveNext = currentStep < steps.length - 1;
   const canSave = isLastStep && name.trim().length > 0 && Number(rounds) > 0 && !saving;
   const summary = useMemo(
-    () => `${formatTime(prepareTime)} 준비 / ${formatTime(workTime)} 운동 / ${formatTime(restTime)} 휴식`,
-    [prepareTime, restTime, workTime],
+    () => `${formatTime(secondsToDurationParts(prepareSeconds))} 준비 / ${formatTime(workTime)} 운동 / ${formatTime(restTime)} 휴식`,
+    [prepareSeconds, restTime, workTime],
   );
 
   const handleSave = async () => {
@@ -84,16 +114,16 @@ export default function NewIntervalProgramRoute() {
 
     try {
       setSaving(true);
-      const program = await createIntervalProgram({
+      await updateIntervalProgram(programId, {
         cueMode,
         name: name.trim(),
-        prepareSeconds: timeToSeconds(prepareTime),
-        restSeconds: timeToSeconds(restTime),
+        prepareSeconds,
+        restSeconds: durationPartsToSeconds(restTime),
         rounds: Number(rounds),
-        workSeconds: timeToSeconds(workTime),
+        workSeconds: durationPartsToSeconds(workTime),
       });
 
-      router.push(`/interval/programs/${program.id}` as never);
+      router.replace(`/interval/programs/${programId}` as never);
     } finally {
       setSaving(false);
     }
@@ -106,20 +136,16 @@ export default function NewIntervalProgramRoute() {
       case 1:
         return (
           <View style={styles.prepareOptions}>
-            {[5, 10].map((option) => {
-              const selected = timeToSeconds(prepareTime) === option;
-
-              return (
-                <Button
-                  key={option}
-                  size="lg"
-                  style={styles.prepareOption}
-                  variant={selected ? 'primary' : 'secondary'}
-                  onPress={() => setPrepareTime(secondsToTimeValue(option))}>
-                  {`${option}초`}
-                </Button>
-              );
-            })}
+            {[5, 10].map((option) => (
+              <Button
+                key={option}
+                size="lg"
+                style={styles.prepareOption}
+                variant={prepareSeconds === option ? 'primary' : 'secondary'}
+                onPress={() => setPrepareSeconds(option)}>
+                {`${option}초`}
+              </Button>
+            ))}
           </View>
         );
       case 2:
@@ -133,7 +159,6 @@ export default function NewIntervalProgramRoute() {
         return (
           <>
             <Paragraph muted>{summary}</Paragraph>
-            <Paragraph muted>기본값은 비프음입니다. 진동 모드에서는 진동으로 대체하는 것을 기준으로 합니다.</Paragraph>
             <View style={styles.cueOptions}>
               <Button
                 size="sm"
@@ -160,7 +185,7 @@ export default function NewIntervalProgramRoute() {
           <View style={styles.header}>
             <Pressable
               accessibilityRole="button"
-              onPress={() => (router.canGoBack() ? router.back() : router.replace('/interval'))}
+              onPress={() => router.replace(`/interval/programs/${programId}` as never)}
               style={({ pressed }) => [
                 styles.backButton,
                 { backgroundColor: theme.surface, borderColor: theme.border },
@@ -174,39 +199,48 @@ export default function NewIntervalProgramRoute() {
             </Button>
           </View>
 
-          <Card>
-            <Heading>새 프로그램</Heading>
-            <Paragraph muted>인터벌 프로그램을 단계적으로 구성한 뒤 저장합니다.</Paragraph>
-          </Card>
+          {program ? (
+            <>
+              <Card>
+                <Heading>프로그램 수정</Heading>
+                <Paragraph muted>새 프로그램 만들기와 같은 순서로 입력값을 수정합니다.</Paragraph>
+              </Card>
 
-          <Card>
-            <Text style={[styles.stepCounter, { color: theme.textSecondary }]}>
-              {currentStep + 1} / {steps.length}
-            </Text>
-            <Heading level={2}>{steps[currentStep].title}</Heading>
-            <Paragraph muted>{steps[currentStep].description}</Paragraph>
-            <View style={styles.stepInput}>{renderStepInput()}</View>
-          </Card>
+              <Card>
+                <Text style={[styles.stepCounter, { color: theme.textSecondary }]}>
+                  {currentStep + 1} / {steps.length}
+                </Text>
+                <Heading level={2}>{steps[currentStep].title}</Heading>
+                <Paragraph muted>{steps[currentStep].description}</Paragraph>
+                <View style={styles.stepInput}>{renderStepInput()}</View>
+              </Card>
 
-          <View style={styles.navigation}>
-            <Button
-              disabled={currentStep === 0}
-              icon={ArrowLeft}
-              size="lg"
-              style={styles.navButton}
-              variant="secondary"
-              onPress={() => setCurrentStep((step) => Math.max(0, step - 1))}>
-              이전
-            </Button>
-            <Button
-              disabled={!canMoveNext}
-              icon={ArrowRight}
-              size="lg"
-              style={styles.navButton}
-              onPress={() => setCurrentStep((step) => Math.min(steps.length - 1, step + 1))}>
-              다음
-            </Button>
-          </View>
+              <View style={styles.navigation}>
+                <Button
+                  disabled={currentStep === 0}
+                  icon={ArrowLeft}
+                  size="lg"
+                  style={styles.navButton}
+                  variant="secondary"
+                  onPress={() => setCurrentStep((step) => Math.max(0, step - 1))}>
+                  이전
+                </Button>
+                <Button
+                  disabled={!canMoveNext}
+                  icon={ArrowRight}
+                  size="lg"
+                  style={styles.navButton}
+                  onPress={() => setCurrentStep((step) => Math.min(steps.length - 1, step + 1))}>
+                  다음
+                </Button>
+              </View>
+            </>
+          ) : (
+            <Card>
+              <Heading>프로그램을 찾을 수 없습니다</Heading>
+              <Paragraph muted>목록으로 돌아가 저장된 프로그램을 다시 선택하세요.</Paragraph>
+            </Card>
+          )}
         </View>
       </SafeAreaView>
     </ScrollView>

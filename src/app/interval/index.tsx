@@ -9,7 +9,7 @@ export default function IntervalRoute() {
       description="운동 시간, 휴식 시간, 라운드 수를 조합해 반복 프로그램을 구성합니다."
       links={[
         { label: '새 프로그램', href: '/interval/new', icon: Plus },
-        { label: '프리셋', href: '/interval/presets', icon: ListChecks },
+        { label: '프로그램 목록', href: '/interval/programs', icon: ListChecks },
         { label: '도움말', href: '/interval/help', icon: CircleHelp },
       ]}
     />

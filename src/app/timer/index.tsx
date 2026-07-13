@@ -1,5 +1,4 @@
 import * as Notifications from 'expo-notifications';
-import { Picker } from '@react-native-picker/picker';
 import { ArrowDown, ArrowUp, Pause, Play, RotateCcw } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
@@ -7,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui';
+import { TimePickerColumn, formatTimePart } from '@/components/ui/time-picker';
 import { Fonts, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -23,73 +23,12 @@ Notifications.setNotificationHandler({
   }),
 });
 
-type TimePickerColumnProps = {
-  disabled: boolean;
-  highlighted: boolean;
-  label: string;
-  max: number;
-  onChange: (value: number) => void;
-  value: number;
-};
-
-function formatNumber(value: number) {
-  return String(value).padStart(2, '0');
-}
-
 function secondsToParts(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
   return { hours, minutes, seconds };
-}
-
-function TimePickerColumn({ disabled, highlighted, label, max, onChange, value }: TimePickerColumnProps) {
-  const theme = useTheme();
-  const items = useMemo(
-    () =>
-      Array.from({ length: max + 1 }, (_, itemValue) => {
-        const formattedValue = formatNumber(itemValue);
-        return { label: formattedValue, value: String(itemValue) };
-      }),
-    [max],
-  );
-
-  return (
-    <View
-      accessibilityLabel={label}
-      style={[
-        styles.pickerColumn,
-        {
-          backgroundColor: highlighted ? theme.primary : theme.surfaceStrong,
-          borderColor: theme.border,
-          opacity: disabled ? 0.95 : 1,
-        },
-      ]}>
-      {disabled ? (
-        <View style={styles.lockedPickerValue}>
-          <Text style={[styles.lockedPickerText, { color: highlighted ? '#111111' : theme.text }]}>
-            {formatNumber(value)}
-          </Text>
-        </View>
-      ) : (
-        <Picker
-          enabled
-          dropdownIconColor={theme.text}
-          itemStyle={[styles.nativePickerItem, { color: theme.text }]}
-          mode="dropdown"
-          prompt={`${label} 선택`}
-          selectedValue={String(value)}
-          style={[styles.nativePicker, { color: theme.text }]}
-          onValueChange={(itemValue) => onChange(Number(itemValue))}>
-          {items.map((item) => (
-            <Picker.Item color={theme.text} key={item.value} label={item.label} value={item.value} />
-          ))}
-        </Picker>
-      )}
-      <Text style={[styles.columnLabel, { color: highlighted ? '#111111' : theme.textSecondary }]}>{label}</Text>
-    </View>
-  );
 }
 
 export default function TimerRoute() {
@@ -124,7 +63,7 @@ export default function TimerRoute() {
       ? remainingSeconds > 0
       : elapsedSeconds < configuredSeconds
     : configuredSeconds > 0;
-  const targetTimeText = `${formatNumber(hours)}:${formatNumber(minutes)}:${formatNumber(seconds)}`;
+  const targetTimeText = `${formatTimePart(hours)}:${formatTimePart(minutes)}:${formatTimePart(seconds)}`;
 
   useEffect(() => {
     if (status !== 'running') {
@@ -411,47 +350,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.two,
     width: '100%',
-  },
-  pickerColumn: {
-    alignItems: 'center',
-    borderRadius: 8,
-    borderWidth: 3,
-    flex: 1,
-    gap: Spacing.two,
-    justifyContent: 'center',
-    minHeight: 132,
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.three,
-  },
-  nativePicker: {
-    alignSelf: 'stretch',
-    minHeight: 92,
-  },
-  lockedPickerValue: {
-    alignItems: 'center',
-    alignSelf: 'stretch',
-    justifyContent: 'center',
-    minHeight: 92,
-  },
-  lockedPickerText: {
-    fontFamily: Fonts.mono,
-    fontSize: 56,
-    fontWeight: '900',
-    letterSpacing: 0,
-    lineHeight: 64,
-  },
-  nativePickerItem: {
-    fontFamily: Fonts.mono,
-    fontSize: 16,
-    fontWeight: '900',
-    letterSpacing: 0,
-    lineHeight: 64,
-  },
-  columnLabel: {
-    fontFamily: Fonts.sans,
-    fontSize: 12,
-    fontWeight: 900,
-    lineHeight: 16,
   },
   actions: {
     flexDirection: 'row',

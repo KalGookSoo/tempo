@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.dorffdoyevskyi.tempo",
+      "bundleIdentifier": "kr.me.seesaw.tempo",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }

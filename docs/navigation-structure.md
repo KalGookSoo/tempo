@@ -16,7 +16,7 @@
 
 | 메뉴 | 경로 | 목적 |
 | --- | --- | --- |
-| 타이머 | `/timer/countdown` | 카운트다운과 카운트업을 토글로 전환해 실행 |
+| 타이머 | `/timer` | 카운트다운과 카운트업을 토글로 전환해 실행 |
 | 스톱워치 | `/timer/stopwatch` | 별도 설정 없이 경과 시간 측정 |
 | 인터벌 | `/timer/interval` | 운동/휴식 구간, 라운드, 인터벌 프리셋 관리 |
 | 설정 | `/settings` | 알림 큐, 표시, 사운드 설정 |
@@ -29,7 +29,7 @@
 %%{init: {"theme": "base", "themeVariables": {"background": "transparent", "primaryColor": "#FFFFFF", "primaryTextColor": "#111111", "primaryBorderColor": "#111111", "lineColor": "#111111", "tertiaryColor": "#F7F7F2"}}}%%
 flowchart TD
     A["앱 시작"] --> B["타이머 홈 /"]
-    B --> T["타이머 /timer/countdown"]
+    B --> T["타이머 /timer"]
     B --> E["스톱워치 /timer/stopwatch"]
     B --> F["인터벌 설정 /timer/interval"]
     B --> S["설정 /settings"]
@@ -73,12 +73,12 @@ flowchart TD
 
 주요 이동:
 
-- `/timer/countdown`
+- `/timer`
 - `/timer/stopwatch`
 - `/timer/interval`
 - `/settings`
 
-### 타이머 `/timer/countdown`
+### 타이머 `/timer`
 
 목적:
 
@@ -97,7 +97,7 @@ flowchart TD
 - 재개: 남은 시간 또는 경과 시간부터 이어서 실행
 - 리셋: 설정 화면으로 복귀
 
-`/timer/count-up`은 별도 라우트로 사용하지 않는다.
+`/timer/countdown`과 `/timer/count-up`은 별도 라우트로 사용하지 않는다.
 
 ### 스톱워치 `/timer/stopwatch`
 

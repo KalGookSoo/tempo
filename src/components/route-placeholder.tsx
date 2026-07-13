@@ -1,5 +1,5 @@
-import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { usePathname, useRouter } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card, Heading, Paragraph } from '@/components/ui';
@@ -19,12 +19,28 @@ export type RoutePlaceholderProps = {
 
 export function RoutePlaceholder({ description, links = [], title }: RoutePlaceholderProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const theme = useTheme();
+  const canGoBack = router.canGoBack();
+  const showBackButton = pathname !== '/';
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
+          {showBackButton ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => (canGoBack ? router.back() : router.replace('/'))}
+              style={({ pressed }) => [
+                styles.backButton,
+                { backgroundColor: theme.surface, borderColor: theme.border },
+                pressed && styles.pressed,
+              ]}>
+              <Text style={[styles.backButtonText, { color: theme.text }]}>← 뒤로</Text>
+            </Pressable>
+          ) : null}
+
           <Card>
             <Heading>{title}</Heading>
             <Paragraph muted>{description}</Paragraph>
@@ -64,5 +80,21 @@ const styles = StyleSheet.create({
   },
   links: {
     gap: Spacing.three,
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+    borderRadius: 4,
+    borderWidth: 3,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: 900,
+    lineHeight: 20,
+  },
+  pressed: {
+    opacity: 0.75,
+    transform: [{ translateX: 1 }, { translateY: 1 }],
   },
 });

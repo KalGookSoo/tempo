@@ -141,7 +141,7 @@ export function Button({
 }: ButtonProps) {
   const theme = useTheme();
   const color = getButtonColor(variant, theme);
-  const textColor = variant === 'ghost' ? theme.text : '#111111';
+  const textColor = getButtonTextColor(variant, theme);
 
   return (
     <Pressable
@@ -179,10 +179,12 @@ export type IconButtonProps = Omit<ButtonProps, 'children' | 'icon'> & {
 export function IconButton({ icon: Icon, label, size = 'md', ...props }: IconButtonProps) {
   const theme = useTheme();
   const iconSize = size === 'sm' ? 18 : size === 'lg' ? 32 : 24;
+  const variant = props.variant ?? 'secondary';
+  const color = getButtonTextColor(variant, theme);
 
   return (
-    <Button accessibilityLabel={label} size={size} {...props}>
-      <Icon color={theme.text} size={iconSize} strokeWidth={2.5} />
+    <Button accessibilityLabel={label} size={size} variant={variant} {...props}>
+      <Icon color={color} size={iconSize} strokeWidth={2.5} />
     </Button>
   );
 }
@@ -251,6 +253,7 @@ export function MenuItem({
   ...props
 }: MenuItemProps) {
   const theme = useTheme();
+  const textColor = selected ? '#111111' : destructive ? theme.danger : theme.text;
 
   return (
     <Pressable
@@ -266,9 +269,9 @@ export function MenuItem({
       ]}
       {...props}>
       {Icon ? (
-        <Icon color={destructive ? theme.danger : theme.text} size={20} strokeWidth={2.5} />
+        <Icon color={textColor} size={20} strokeWidth={2.5} />
       ) : null}
-      <Text style={[styles.menuItemText, { color: destructive ? theme.danger : theme.text }]}>{label}</Text>
+      <Text style={[styles.menuItemText, { color: textColor }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -355,7 +358,7 @@ export function TableCell({ header = false, style, ...props }: TableCellProps) {
     <Text
       style={[
         styles.tableCell,
-        { borderColor: theme.border, color: theme.text },
+        { borderColor: theme.border, color: header ? '#111111' : theme.text },
         header && styles.tableHeaderCell,
         style,
       ]}
@@ -405,6 +408,18 @@ function getButtonColor(variant: NonNullable<ButtonProps['variant']>, theme: Ret
     case 'primary':
     default:
       return theme.primary;
+  }
+}
+
+function getButtonTextColor(variant: NonNullable<ButtonProps['variant']>, theme: ReturnType<typeof useTheme>) {
+  switch (variant) {
+    case 'secondary':
+    case 'ghost':
+      return theme.text;
+    case 'danger':
+    case 'primary':
+    default:
+      return '#111111';
   }
 }
 

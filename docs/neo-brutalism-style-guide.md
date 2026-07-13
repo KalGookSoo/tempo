@@ -60,11 +60,11 @@ heading, paragraph, table, button, menu, list, link 같은 표현 요소는 Reac
 
 | Token           | Value     |
 |-----------------|-----------|
-| `bg`            | `night`   |
-| `surface`       | `coal`    |
-| `surfaceStrong` | `#2D2D2D` |
+| `bg`            | `#080808` |
+| `surface`       | `#1C1C1C` |
+| `surfaceStrong` | `#2A2A2A` |
 | `text`          | `white`   |
-| `textMuted`     | `#B8B8B8` |
+| `textMuted`     | `#CFCFCF` |
 | `border`        | `white`   |
 | `shadow`        | `#000000` |
 | `primary`       | `yellow`  |

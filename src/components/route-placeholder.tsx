@@ -1,13 +1,21 @@
+import type { ComponentType } from 'react';
 import { usePathname, useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card, Heading, Paragraph } from '@/components/ui';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+
+type RouteIcon = ComponentType<{
+  color?: string;
+  size?: number;
+  strokeWidth?: number;
+}>;
 
 export type RouteLink = {
   href: string;
+  icon?: RouteIcon;
   label: string;
 };
 
@@ -49,7 +57,11 @@ export function RoutePlaceholder({ description, links = [], title }: RoutePlaceh
           {links.length > 0 ? (
             <View style={styles.links}>
               {links.map((link) => (
-                <Button key={link.href} variant="secondary" onPress={() => router.push(link.href as never)}>
+                <Button
+                  key={link.href}
+                  icon={link.icon}
+                  variant="secondary"
+                  onPress={() => router.push(link.href as never)}>
                   {link.label}
                 </Button>
               ))}
@@ -68,7 +80,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     alignItems: 'center',
-    paddingBottom: BottomTabInset + Spacing.three,
+    paddingBottom: Spacing.three,
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.four,
   },

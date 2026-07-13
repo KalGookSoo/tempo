@@ -1,7 +1,8 @@
 import { Audio } from 'expo-av';
+import * as Notifications from 'expo-notifications';
 import { ArrowDown, ArrowUp, Pause, Play, RotateCcw } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -33,6 +34,16 @@ const phaseThemeColor: Record<IntervalPhase, 'prepare' | 'rest' | 'work'> = {
 };
 
 const beepSound = require('../../../../assets/sounds/beep.wav');
+const INTERVAL_NOTIFICATION_CHANNEL_ID = 'interval';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 function buildSegments(program: IntervalProgram) {
   const segments: IntervalSegment[] = [];
@@ -65,6 +76,7 @@ export default function IntervalRunRoute() {
   const [segmentIndex, setSegmentIndex] = useState(0);
   const [elapsedInSegment, setElapsedInSegment] = useState(0);
   const cueKeyRef = useRef<string | null>(null);
+  const notificationIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!Number.isFinite(numericProgramId)) {
@@ -99,6 +111,64 @@ export default function IntervalRunRoute() {
       playsInSilentModeIOS: true,
     });
   }, []);
+
+  useEffect(() => {
+    return () => {
+      void cancelCompletionNotification();
+    };
+  }, []);
+
+  const cancelCompletionNotification = async () => {
+    if (!notificationIdRef.current) {
+      return;
+    }
+
+    await Notifications.cancelScheduledNotificationAsync(notificationIdRef.current);
+    notificationIdRef.current = null;
+  };
+
+  const scheduleCompletionNotification = async (durationSeconds: number) => {
+    await cancelCompletionNotification();
+
+    const permissions = await Notifications.requestPermissionsAsync();
+    if (!permissions.granted) {
+      return;
+    }
+
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync(INTERVAL_NOTIFICATION_CHANNEL_ID, {
+        enableVibrate: true,
+        importance: Notifications.AndroidImportance.HIGH,
+        name: 'Interval',
+        vibrationPattern: [0, 500],
+      });
+    }
+
+    notificationIdRef.current = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Tempo',
+        body: program ? `${program.name} 프로그램이 완료되었습니다.` : '인터벌 프로그램이 완료되었습니다.',
+      },
+      trigger: {
+        channelId: INTERVAL_NOTIFICATION_CHANNEL_ID,
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: Math.max(1, durationSeconds),
+      },
+    });
+  };
+
+  const getRemainingRunSeconds = () => {
+    if (!currentSegment) {
+      return 0;
+    }
+
+    const currentRemainingSeconds = Math.max(0, currentSegment.durationSeconds - elapsedInSegment);
+    const nextSegmentsSeconds = segments
+      .slice(segmentIndex + 1)
+      .reduce((totalSeconds, segment) => totalSeconds + segment.durationSeconds, 0);
+
+    return currentRemainingSeconds + nextSegmentsSeconds;
+  };
 
   const playCue = useCallback(async () => {
     if (program?.cueMode === 'vibration') {
@@ -174,6 +244,7 @@ export default function IntervalRunRoute() {
 
   const handleAction = () => {
     if (status === 'running') {
+      void cancelCompletionNotification();
       setStatus('paused');
       return;
     }
@@ -182,10 +253,12 @@ export default function IntervalRunRoute() {
       return;
     }
 
+    void scheduleCompletionNotification(getRemainingRunSeconds());
     setStatus('running');
   };
 
   const handleReset = () => {
+    void cancelCompletionNotification();
     setStatus('idle');
     setSegmentIndex(0);
     setElapsedInSegment(0);

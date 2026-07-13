@@ -8,10 +8,12 @@
     "scheme": "tempo",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/images/tempo-icon.png",
       "bundleIdentifier": "kr.me.seesaw.tempo",
+      "buildNumber": "1",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSMicrophoneUsageDescription": "운동 알림 사운드 큐를 직접 녹음하기 위해 마이크를 사용합니다. 녹음 파일은 기기 안에만 저장됩니다."
       }
     },
     "android": {

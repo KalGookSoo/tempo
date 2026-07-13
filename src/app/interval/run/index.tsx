@@ -1,5 +1,6 @@
+import { Audio } from 'expo-av';
 import { ArrowDown, ArrowUp, Pause, Play, RotateCcw } from 'lucide-react-native';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,6 +25,14 @@ const phaseLabel: Record<IntervalPhase, string> = {
   rest: '휴식',
   work: '운동',
 };
+
+const phaseThemeColor: Record<IntervalPhase, 'prepare' | 'rest' | 'work'> = {
+  prepare: 'prepare',
+  rest: 'rest',
+  work: 'work',
+};
+
+const beepSound = require('../../../../assets/sounds/beep.wav');
 
 function buildSegments(program: IntervalProgram) {
   const segments: IntervalSegment[] = [];
@@ -55,6 +64,7 @@ export default function IntervalRunRoute() {
   const [status, setStatus] = useState<RunStatus>('idle');
   const [segmentIndex, setSegmentIndex] = useState(0);
   const [elapsedInSegment, setElapsedInSegment] = useState(0);
+  const cueKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!Number.isFinite(numericProgramId)) {
@@ -83,6 +93,52 @@ export default function IntervalRunRoute() {
     : 0;
   const canStart = segments.length > 0 && status !== 'completed';
   const roundLabel = currentSegment?.round ? `${currentSegment.round} / ${program?.rounds ?? 0}` : '-';
+
+  useEffect(() => {
+    void Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+    });
+  }, []);
+
+  const playCue = useCallback(async () => {
+    if (program?.cueMode === 'vibration') {
+      Vibration.vibrate(180);
+      return;
+    }
+
+    const { sound } = await Audio.Sound.createAsync(beepSound, { shouldPlay: true });
+    sound.setOnPlaybackStatusUpdate((playbackStatus) => {
+      if (playbackStatus.isLoaded && playbackStatus.didJustFinish) {
+        void sound.unloadAsync();
+      }
+    });
+  }, [program?.cueMode]);
+
+  useEffect(() => {
+    if (
+      status !== 'running' ||
+      !currentSegment ||
+      currentSegment.durationSeconds <= 3 ||
+      currentSegment.phase === 'prepare'
+    ) {
+      return;
+    }
+
+    const remainingSeconds = currentSegment.durationSeconds - elapsedInSegment;
+
+    if (remainingSeconds < 1 || remainingSeconds > 3) {
+      return;
+    }
+
+    const cueKey = `${segmentIndex}:${remainingSeconds}`;
+
+    if (cueKeyRef.current === cueKey) {
+      return;
+    }
+
+    cueKeyRef.current = cueKey;
+    void playCue();
+  }, [currentSegment, elapsedInSegment, playCue, segmentIndex, status]);
 
   useEffect(() => {
     if (status !== 'running' || !currentSegment) {
@@ -133,10 +189,12 @@ export default function IntervalRunRoute() {
     setStatus('idle');
     setSegmentIndex(0);
     setElapsedInSegment(0);
+    cueKeyRef.current = null;
   };
 
   const buttonLabel = status === 'running' ? '일시정지' : status === 'paused' ? '재개' : '시작';
   const buttonIcon = status === 'running' ? Pause : Play;
+  const activeBackgroundColor = currentSegment ? theme[phaseThemeColor[currentSegment.phase]] : theme.primary;
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
@@ -187,7 +245,7 @@ export default function IntervalRunRoute() {
                 style={[
                   styles.timePanel,
                   {
-                    backgroundColor: status === 'running' ? theme.primary : theme.surfaceStrong,
+                    backgroundColor: status === 'running' ? activeBackgroundColor : theme.surfaceStrong,
                     borderColor: theme.border,
                   },
                 ]}>

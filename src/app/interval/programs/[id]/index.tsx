@@ -1,4 +1,4 @@
-import { CirclePlay, ListChecks, Pencil, Trash2 } from 'lucide-react-native';
+import { CirclePlay, Pencil, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -107,14 +107,6 @@ export default function CustomPresetDetailRoute() {
                   style={styles.actionButton}
                   onPress={() => router.push(`/interval/run?programId=${program.id}` as never)}>
                   실행
-                </Button>
-                <Button
-                  icon={ListChecks}
-                  size="lg"
-                  style={styles.actionButton}
-                  variant="secondary"
-                  onPress={() => router.replace('/interval/programs')}>
-                  목록으로가기
                 </Button>
               </View>
 

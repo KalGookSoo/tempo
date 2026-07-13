@@ -71,7 +71,8 @@ export default function NewIntervalProgramRoute() {
 
   const isLastStep = currentStep === steps.length - 1;
   const canMoveNext = currentStep < steps.length - 1;
-  const canSave = isLastStep && name.trim().length > 0 && Number(rounds) > 0 && !saving;
+  const isValid = name.trim().length > 0 && Number(rounds) > 0;
+  const canSave = isValid && !saving;
   const summary = useMemo(
     () => `${formatTime(prepareTime)} 준비 / ${formatTime(workTime)} 운동 / ${formatTime(restTime)} 휴식`,
     [prepareTime, restTime, workTime],
@@ -199,12 +200,12 @@ export default function NewIntervalProgramRoute() {
               이전
             </Button>
             <Button
-              disabled={!canMoveNext}
-              icon={ArrowRight}
+              disabled={isLastStep ? !canSave : !canMoveNext}
+              icon={isLastStep ? Save : ArrowRight}
               size="lg"
               style={styles.navButton}
-              onPress={() => setCurrentStep((step) => Math.min(steps.length - 1, step + 1))}>
-              다음
+              onPress={isLastStep ? handleSave : () => setCurrentStep((step) => Math.min(steps.length - 1, step + 1))}>
+              {isLastStep ? (saving ? '저장 중' : '저장') : '다음'}
             </Button>
           </View>
         </View>

@@ -10,8 +10,8 @@ export default function CustomPresetEditRoute() {
       title={`프리셋 편집: ${id ?? ''}`}
       description="이름, 인터벌 세트, 라운드, 알림 큐를 수정합니다."
       links={[
-        { label: '프리셋 상세로 이동', href: `/presets/custom/${id ?? ''}` },
-        { label: '실행 화면으로 이동', href: '/timer/run' },
+        { label: '프리셋 상세로 이동', href: `/interval/presets/custom/${id ?? ''}` },
+        { label: '실행 화면으로 이동', href: '/interval/run' },
       ]}
     />
   );

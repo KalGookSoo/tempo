@@ -1,35 +1,54 @@
 # Tempo 내비게이션 구조도
 
-이 문서는 tempo MVP의 페이지 간 이동 경로를 정의한다.
+이 문서는 tempo MVP의 화면 간 이동 경로를 정의한다.
 이런 문서는 보통 `정보 구조(Information Architecture, IA)`, `사이트맵`, 또는 `내비게이션 구조도`라고 부른다.
+
+화면 이동은 SwiftUI의 `NavigationStack` + 값 기반 라우트(enum)로 구현한다. URL 경로 대신, 아래와 같은 `Route` enum의 case로 화면을 식별한다.
+
+```swift
+enum Route: Hashable {
+    case timer
+    case stopwatch
+    case interval
+    case intervalNew
+    case intervalPrograms
+    case intervalProgramDetail(id: String)
+    case intervalProgramEdit(id: String)
+    case intervalHelp
+    case intervalHelpDetail(id: String)
+    case intervalRun(programID: String)
+}
+```
+
+홈 화면은 `NavigationStack`의 루트이므로 별도 `Route` case가 필요 없다.
 
 ## 원칙
 
 - 앱의 첫 화면은 `타이머`, `스톱워치`, `인터벌` 세 가지 핵심 실행 흐름에 집중한다.
-- `카운트다운`과 `카운트업`은 별도 라우트로 나누지 않고 `/timer` 안에서 토글로 전환한다.
+- `카운트다운`과 `카운트업`은 별도 라우트로 나누지 않고 `Route.timer` 화면 안에서 토글로 전환한다.
 - 저장된 인터벌 구성은 `프로그램 목록`에서 관리한다.
 - 실행 기록, 히스토리는 1차 MVP의 화면 IA에서 제외한다.
 - 실시간 시계와 하드웨어 전자시계 관련 화면은 제공하지 않는다.
 
 ## 최상위 진입점
 
-| 메뉴 | 경로 | 목적 |
+| 메뉴 | Route | 목적 |
 | --- | --- | --- |
-| 타이머 | `/timer` | 카운트다운과 카운트업을 토글로 전환해 실행 |
-| 스톱워치 | `/stopwatch` | 제한 시간 없이 경과 시간과 랩 측정 |
-| 인터벌 | `/interval` | 인터벌 프로그램 생성, 저장된 프로그램 선택, 도움말 확인 |
+| 타이머 | `.timer` | 카운트다운과 카운트업을 토글로 전환해 실행 |
+| 스톱워치 | `.stopwatch` | 제한 시간 없이 경과 시간과 랩 측정 |
+| 인터벌 | `.interval` | 인터벌 프로그램 생성, 저장된 프로그램 선택, 도움말 확인 |
 
-홈 `/`은 위 진입점으로 이동하는 시작 화면이다.
+홈(`NavigationStack` 루트)은 위 진입점으로 이동하는 시작 화면이다.
 
 ## 전체 구조
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"background": "transparent", "primaryColor": "#FFFFFF", "primaryTextColor": "#111111", "primaryBorderColor": "#111111", "lineColor": "#111111", "tertiaryColor": "#F7F7F2"}}}%%
 flowchart TD
-    A["앱 시작"] --> B["타이머 홈 /"]
-    B --> T["타이머 /timer"]
-    B --> S["스톱워치 /stopwatch"]
-    B --> I["인터벌 /interval"]
+    A["앱 시작"] --> B["홈 (NavigationStack 루트)"]
+    B --> T[".timer"]
+    B --> S[".stopwatch"]
+    B --> I[".interval"]
 
     T --> T1["카운트다운 모드"]
     T --> T2["카운트업 모드"]
@@ -39,44 +58,46 @@ flowchart TD
     S --> S1["시작 / 중지"]
     S --> S2["랩 / 리셋"]
 
-    I --> N["새 프로그램 /interval/new"]
-    I --> P["프로그램 목록 /interval/programs"]
-    I --> H["도움말 /interval/help"]
-    H --> H1["도움말 상세 /interval/help/:id"]
+    I --> N[".intervalNew"]
+    I --> P[".intervalPrograms"]
+    I --> H[".intervalHelp"]
+    H --> H1[".intervalHelpDetail(id:)"]
 
-    N --> R["인터벌 실행 /interval/run"]
+    N --> R[".intervalRun(programID:)"]
     N --> P
-    P --> P2["프로그램 상세 /interval/programs/:id"]
+    P --> P2[".intervalProgramDetail(id:)"]
     P --> N
     P2 --> R
+    P2 --> E[".intervalProgramEdit(id:)"]
+    E --> P2
     H1 --> N
 
     classDef primary fill:#FFF4BF,stroke:#111111,color:#111111;
     classDef screen fill:#FFFFFF,stroke:#111111,color:#111111;
     classDef done fill:#DDF8E8,stroke:#111111,color:#111111;
     class B,T,S,I,R primary;
-    class T1,T2,T3,S1,S2,N,P,H,H1,P2 screen;
+    class T1,T2,T3,S1,S2,N,P,H,H1,P2,E screen;
 ```
 
-## 홈 `/`
+## 홈
 
 목적:
 
 - 사용자가 바로 실행할 타이머 유형을 선택한다.
 - 홈에는 `타이머`, `스톱워치`, `인터벌`만 둔다.
 
-주요 이동:
+주요 이동 (`navigationPath.append(...)`):
 
-- `/timer`
-- `/stopwatch`
-- `/interval`
+- `.timer`
+- `.stopwatch`
+- `.interval`
 
-## 타이머 `/timer`
+## 타이머 `.timer`
 
 목적:
 
 - 하나의 화면 우측 상단 토글 버튼으로 카운트다운과 카운트업을 전환한다.
-- 시간, 분, 초를 네이티브 picker로 설정한다.
+- 시간, 분, 초를 네이티브 `Picker`(wheel style)로 설정한다.
 - 시작하면 picker는 수정 불가 상태가 되고 남은 시간 또는 경과 시간을 표시한다.
 - 모드 토글은 타이머 상태와 무관하게 항상 접근 가능하다.
 - 일시정지 상태에서는 재개와 리셋을 제공한다.
@@ -90,9 +111,9 @@ flowchart TD
 - 재개: 남은 시간 또는 경과 시간부터 이어서 실행
 - 리셋: 설정 화면으로 복귀
 
-`/timer/countdown`과 `/timer/count-up`은 별도 라우트로 사용하지 않는다.
+카운트다운/카운트업은 `.timer` 화면 내부 상태(`mode`)로만 구분하고, 별도 `Route` case(`.timerCountdown`, `.timerCountUp` 같은 것)를 두지 않는다.
 
-## 스톱워치 `/stopwatch`
+## 스톱워치 `.stopwatch`
 
 목적:
 
@@ -107,7 +128,7 @@ flowchart TD
 - 랩
 - 리셋
 
-## 인터벌 `/interval`
+## 인터벌 `.interval`
 
 목적:
 
@@ -116,11 +137,11 @@ flowchart TD
 
 주요 이동:
 
-- 새 프로그램: `/interval/new`
-- 프로그램 목록: `/interval/programs`
-- 도움말: `/interval/help`
+- 새 프로그램: `.intervalNew`
+- 프로그램 목록: `.intervalPrograms`
+- 도움말: `.intervalHelp`
 
-## 새 프로그램 `/interval/new`
+## 새 프로그램 `.intervalNew`
 
 목적:
 
@@ -130,24 +151,24 @@ flowchart TD
 
 주요 이동:
 
-- 저장: `/interval/programs/:id`
-- 취소 또는 뒤로가기: `/interval`
+- 저장: `.intervalProgramDetail(id:)`
+- 취소 또는 뒤로가기: `.interval` (또는 `navigationPath.removeLast()`)
 
-## 프로그램 목록 `/interval/programs`
+## 프로그램 목록 `.intervalPrograms`
 
 목적:
 
 - 저장된 사용자 인터벌 프로그램을 목록으로 보여준다.
-- 저장된 프로그램이 없으면 fallback component를 보여준다.
-- 목록이 길어지면 페이지네이션 없이 스크롤로 탐색한다.
+- 저장된 프로그램이 없으면 fallback view를 보여준다.
+- 목록이 길어지면 페이지네이션 없이 스크롤로 탐색한다 (`List`).
 
 주요 이동:
 
-- 새 프로그램: `/interval/new`
-- 도움말: `/interval/help`
-- 프로그램 상세: `/interval/programs/:id`
+- 새 프로그램: `.intervalNew`
+- 도움말: `.intervalHelp`
+- 프로그램 상세: `.intervalProgramDetail(id:)`
 
-## 프로그램 상세 `/interval/programs/:id`
+## 프로그램 상세 `.intervalProgramDetail(id:)`
 
 목적:
 
@@ -156,21 +177,34 @@ flowchart TD
 
 주요 이동:
 
-- 실행: `/interval/run`
-- 목록으로가기: `/interval/programs`
+- 실행: `.intervalRun(programID:)`
+- 수정: `.intervalProgramEdit(id:)`
+- 목록으로가기: `.intervalPrograms` (또는 `navigationPath.removeLast()`)
 
-## 도움말 `/interval/help`
+## 프로그램 수정 `.intervalProgramEdit(id:)`
+
+목적:
+
+- 저장된 인터벌 프로그램의 이름, 준비/운동/휴식 시간, 라운드, 알림 큐를 단계적으로 수정한다.
+- 화면 구성은 `.intervalNew`와 동일한 단계형 흐름을 재사용한다.
+
+주요 이동:
+
+- 저장: `.intervalProgramDetail(id:)`로 복귀 (`navigationPath.removeLast()`)
+- 취소 또는 뒤로가기: `.intervalProgramDetail(id:)`로 복귀 (`navigationPath.removeLast()`)
+
+## 도움말 `.intervalHelp`
 
 목적:
 
 - Tabata, EMOM, FGB 스타일, 사용자 커스텀 프로그램명을 목록으로 보여준다.
-- 상세 설명은 별도 상세 페이지에서 제공한다.
+- 상세 설명은 별도 상세 화면에서 제공한다.
 
 주요 이동:
 
-- 도움말 상세: `/interval/help/:id`
+- 도움말 상세: `.intervalHelpDetail(id:)`
 
-## 도움말 상세 `/interval/help/:id`
+## 도움말 상세 `.intervalHelpDetail(id:)`
 
 목적:
 
@@ -180,9 +214,9 @@ flowchart TD
 
 주요 이동:
 
-- 새 프로그램 만들기: `/interval/new`
+- 새 프로그램 만들기: `.intervalNew`
 
-## 인터벌 실행 `/interval/run`
+## 인터벌 실행 `.intervalRun(programID:)`
 
 목적:
 
@@ -192,5 +226,5 @@ flowchart TD
 
 주요 이동:
 
-- 완료: `/`
-- 설정 수정: `/interval`
+- 완료: 홈으로 복귀 (`navigationPath.removeLast(navigationPath.count)`)
+- 설정 수정: `.interval`

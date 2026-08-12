@@ -7,27 +7,27 @@ tempo MVP는 네트워크 없이도 사용자의 인터벌 프리셋, 알림 큐
 
 ## 결론
 
-MVP의 기본 저장소는 `SQLite`로 둔다.
-사용자가 추가한 음원 파일과 직접 녹음 파일은 파일 시스템에 저장하고, SQLite에는 파일 식별자와 경로만 저장한다.
+MVP의 기본 저장소는 `SwiftData`로 둔다.
+사용자가 추가한 음원 파일과 직접 녹음 파일은 파일 시스템(`FileManager`)에 저장하고, SwiftData 모델에는 파일 식별자와 경로만 저장한다.
 
-권장 패키지:
+권장 프레임워크:
 
-- `expo-sqlite`: 프리셋, 설정, 사운드 메타데이터 저장
-- `expo-file-system`: 사용자 음원 파일과 녹음 파일 저장
+- `SwiftData`: 프리셋, 설정, 사운드 메타데이터 저장. `@Model` 매크로로 스키마를 Swift 코드로 선언하고, SwiftUI의 `@Query`와 바로 연동한다.
+- `FileManager`: 사용자 음원 파일과 녹음 파일 저장.
 
-현재 앱은 Expo 기반이므로 네이티브 SQLite를 직접 붙이는 대신 Expo 생태계 패키지를 우선 사용한다.
+SwiftData는 Apple의 기본 퍼시스턴스 프레임워크이므로, 별도 서드파티 DB 라이브러리를 붙이지 않고 iOS 표준 스택만으로 구현한다.
 
 ## 저장 대상
 
-| 대상 | 저장소 | 이유 |
-| --- | --- | --- |
-| 기본 인터벌 프리셋 | 앱 코드 + SQLite seed | 기본값은 코드로 관리하고, 앱 최초 실행 시 DB에 반영한다. |
-| 사용자 인터벌 프리셋 | SQLite | 이름, 라운드, 세트, 큐 옵션을 구조화해서 조회해야 한다. |
-| 알림 큐 설정 | SQLite | 전역 기본값과 프리셋별 오버라이드를 함께 다뤄야 한다. |
-| 사운드 큐 메타데이터 | SQLite | 기본 사운드, 사용자 파일, 녹음 파일을 같은 방식으로 선택해야 한다. |
-| 사용자 음원 파일 | File System | 바이너리 파일은 DB에 넣지 않는다. |
-| 직접 녹음 파일 | File System | 파일로 저장하고 DB에는 참조만 남긴다. |
-| 표시 설정 | SQLite key-value | 다크모드, 큰 숫자 표시 등 앱 설정은 단순 key-value로 충분하다. |
+| 대상          | 저장소                    | 이유                                        |
+|-------------|------------------------|-------------------------------------------|
+| 기본 인터벌 프리셋  | 앱 코드 + SwiftData seed  | 기본값은 코드로 관리하고, 앱 최초 실행 시 저장소에 반영한다.       |
+| 사용자 인터벌 프리셋 | SwiftData              | 이름, 라운드, 세트, 큐 옵션을 구조화해서 조회해야 한다.         |
+| 알림 큐 설정     | SwiftData              | 전역 기본값과 프리셋별 오버라이드를 함께 다뤄야 한다.            |
+| 사운드 큐 메타데이터 | SwiftData              | 기본 사운드, 사용자 파일, 녹음 파일을 같은 방식으로 선택해야 한다.   |
+| 사용자 음원 파일   | File System            | 바이너리 파일은 모델에 넣지 않는다.                      |
+| 직접 녹음 파일    | File System            | 파일로 저장하고 모델에는 참조만 남긴다.                    |
+| 표시 설정       | SwiftData 모델(`AppSettings`) | 설정 항목 수가 적어 key-value 대신 필드별 타입 있는 속성으로 관리한다. |
 
 ## 저장하지 않을 대상
 
@@ -38,7 +38,7 @@ MVP의 기본 저장소는 `SQLite`로 둔다.
 - 일시적인 UI 상태
 - 화면 미러링 연결 상태
 
-실행 중 앱이 종료된 뒤 복구가 필요해지면 `active_timer_session` 같은 별도 테이블을 추가한다.
+실행 중 앱이 종료된 뒤 복구가 필요해지면 `ActiveTimerSession` 같은 별도 모델을 추가한다.
 MVP에서는 먼저 프리셋과 사용자 설정 영속화에 집중한다.
 
 ## MVP 제외 대상
@@ -54,119 +54,175 @@ MVP에서는 먼저 프리셋과 사용자 설정 영속화에 집중한다.
 
 나중에 운동 로그, 통계, 최근 사용한 설정 다시 실행 기능이 필요해지면 별도 단계에서 추가한다.
 
-## 왜 AsyncStorage만 쓰지 않는가
+## 왜 UserDefaults만 쓰지 않는가
 
-AsyncStorage는 간단한 설정 저장에는 좋지만, tempo의 핵심 데이터에는 약하다.
+`UserDefaults`는 간단한 설정 저장에는 좋지만, tempo의 핵심 데이터에는 약하다.
 
-- 프리셋 목록, 기본 프리셋, 사용자 프리셋을 필터링하기 어렵다.
-- 프리셋별 알림 큐와 사운드 큐가 서로 참조될 때 JSON 덩어리가 커진다.
+- 프리셋 목록, 기본 프리셋, 사용자 프리셋을 필터링하거나 정렬하기 어렵다.
+- 프리셋별 알림 큐와 사운드 큐가 서로 참조될 때 하나의 plist 값이 계속 커진다.
 - 마이그레이션 실수가 발생하면 전체 데이터를 망가뜨리기 쉽다.
+- `@Query`로 SwiftUI 뷰에 자동 반영되는 이점을 얻을 수 없다.
 
-따라서 SQLite를 기준으로 잡고, 단순 설정도 같은 저장 계층에서 관리한다.
+따라서 SwiftData를 기준으로 잡고, 단순 설정(`AppSettings`)도 같은 저장 계층에서 모델로 관리한다.
 
 ## 데이터 모델
 
-### `schema_migrations`
+SwiftData는 `schema_migrations` 같은 버전 테이블을 직접 만들지 않는다. 스키마 버전 관리는 [마이그레이션 원칙](#마이그레이션-원칙)에서 설명하는 `VersionedSchema`/`SchemaMigrationPlan`으로
+처리한다. 아래는 초기 스키마(SchemaV1)에 포함되는 모델이다.
 
-DB 스키마 버전을 관리한다.
-
-| 컬럼 | 타입 | 설명 |
-| --- | --- | --- |
-| `version` | integer | 적용된 마이그레이션 버전 |
-| `applied_at` | text | ISO 8601 적용 시각 |
-
-### `timer_presets`
+### `TimerPreset`
 
 기본 프리셋과 사용자 프리셋을 저장한다.
 
-| 컬럼 | 타입 | 설명 |
-| --- | --- | --- |
-| `id` | text | UUID 또는 고정 seed id |
-| `kind` | text | `default` 또는 `custom` |
-| `mode` | text | `interval` |
-| `name` | text | 사용자에게 보이는 이름 |
-| `description` | text nullable | 보조 설명 |
-| `config_json` | text | 타이머 설정 JSON |
-| `cue_profile_id` | text nullable | 사용할 알림 큐 프로필 |
-| `sort_order` | integer | 목록 표시 순서 |
-| `created_at` | text | 생성 시각 |
-| `updated_at` | text | 수정 시각 |
-| `deleted_at` | text nullable | soft delete 시각 |
+```swift
+@Model
+final class TimerPreset {
+    @Attribute(.unique) var id: UUID
+    var kind: PresetKind        // .default 또는 .custom
+    var mode: String            // "interval"
+    var name: String
+    var presetDescription: String?
+    var config: IntervalConfig  // 타이머 설정 (아래 정의 참고). String이 아닌 구조화된 타입으로 저장한다.
+    var cueProfileID: UUID?
+    var sortOrder: Int
+    var createdAt: Date
+    var updatedAt: Date
+    var deletedAt: Date?        // soft delete
+}
+
+enum PresetKind: String, Codable {
+    case `default`
+    case custom
+}
+```
 
 MVP에서 프리셋은 인터벌 전용이다.
 타이머의 카운트다운과 카운트업은 프리셋으로 저장하지 않는다.
 
-예시 `config_json`:
+`IntervalConfig` 정의 — SwiftData는 `Codable` struct/enum을 모델 속성 타입으로 직접 저장할 수 있으므로, JSON 문자열로 직렬화하지 않고 아래처럼 타입 있는 struct를 그대로 쓴다. 잘못된 필드명이나 값 타입은 컴파일 타임에 걸러진다.
 
-```json
-{
-  "rounds": 8,
-  "prepareSeconds": 10,
-  "segments": [
-    { "type": "work", "seconds": 20 },
-    { "type": "rest", "seconds": 10 }
-  ]
+```swift
+struct IntervalConfig: Codable, Hashable {
+    var rounds: Int
+    var prepareSeconds: Int
+    var segments: [IntervalSegment]
+}
+
+struct IntervalSegment: Codable, Hashable {
+    enum Kind: String, Codable {
+        case work
+        case rest
+    }
+    var type: Kind
+    var seconds: Int
 }
 ```
 
-### `cue_profiles`
+예시:
+
+```swift
+IntervalConfig(
+    rounds: 8,
+    prepareSeconds: 10,
+    segments: [
+        IntervalSegment(type: .work, seconds: 20),
+        IntervalSegment(type: .rest, seconds: 10),
+    ]
+)
+```
+
+### `CueProfile`
 
 알림 큐 프로필을 저장한다.
 
-| 컬럼 | 타입 | 설명 |
-| --- | --- | --- |
-| `id` | text | UUID |
-| `name` | text | 프로필 이름 |
-| `is_default` | integer | 기본 프로필 여부 |
-| `config_json` | text | 큐 규칙 JSON |
-| `created_at` | text | 생성 시각 |
-| `updated_at` | text | 수정 시각 |
-
-예시 `config_json`:
-
-```json
-{
-  "countdownCueSeconds": [3, 2, 1],
-  "useVibrationWhenMuted": true,
-  "events": {
-    "prepareStart": { "soundId": "default_prepare", "vibration": true },
-    "workStart": { "soundId": "default_work", "vibration": true },
-    "restStart": { "soundId": "default_rest", "vibration": true },
-    "finish": { "soundId": "default_finish", "vibration": true }
-  }
+```swift
+@Model
+final class CueProfile {
+    @Attribute(.unique) var id: UUID
+    var name: String
+    var isDefault: Bool
+    var config: CueConfig       // 큐 규칙 (아래 정의 참고). String이 아닌 구조화된 타입으로 저장한다.
+    var createdAt: Date
+    var updatedAt: Date
 }
 ```
 
-### `sound_assets`
+`CueConfig` 정의:
+
+```swift
+struct CueConfig: Codable, Hashable {
+    struct Event: Codable, Hashable {
+        var soundId: String
+        var vibration: Bool
+    }
+
+    var countdownCueSeconds: [Int]
+    var useVibrationWhenMuted: Bool
+    var prepareStart: Event
+    var workStart: Event
+    var restStart: Event
+    var finish: Event
+}
+```
+
+예시:
+
+```swift
+CueConfig(
+    countdownCueSeconds: [3, 2, 1],
+    useVibrationWhenMuted: true,
+    prepareStart: .init(soundId: "default_prepare", vibration: true),
+    workStart: .init(soundId: "default_work", vibration: true),
+    restStart: .init(soundId: "default_rest", vibration: true),
+    finish: .init(soundId: "default_finish", vibration: true)
+)
+```
+
+### `SoundAsset`
 
 기본 사운드, 사용자 음원, 직접 녹음 음성 큐를 관리한다.
 
-| 컬럼 | 타입 | 설명 |
-| --- | --- | --- |
-| `id` | text | UUID 또는 기본 사운드 id |
-| `kind` | text | `builtin`, `imported`, `recorded` |
-| `name` | text | 사용자에게 보이는 이름 |
-| `uri` | text nullable | 파일 시스템 경로 또는 앱 asset 경로 |
-| `duration_ms` | integer nullable | 길이 |
-| `created_at` | text | 생성 시각 |
-| `deleted_at` | text nullable | soft delete 시각 |
+```swift
+@Model
+final class SoundAsset {
+    @Attribute(.unique) var id: UUID
+    var kind: SoundAssetKind     // .builtin, .imported, .recorded
+    var name: String
+    var relativePath: String?   // 파일 시스템 경로(문서 디렉터리 기준 상대 경로) 또는 앱 asset 이름
+    var durationMs: Int?
+    var createdAt: Date
+    var deletedAt: Date?        // soft delete
+}
 
-사용자 파일을 삭제할 때는 DB row를 soft delete하고, 실제 파일 삭제 실패 가능성을 별도 처리한다.
+enum SoundAssetKind: String, Codable {
+    case builtin
+    case imported
+    case recorded
+}
+```
 
-### `app_settings`
+사용자 파일을 삭제할 때는 모델을 soft delete하고, 실제 파일 삭제 실패 가능성을 별도 처리한다.
 
-작은 앱 설정을 key-value로 저장한다.
+### `AppSettings`
 
-| 컬럼 | 타입 | 설명 |
-| --- | --- | --- |
-| `key` | text | 설정 키 |
-| `value_json` | text | JSON 값 |
-| `updated_at` | text | 수정 시각 |
+설정 항목이 몇 개뿐이므로, 범용 key-value 모델 대신 필드별로 타입 있는 속성을 가진 단일 모델로 관리한다. 새 설정이 필요해지면 필드를 추가하면 되고, 문자열 key로 값을 찾아 JSON을 디코딩하는 간접 단계가 없어 컴파일 타임에 타입이 보장된다.
 
-예시 키:
+```swift
+@Model
+final class AppSettings {
+    var themeMode: ThemeMode          // .system, .light, .dark
+    var bigTimerDigitsEnabled: Bool
+    var updatedAt: Date
+}
 
-- `theme_mode`: `system`, `light`, `dark`
-- `display.big_timer_digits`: `true`
+enum ThemeMode: String, Codable {
+    case system
+    case light
+    case dark
+}
+```
+
+앱 인스턴스당 `AppSettings` row는 하나만 존재한다 (없으면 seed 단계에서 기본값으로 생성한다).
 
 ## 기본 프리셋 seed 전략
 
@@ -177,26 +233,25 @@ MVP에서 프리셋은 인터벌 전용이다.
 - `fgb_3r`
 - `emom`
 
-앱 시작 시 DB가 비어 있으면 기본 프리셋을 삽입한다.
+앱 시작 시 저장소가 비어 있으면 기본 프리셋을 삽입한다.
 이미 존재하는 기본 프리셋은 사용자가 삭제할 수 없고, 앱 업데이트로 기본값이 바뀌면 `seed_version` 기준으로 필요한 항목만 갱신한다.
 
 사용자가 기본 프리셋을 수정하고 싶으면 원본을 바꾸지 않고 `custom` 프리셋으로 복제한다.
 
 ## 파일 저장 전략
 
-사용자 음원과 녹음 파일은 앱 전용 document directory 아래에 저장한다.
+사용자 음원과 녹음 파일은 앱 전용 document directory(`FileManager.default.urls(for: .documentDirectory, ...)`) 아래에 저장한다.
 
 권장 디렉터리:
 
 ```text
-tempo/
-  sounds/
-    imported/
-    recorded/
+sounds/
+  imported/
+  recorded/
 ```
 
 파일명은 사용자 입력 이름을 직접 쓰지 않는다.
-`sound_asset_id` 기반으로 생성한다.
+`SoundAsset.id` 기반으로 생성한다.
 
 예시:
 
@@ -205,49 +260,59 @@ sounds/recorded/sound_7f3a9c.m4a
 sounds/imported/sound_a91bd2.mp3
 ```
 
-DB에는 파일 경로와 메타데이터만 저장한다.
+모델에는 파일 경로와 메타데이터만 저장한다.
 파일이 사라진 경우 앱은 해당 사운드를 사용할 수 없음 상태로 표시하고, 기본 사운드로 대체한다.
 
 ## 마이그레이션 원칙
 
-- 모든 스키마 변경은 숫자 버전 마이그레이션으로 관리한다.
-- 앱 시작 시 현재 DB 버전을 확인하고 누락된 마이그레이션을 순서대로 적용한다.
-- 마이그레이션은 재실행되어도 안전해야 한다.
+- 모든 스키마 변경은 SwiftData의 `VersionedSchema`로 버전을 나누어 관리한다 (`SchemaV1`, `SchemaV2`, ...).
+- 버전 간 변환은 `SchemaMigrationPlan`에 마이그레이션 stage로 정의한다. 속성 추가/삭제처럼 단순한 변경은 SwiftData의 lightweight 마이그레이션으로 자동 처리되고, 데이터 변환이 필요한 변경만 커스텀 stage를
+  작성한다.
+- 마이그레이션은 재실행되어도 안전해야 한다 (SwiftData가 현재 스토어 버전을 추적하고 필요한 stage만 적용한다).
 - 사용자 데이터 삭제가 필요한 변경은 MVP에서는 피한다.
 
-초기 버전:
+초기 스키마(`SchemaV1`)에 포함되는 모델:
 
-1. `schema_migrations`
-2. `timer_presets`
-3. `cue_profiles`
-4. `sound_assets`
-5. `app_settings`
+1. `TimerPreset`
+2. `CueProfile`
+3. `SoundAsset`
+4. `AppSettings`
 
 ## 데이터 접근 계층
 
-화면 컴포넌트에서 SQLite를 직접 호출하지 않는다.
+화면(View)에서 SwiftData `ModelContext`를 직접 다루지 않는다.
 저장소 접근은 repository 계층으로 숨긴다.
 
 권장 구조:
 
 ```text
-src/
-  data/
-    database.ts
-    migrations.ts
-    repositories/
-      preset-repository.ts
-      cue-profile-repository.ts
-      sound-asset-repository.ts
-      settings-repository.ts
+Data/
+  Models/
+    TimerPreset.swift
+    IntervalConfig.swift
+    CueProfile.swift
+    CueConfig.swift
+    SoundAsset.swift
+    AppSettings.swift
+  Migration/
+    SchemaV1.swift
+    MigrationPlan.swift
+  Repositories/
+    PresetRepository.swift
+    CueProfileRepository.swift
+    SoundAssetRepository.swift
+    SettingsRepository.swift
 ```
 
 화면은 repository를 통해 다음처럼 사용한다.
 
-```ts
-const presets = await presetRepository.findIntervalPresets();
-await presetRepository.createCustomPreset(input);
+```swift
+let presets = try await presetRepository.findIntervalPresets()
+try await presetRepository.createCustomPreset(input)
 ```
+
+목록을 표시하는 화면에서는 repository 대신 SwiftUI의 `@Query`로 SwiftData 모델을 직접 관찰할 수도 있다. 다만 생성/수정/삭제 같은 쓰기 동작과 seed, 파일 시스템 연동처럼 여러 모델에 걸친 로직은
+repository로 모은다.
 
 이 구조를 두면 나중에 클라우드 동기화나 백업 기능을 추가할 때 화면 코드를 크게 바꾸지 않아도 된다.
 
@@ -256,21 +321,21 @@ await presetRepository.createCustomPreset(input);
 MVP는 로컬 전용이다.
 다만 나중에 계정 기반 동기화를 붙일 수 있도록 다음 규칙을 지킨다.
 
-- 모든 사용자 생성 데이터는 UUID를 가진다.
-- `created_at`, `updated_at`, `deleted_at`을 둔다.
+- 모든 사용자 생성 데이터는 `UUID`를 가진다.
+- `createdAt`, `updatedAt`, `deletedAt`을 둔다.
 - 삭제는 가능한 soft delete로 처리한다.
 
 이렇게 해두면 나중에 서버 동기화, 파일 백업, 기기 이전 기능을 붙이기 쉽다.
 
 ## 구현 순서
 
-1. `expo-sqlite`와 `expo-file-system`을 추가한다.
-2. DB 초기화와 마이그레이션 실행 코드를 만든다.
+1. SwiftData `@Model` 타입과 `ModelContainer` 설정을 추가한다.
+2. 초기 스키마(`SchemaV1`)와 `SchemaMigrationPlan`을 만든다.
 3. 기본 프리셋 seed를 넣는다.
 4. 프리셋 repository를 만든다.
-5. 인터벌 화면에서 사용자 프리셋 목록을 읽는다.
+5. 인터벌 화면에서 사용자 프리셋 목록을 읽는다 (`@Query` 또는 repository).
 6. 새 프리셋 저장과 편집을 repository로 연결한다.
-7. 사운드 큐 메타데이터와 파일 저장을 연결한다.
+7. 사운드 큐 메타데이터와 `FileManager` 기반 파일 저장을 연결한다.
 
 ## MVP 성공 기준
 

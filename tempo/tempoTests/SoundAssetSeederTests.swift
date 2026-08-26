@@ -1,0 +1,59 @@
+//
+//  SoundAssetSeederTests.swift
+//  tempoTests
+//
+
+import Foundation
+import SwiftData
+@testable import tempo
+import Testing
+
+/// docs/testing-strategy.md 6번 항목과 같은 성격의 SwiftData 통합 테스트: 앱 최초 실행 시
+/// 기본 사운드 3종이 seed되는지, 두 번 실행해도 중복되지 않는지 검증한다. 이벤트별 기본
+/// 사운드 이름 매핑(`defaultSoundName(for:)`)은 순수 함수라 별도로 검증한다.
+@Suite("SoundAssetSeeder")
+@MainActor
+struct SoundAssetSeederTests {
+    private func makeInMemoryStore() throws -> (container: ModelContainer, context: ModelContext) {
+        let container = try ModelContainer(
+            for: Schema(versionedSchema: SchemaV1.self),
+            configurations: [ModelConfiguration(isStoredInMemoryOnly: true)]
+        )
+        return (container, container.mainContext)
+    }
+
+    @Test("최초 실행 시 기본 사운드 3종이 builtin으로 seed된다")
+    func seedsThreeBuiltinSounds() throws {
+        let store = try makeInMemoryStore()
+        try SoundAssetSeeder.seedDefaultsIfNeeded(in: store.context)
+
+        let assets = try store.context.fetch(FetchDescriptor<SoundAsset>())
+
+        #expect(assets.count == 3)
+        #expect(Set(assets.map(\.name)) == ["짧은 비프", "긴 비프", "종료음"])
+        #expect(assets.allSatisfy { $0.kind == .builtin })
+        #expect(assets.allSatisfy { $0.relativePath != nil })
+    }
+
+    @Test("같은 컨텍스트에서 두 번 실행해도 중복 생성되지 않는다")
+    func seedingTwiceDoesNotDuplicate() throws {
+        let store = try makeInMemoryStore()
+        try SoundAssetSeeder.seedDefaultsIfNeeded(in: store.context)
+        try SoundAssetSeeder.seedDefaultsIfNeeded(in: store.context)
+
+        let assets = try store.context.fetch(FetchDescriptor<SoundAsset>())
+        #expect(assets.count == 3)
+    }
+
+    @Test("전체 종료 이벤트의 기본 사운드는 종료음이고, 나머지는 짧은 비프다")
+    func defaultSoundNameMapsFinishToFinishSound() {
+        #expect(SoundAssetSeeder.defaultSoundName(for: .finish) == "종료음")
+        #expect(SoundAssetSeeder.defaultSoundName(for: .prepareStart) == "짧은 비프")
+        #expect(SoundAssetSeeder.defaultSoundName(for: .workStart) == "짧은 비프")
+        #expect(SoundAssetSeeder.defaultSoundName(for: .restStart) == "짧은 비프")
+        #expect(SoundAssetSeeder.defaultSoundName(for: .segmentEnd) == "짧은 비프")
+        #expect(SoundAssetSeeder.defaultSoundName(for: .roundEnd) == "짧은 비프")
+        #expect(SoundAssetSeeder.defaultSoundName(for: .finalRoundEnter) == "짧은 비프")
+        #expect(SoundAssetSeeder.defaultSoundName(for: .countdownLead(secondsRemaining: 3)) == "짧은 비프")
+    }
+}

@@ -127,7 +127,14 @@ struct TimerView: View {
         defer { previousState = state }
 
         if previousState != .completed, state == .completed {
-            CueTriggerPlayer.play(cueConfig.finish)
+            let finishEvent = cueConfig.finish
+            // 이 타이머에서 직접 고른 "타이머 종료 시" 사운드가 있으면 그걸 우선한다.
+            // 재생 여부(모드)는 전역 알림 큐 설정을 그대로 따른다.
+            let soundAsset = resolvedSoundAsset(
+                soundAssetID: engine.endSoundAssetID ?? finishEvent.soundAssetID,
+                defaultName: SoundAssetSeeder.defaultSoundName(for: .finish)
+            )
+            CueTriggerPlayer.play(finishEvent, soundAsset: soundAsset)
             return
         }
 
@@ -138,8 +145,25 @@ struct TimerView: View {
            remainingUntilTarget > 0,
            remainingUntilTarget <= cueConfig.countdownLeadSeconds
         {
-            CueTriggerPlayer.play(CueConfig.Event(mode: .soundAndVibration, soundAssetID: nil))
+            let event = CueConfig.Event(mode: .soundAndVibration, soundAssetID: nil)
+            let soundAsset = resolvedSoundAsset(
+                soundAssetID: nil,
+                defaultName: SoundAssetSeeder.defaultSoundName(for: .countdownLead(secondsRemaining: remainingUntilTarget))
+            )
+            CueTriggerPlayer.play(event, soundAsset: soundAsset)
         }
+    }
+
+    private func resolvedSoundAsset(soundAssetID: UUID?, defaultName: String) -> SoundAsset? {
+        if let soundAssetID {
+            return try? modelContext.fetch(
+                FetchDescriptor<SoundAsset>(predicate: #Predicate { $0.id == soundAssetID })
+            ).first
+        }
+
+        return try? modelContext.fetch(
+            FetchDescriptor<SoundAsset>(predicate: #Predicate { $0.name == defaultName })
+        ).first
     }
 
     @ViewBuilder

@@ -113,15 +113,31 @@ struct IntervalRunView: View {
 
         for kind in events {
             if let event = CueEventDetector.event(for: kind, in: cueConfig) {
-                CueTriggerPlayer.play(event)
+                CueTriggerPlayer.play(event, soundAsset: resolvedSoundAsset(for: event, kind: kind))
             } else if case .countdownLead = kind {
                 // countdownLead는 이벤트별 설정이 따로 없다 — 시작 전 알림 시점(초)이
                 // 0보다 클 때 사운드+진동으로 알린다.
-                CueTriggerPlayer.play(CueConfig.Event(mode: .soundAndVibration, soundAssetID: nil))
+                let event = CueConfig.Event(mode: .soundAndVibration, soundAssetID: nil)
+                CueTriggerPlayer.play(event, soundAsset: resolvedSoundAsset(for: event, kind: kind))
             }
         }
 
         previousStep = progress?.step
+    }
+
+    /// `event.soundAssetID`가 지정돼 있으면 그걸, 아니면 이벤트 종류별 기본 사운드
+    /// (`SoundAssetSeeder.defaultSoundName(for:)`)를 이름으로 조회한다.
+    private func resolvedSoundAsset(for event: CueConfig.Event, kind: CueEventKind) -> SoundAsset? {
+        if let soundAssetID = event.soundAssetID {
+            return try? modelContext.fetch(
+                FetchDescriptor<SoundAsset>(predicate: #Predicate { $0.id == soundAssetID })
+            ).first
+        }
+
+        let defaultName = SoundAssetSeeder.defaultSoundName(for: kind)
+        return try? modelContext.fetch(
+            FetchDescriptor<SoundAsset>(predicate: #Predicate { $0.name == defaultName })
+        ).first
     }
 
     private func loadAndStart() {

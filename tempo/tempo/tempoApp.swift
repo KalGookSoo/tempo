@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct tempoApp: App {
     @State private var router = Router()
+    private let modelContainer = SharedModelContainer.make()
 
     var body: some Scene {
         WindowGroup {
@@ -19,6 +21,7 @@ struct tempoApp: App {
             }
             .environment(router)
         }
+        .modelContainer(modelContainer)
     }
 
     @ViewBuilder

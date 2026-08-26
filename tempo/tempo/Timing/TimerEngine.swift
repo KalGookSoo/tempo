@@ -102,4 +102,12 @@ final class TimerEngine {
         startedAt = nil
         pausedElapsed = 0
     }
+
+    /// 초 단위 값을 `HH:MM:SS` 문자열로 표시한다. View 밖에서 테스트할 수 있도록 순수 함수로 둔다.
+    static func formattedClock(seconds: Int) -> String {
+        let hours = seconds / 3600
+        let minutes = (seconds % 3600) / 60
+        let secs = seconds % 60
+        return String(format: "%02d:%02d:%02d", hours, minutes, secs)
+    }
 }

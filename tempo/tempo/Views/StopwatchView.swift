@@ -5,22 +5,65 @@
 
 import SwiftUI
 
-/// `.stopwatch` 화면 자리. 실제 스톱워치 로직은 후속 이슈에서 구현한다.
-/// docs/timer-functional-spec.md "2. 스톱워치" 참고.
 struct StopwatchView: View {
+    @State private var engine = StopwatchEngine()
+    @ScaledMetric(relativeTo: .largeTitle) private var timerFontSize: CGFloat = 64
+
+    private var isRunning: Bool {
+        engine.state == .running
+    }
+
     var body: some View {
-        ContentUnavailableView {
-            Label("스톱워치", systemImage: "stopwatch")
-        } description: {
-            Text("스톱워치 화면은 아직 구현되지 않았습니다.")
+        NavigationStack {
+            VStack {
+                TimelineView(.periodic(from: .now, by: 0.1)) { context in
+                    Text(StopwatchEngine.formattedClock(elapsed: engine.elapsed(at: context.date)))
+                        .font(.system(size: timerFontSize, weight: .bold, design: .monospaced))
+                }
+
+                HStack {
+                    Button(isRunning ? "랩" : "리셋") {
+                        if isRunning {
+                            engine.recordLap(at: .now)
+                        } else {
+                            engine.reset()
+                        }
+                    }
+                    .disabled(engine.state == .idle && engine.laps.isEmpty)
+
+                    Spacer()
+
+                    Button(isRunning ? "정지" : "시작") {
+                        if isRunning {
+                            engine.stop(at: .now)
+                        } else if engine.state == .idle {
+                            engine.start(at: .now)
+                        } else {
+                            engine.resume(at: .now)
+                        }
+                    }
+                    .disabled(engine.state == .completed)
+                }
+                .padding(.horizontal)
+
+                List(engine.laps.reversed()) { lap in
+                    HStack {
+                        Text("랩 \(lap.id)")
+                        Spacer()
+                        Text(StopwatchEngine.formattedClock(elapsed: lap.lapDuration))
+                            .foregroundStyle(.secondary)
+                        Text(StopwatchEngine.formattedClock(elapsed: lap.cumulativeDuration))
+                            .monospacedDigit()
+                    }
+                }
+                .listStyle(.plain)
+            }
+            .navigationTitle("스톱워치")
+            .navigationBarTitleDisplayMode(.inline)
         }
-        .navigationTitle("스톱워치")
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
 #Preview {
-    NavigationStack {
-        StopwatchView()
-    }
+    StopwatchView()
 }

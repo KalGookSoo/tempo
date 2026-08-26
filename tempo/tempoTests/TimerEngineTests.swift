@@ -13,6 +13,12 @@ import Testing
 struct TimerEngineTests {
     private let base = Date()
 
+    /// `Date` 뺄셈은 부동소수점 오차가 아주 미세하게 생길 수 있어, `TimeInterval` 비교는
+    /// 항상 약간의 허용 오차를 두고 비교한다.
+    private func isClose(_ a: TimeInterval, _ b: TimeInterval) -> Bool {
+        abs(a - b) < 0.001
+    }
+
     // MARK: - hours / minutes / seconds
 
     @Test("configuredSeconds를 시/분/초로 정확히 분해한다")
@@ -51,7 +57,7 @@ struct TimerEngineTests {
         let engine = TimerEngine(configuredSeconds: 60)
         engine.start(at: base)
 
-        #expect(engine.elapsed(at: base.addingTimeInterval(10)) == 10)
+        #expect(isClose(engine.elapsed(at: base.addingTimeInterval(10)), 10))
     }
 
     @Test("일시정지하면 그 시점 경과 시간에서 멈춘다")
@@ -61,7 +67,7 @@ struct TimerEngineTests {
         engine.pause(at: base.addingTimeInterval(10))
 
         // 일시정지 후 시간이 더 흘러도(now가 계속 지나도) 경과 시간은 그대로다.
-        #expect(engine.elapsed(at: base.addingTimeInterval(50)) == 10)
+        #expect(isClose(engine.elapsed(at: base.addingTimeInterval(50)), 10))
     }
 
     @Test("일시정지 후 재개하면 이전 경과 시간에 이어서 누적된다")
@@ -71,7 +77,7 @@ struct TimerEngineTests {
         engine.pause(at: base.addingTimeInterval(10))
         engine.resume(at: base.addingTimeInterval(20))
 
-        #expect(engine.elapsed(at: base.addingTimeInterval(25)) == 15) // 10 + (25 - 20)
+        #expect(isClose(engine.elapsed(at: base.addingTimeInterval(25)), 15)) // 10 + (25 - 20)
     }
 
     // MARK: - remainingOrElapsedSeconds(at:) — 카운트다운

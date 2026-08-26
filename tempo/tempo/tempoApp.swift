@@ -6,27 +6,44 @@
 //
 
 import SwiftUI
-import SwiftData
 
 @main
 struct tempoApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    @State private var router = Router()
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationStack(path: $router.path) {
+                HomeView()
+                    .navigationDestination(for: Route.self, destination: destination(for:))
+            }
+            .environment(router)
         }
-        .modelContainer(sharedModelContainer)
+    }
+
+    @ViewBuilder
+    private func destination(for route: Route) -> some View {
+        switch route {
+        case .timer:
+            TimerView()
+        case .stopwatch:
+            StopwatchView()
+        case .interval:
+            IntervalHomeView()
+        case .intervalNew:
+            IntervalNewView()
+        case .intervalPrograms:
+            IntervalProgramsView()
+        case .intervalProgramDetail(let id):
+            IntervalProgramDetailView(id: id)
+        case .intervalProgramEdit(let id):
+            IntervalProgramEditView(id: id)
+        case .intervalHelp:
+            IntervalHelpView()
+        case .intervalHelpDetail(let id):
+            IntervalHelpDetailView(id: id)
+        case .intervalRun(let programID):
+            IntervalRunView(programID: programID)
+        }
     }
 }

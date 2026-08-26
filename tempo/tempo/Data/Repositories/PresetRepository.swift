@@ -29,6 +29,12 @@ final class PresetRepository {
         return try modelContext.fetch(descriptor)
     }
 
+    /// id로 삭제되지 않은 프리셋 하나를 조회한다. 인터벌 실행 화면이 `programID`로 실제
+    /// 설정을 가져올 때 쓴다.
+    func findPreset(id: UUID) throws -> TimerPreset? {
+        try findIntervalPresets().first { $0.id == id }
+    }
+
     @discardableResult
     func createCustomPreset(
         name: String,

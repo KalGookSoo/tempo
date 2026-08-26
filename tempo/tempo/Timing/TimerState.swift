@@ -1,8 +1,10 @@
-//
-//  TimerState.swift
-//  tempo
-//
-//  Created by doyevskyi on 8/26/26.
-//
-
 import Foundation
+
+enum TimerState {
+    case idle
+    case preparing
+    case running
+    case paused
+    case completed
+    case editing
+}

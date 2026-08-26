@@ -9,6 +9,9 @@ import SwiftUI
 struct SettingsHomeView: View {
     var body: some View {
         List {
+            NavigationLink(value: SettingsRoute.cue) {
+                Label("알림 큐", systemImage: "bell.badge")
+            }
             NavigationLink(value: SettingsRoute.help) {
                 Label("도움말", systemImage: "questionmark.circle")
             }

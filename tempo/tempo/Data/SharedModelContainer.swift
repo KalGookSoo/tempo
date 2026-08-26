@@ -17,6 +17,7 @@ enum SharedModelContainer {
                 configurations: [configuration]
             )
             try PresetSeeder.seedDefaultsIfNeeded(in: container.mainContext)
+            try CueProfileSeeder.seedDefaultIfNeeded(in: container.mainContext)
             return container
         } catch {
             fatalError("Could not create ModelContainer: \(error)")

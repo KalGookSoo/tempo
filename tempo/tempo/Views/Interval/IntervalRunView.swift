@@ -9,7 +9,9 @@ import SwiftUI
 /// `.run(programID:)` 화면. `programID`로 실제 `TimerPreset`을 조회해서 `IntervalRunner`를
 /// 만들고, 화면에 들어오는 즉시 실행을 시작한다("실행" 액션은 프로그램 상세 화면에서 이미
 /// 눌렸으므로 이 화면은 대기 없이 바로 진행한다). docs/navigation-structure.md
-/// "인터벌 실행 `.intervalRun(programID:)`" 참고.
+/// "인터벌 실행 `.intervalRun(programID:)`" 참고. 구간이 바뀔 때마다(또는 시작 전 카운트다운
+/// 구간마다) `CueEventDetector`로 알림 이벤트를 판정해 `CueTriggerPlayer`로 재생한다
+/// (이슈 #15).
 struct IntervalRunView: View {
     let programID: String
 
@@ -19,6 +21,13 @@ struct IntervalRunView: View {
 
     @State private var runner: IntervalRunner?
     @State private var presetNotFound = false
+    @State private var cueConfig: CueConfig?
+    @State private var previousStep: IntervalStep?
+
+    private struct TickKey: Equatable {
+        let stepID: Int?
+        let remainingSeconds: Int?
+    }
 
     var body: some View {
         Group {
@@ -87,7 +96,32 @@ struct IntervalRunView: View {
                     .buttonStyle(.bordered)
                 }
             }
+            .task(id: TickKey(stepID: progress?.step.id, remainingSeconds: progress?.remainingSeconds)) {
+                triggerCuesIfNeeded(progress: progress)
+            }
         }
+    }
+
+    private func triggerCuesIfNeeded(progress: IntervalRunner.Progress?) {
+        guard let cueConfig else { return }
+
+        let events = CueEventDetector.events(
+            previousStep: previousStep,
+            currentProgress: progress,
+            countdownLeadSeconds: cueConfig.countdownLeadSeconds
+        )
+
+        for kind in events {
+            if let event = CueEventDetector.event(for: kind, in: cueConfig) {
+                CueTriggerPlayer.play(event)
+            } else if case .countdownLead = kind {
+                // countdownLead는 이벤트별 설정이 따로 없다 — 시작 전 알림 시점(초)이
+                // 0보다 클 때 사운드+진동으로 알린다.
+                CueTriggerPlayer.play(CueConfig.Event(mode: .soundAndVibration, soundAssetID: nil))
+            }
+        }
+
+        previousStep = progress?.step
     }
 
     private func loadAndStart() {
@@ -101,9 +135,25 @@ struct IntervalRunView: View {
             return
         }
 
+        cueConfig = resolveCueConfig(cueProfileID: preset.cueProfileID)
+
         let newRunner = IntervalRunner(config: preset.config)
         newRunner.start(at: .now)
         runner = newRunner
+    }
+
+    private func resolveCueConfig(cueProfileID: UUID?) -> CueConfig? {
+        if let cueProfileID,
+           let profile = try? modelContext.fetch(
+               FetchDescriptor<CueProfile>(predicate: #Predicate { $0.id == cueProfileID })
+           ).first
+        {
+            return profile.config
+        }
+
+        return try? modelContext.fetch(
+            FetchDescriptor<CueProfile>(predicate: #Predicate { $0.isDefault })
+        ).first?.config
     }
 }
 

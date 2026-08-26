@@ -71,6 +71,8 @@ struct tempoApp: App {
             SettingsOnboardingView()
         case .version:
             SettingsVersionView()
+        case .cue:
+            SettingsCueView()
         }
     }
 }

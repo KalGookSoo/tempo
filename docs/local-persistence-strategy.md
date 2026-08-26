@@ -151,30 +151,44 @@ final class CueProfile {
 
 ```swift
 struct CueConfig: Codable, Hashable {
-    struct Event: Codable, Hashable {
-        var soundId: String
-        var vibration: Bool
+    enum Mode: String, Codable, CaseIterable, Identifiable {
+        case none
+        case sound
+        case vibration
+        case soundAndVibration
     }
 
-    var countdownCueSeconds: [Int]
-    var useVibrationWhenMuted: Bool
+    struct Event: Codable, Hashable {
+        var mode: Mode
+        var soundAssetID: UUID?   // SoundAsset.id 참조, nil이면 MVP 기본 사운드
+    }
+
+    var countdownLeadSeconds: Int   // 시작 전 알림 시점(초). 0/1/3/5/10 중 선택, 0=없음
     var prepareStart: Event
     var workStart: Event
     var restStart: Event
+    var segmentEnd: Event
+    var roundEnd: Event
+    var finalRoundEnter: Event
     var finish: Event
 }
 ```
 
+이벤트는 `docs/timer-functional-spec.md` "알림 큐"가 정의한 8개(시작 전 카운트다운은 `countdownLeadSeconds` 하나로 전역 처리, 나머지 7개는 이벤트별 `Mode`) 그대로 대응한다. `soundId: String`(항상 값이 있어야 하는 문자열) 대신 `soundAssetID: UUID?`로 바꿔서, "사운드 없음"을 컴파일 타임에 안전하게 표현하고 `SoundAsset` 테이블을 직접 참조한다 — 임의의 문자열 ID를 손으로 맞추는 대신 실제 존재하는 사운드 row만 가리킬 수 있다.
+
 예시:
 
 ```swift
+let event = CueConfig.Event(mode: .soundAndVibration, soundAssetID: nil)
 CueConfig(
-    countdownCueSeconds: [3, 2, 1],
-    useVibrationWhenMuted: true,
-    prepareStart: .init(soundId: "default_prepare", vibration: true),
-    workStart: .init(soundId: "default_work", vibration: true),
-    restStart: .init(soundId: "default_rest", vibration: true),
-    finish: .init(soundId: "default_finish", vibration: true)
+    countdownLeadSeconds: 3,
+    prepareStart: event,
+    workStart: event,
+    restStart: event,
+    segmentEnd: event,
+    roundEnd: event,
+    finalRoundEnter: event,
+    finish: event
 )
 ```
 

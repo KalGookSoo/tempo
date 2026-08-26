@@ -7,11 +7,19 @@ import SwiftData
 import SwiftUI
 
 struct TimerView: View {
+    @Environment(\.modelContext) private var modelContext
     @State private var engine = TimerEngine()
     @ScaledMetric(relativeTo: .largeTitle) private var timerFontSize: CGFloat = 64
     @State private var isEndSoundPickerPresented = false
+    @State private var cueConfig: CueConfig?
+    @State private var previousState: TimerState?
     @Query(filter: #Predicate<SoundAsset> { $0.deletedAt == nil })
     private var soundAssets: [SoundAsset]
+
+    private struct TickKey: Equatable {
+        let state: TimerState
+        let seconds: Int
+    }
 
     var body: some View {
         NavigationStack {
@@ -23,6 +31,9 @@ struct TimerView: View {
 
                     Text(formatted(seconds: seconds))
                         .font(.system(size: timerFontSize, weight: .bold, design: .monospaced))
+                        .task(id: TickKey(state: engine.state, seconds: seconds)) {
+                            triggerCuesIfNeeded(state: engine.state, seconds: seconds)
+                        }
                 }
 
                 HStack {
@@ -100,6 +111,34 @@ struct TimerView: View {
                     selection: Binding(get: { engine.endSoundAssetID }, set: { engine.endSoundAssetID = $0 })
                 )
             }
+        }
+        .task {
+            cueConfig = try? modelContext.fetch(
+                FetchDescriptor<CueProfile>(predicate: #Predicate { $0.isDefault })
+            ).first?.config
+        }
+    }
+
+    /// 시작 전 카운트다운(설정된 초 이하로 남았을 때)과 전체 종료 이벤트를 전역 기본 알림
+    /// 큐 설정으로 재생한다. 타이머에는 준비/운동/휴식/라운드 개념이 없어 인터벌보다 훨씬
+    /// 단순하다 — 이슈 #15.
+    private func triggerCuesIfNeeded(state: TimerState, seconds: Int) {
+        guard let cueConfig else { return }
+        defer { previousState = state }
+
+        if previousState != .completed, state == .completed {
+            CueTriggerPlayer.play(cueConfig.finish)
+            return
+        }
+
+        guard state == .running else { return }
+
+        let remainingUntilTarget = engine.mode == .countdown ? seconds : engine.configuredSeconds - seconds
+        if cueConfig.countdownLeadSeconds > 0,
+           remainingUntilTarget > 0,
+           remainingUntilTarget <= cueConfig.countdownLeadSeconds
+        {
+            CueTriggerPlayer.play(CueConfig.Event(mode: .soundAndVibration, soundAssetID: nil))
         }
     }
 

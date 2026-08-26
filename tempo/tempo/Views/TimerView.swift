@@ -23,78 +23,86 @@ struct TimerView: View {
 
     var body: some View {
         NavigationStack {
-            VStack {
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    let seconds = engine.state == .idle
-                        ? engine.configuredSeconds
-                        : engine.remainingOrElapsedSeconds(at: context.date)
+            ScrollView {
+                VStack(spacing: 24) {
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        let seconds = engine.state == .idle
+                            ? engine.configuredSeconds
+                            : engine.remainingOrElapsedSeconds(at: context.date)
+                        let status = defaultRunningStatusInfo(for: engine.state)
 
-                    Text(formatted(seconds: seconds))
-                        .font(.system(size: timerFontSize, weight: .bold, design: .monospaced))
+                        RunningDisplayView(
+                            primaryText: formatted(seconds: seconds),
+                            statusLabel: status.label,
+                            statusColor: status.color,
+                            fontSize: timerFontSize
+                        )
                         .task(id: TickKey(state: engine.state, seconds: seconds)) {
                             triggerCuesIfNeeded(state: engine.state, seconds: seconds)
                         }
-                }
+                    }
 
-                HStack {
-                    VStack {
-                        Text("시").font(.caption)
-                        Picker("시", selection: Binding(get: { engine.hours }, set: { engine.hours = $0 })) {
-                            ForEach(0 ..< 24, id: \.self) { value in
-                                Text("\(value)").tag(value)
+                    HStack {
+                        VStack {
+                            Text("시").font(.caption)
+                            Picker("시", selection: Binding(get: { engine.hours }, set: { engine.hours = $0 })) {
+                                ForEach(0 ..< 24, id: \.self) { value in
+                                    Text("\(value)").tag(value)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                        }
+
+                        VStack {
+                            Text("분").font(.caption)
+                            Picker("분", selection: Binding(get: { engine.minutes }, set: { engine.minutes = $0 })) {
+                                ForEach(0 ..< 60, id: \.self) { value in
+                                    Text("\(value)").tag(value)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                        }
+
+                        VStack {
+                            Text("초").font(.caption)
+                            Picker("초", selection: Binding(get: { engine.seconds }, set: { engine.seconds = $0 })) {
+                                ForEach(0 ..< 60, id: \.self) { value in
+                                    Text("\(value)").tag(value)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .disabled(engine.state != .idle)
+
+                    Form {
+                        TextField("레이블", text: Binding(get: { engine.label }, set: { engine.label = $0 }))
+
+                        Button {
+                            isEndSoundPickerPresented = true
+                        } label: {
+                            HStack {
+                                Text("타이머 종료 시")
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                                Text(selectedEndSoundName)
+                                    .foregroundStyle(.secondary)
                             }
                         }
-                        .pickerStyle(.wheel)
                     }
+                    .frame(height: 160)
+                    .scrollDisabled(true)
+                    .disabled(engine.state != .idle)
 
-                    VStack {
-                        Text("분").font(.caption)
-                        Picker("분", selection: Binding(get: { engine.minutes }, set: { engine.minutes = $0 })) {
-                            ForEach(0 ..< 60, id: \.self) { value in
-                                Text("\(value)").tag(value)
-                            }
-                        }
-                        .pickerStyle(.wheel)
+                    HStack {
+                        leadingButton
+                        Spacer()
+                        trailingButton
                     }
-
-                    VStack {
-                        Text("초").font(.caption)
-                        Picker("초", selection: Binding(get: { engine.seconds }, set: { engine.seconds = $0 })) {
-                            ForEach(0 ..< 60, id: \.self) { value in
-                                Text("\(value)").tag(value)
-                            }
-                        }
-                        .pickerStyle(.wheel)
-                    }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
-                .disabled(engine.state != .idle)
-
-                Form {
-                    TextField("레이블", text: Binding(get: { engine.label }, set: { engine.label = $0 }))
-
-                    Button {
-                        isEndSoundPickerPresented = true
-                    } label: {
-                        HStack {
-                            Text("타이머 종료 시")
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            Text(selectedEndSoundName)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-                .frame(maxHeight: 160)
-                .scrollDisabled(true)
-                .disabled(engine.state != .idle)
-
-                HStack {
-                    leadingButton
-                    Spacer()
-                    trailingButton
-                }
-                .padding(.horizontal)
+                .padding(.vertical)
             }
             .navigationTitle("타이머")
             .navigationBarTitleDisplayMode(.inline)

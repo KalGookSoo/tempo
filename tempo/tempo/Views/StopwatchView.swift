@@ -17,8 +17,14 @@ struct StopwatchView: View {
         NavigationStack {
             VStack {
                 TimelineView(.periodic(from: .now, by: 0.1)) { context in
-                    Text(StopwatchEngine.formattedClock(elapsed: engine.elapsed(at: context.date)))
-                        .font(.system(size: timerFontSize, weight: .bold, design: .monospaced))
+                    let status = defaultRunningStatusInfo(for: engine.state)
+
+                    RunningDisplayView(
+                        primaryText: StopwatchEngine.formattedClock(elapsed: engine.elapsed(at: context.date)),
+                        statusLabel: status.label,
+                        statusColor: status.color,
+                        fontSize: timerFontSize
+                    )
                 }
 
                 HStack {

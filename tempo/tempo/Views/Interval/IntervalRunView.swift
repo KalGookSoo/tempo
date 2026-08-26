@@ -52,53 +52,78 @@ struct IntervalRunView: View {
     }
 
     private func runningContent(runner: IntervalRunner) -> some View {
-        TimelineView(.periodic(from: .now, by: 1)) { context in
-            let progress = runner.currentProgress(at: context.date)
+        ScrollView {
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                let progress = runner.currentProgress(at: context.date)
 
-            VStack(spacing: 16) {
-                if let progress {
-                    if progress.step.round > 0 {
-                        Text("라운드 \(progress.step.round) / \(progress.step.totalRounds)")
-                            .font(.headline)
+                VStack(spacing: 24) {
+                    if let progress {
+                        RunningDisplayView(
+                            primaryText: IntervalRunner.formattedClock(seconds: progress.remainingSeconds),
+                            statusLabel: statusLabel(for: progress.step),
+                            statusColor: statusColor(for: progress.step, runnerState: runner.state),
+                            secondaryText: progress.step.round > 0
+                                ? "라운드 \(progress.step.round) / \(progress.step.totalRounds)"
+                                : nil,
+                            fontSize: timerFontSize
+                        )
+                    } else {
+                        RunningDisplayView(
+                            primaryText: "완료",
+                            statusColor: .danger,
+                            fontSize: timerFontSize
+                        )
                     }
 
-                    Text(progress.step.label)
-                        .font(.title)
+                    HStack {
+                        Button("완료") {
+                            router.popToRoot()
+                        }
+                        .buttonStyle(.bordered)
 
-                    Text(IntervalRunner.formattedClock(seconds: progress.remainingSeconds))
-                        .font(.system(size: timerFontSize, weight: .bold, design: .monospaced))
-                } else {
-                    Text("완료")
-                        .font(.system(size: timerFontSize, weight: .bold, design: .monospaced))
+                        if runner.state == .running || runner.state == .preparing {
+                            Button("일시정지") {
+                                runner.pause(at: .now)
+                            }
+                            .buttonStyle(.borderedProminent)
+                        } else if runner.state == .paused {
+                            Button("재개") {
+                                runner.resume(at: .now)
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+
+                        Button("설정 수정") {
+                            router.push(IntervalRoute.programEdit(id: programID))
+                        }
+                        .buttonStyle(.bordered)
+                    }
                 }
-
-                HStack {
-                    Button("완료") {
-                        router.popToRoot()
-                    }
-                    .buttonStyle(.bordered)
-
-                    if runner.state == .running || runner.state == .preparing {
-                        Button("일시정지") {
-                            runner.pause(at: .now)
-                        }
-                        .buttonStyle(.borderedProminent)
-                    } else if runner.state == .paused {
-                        Button("재개") {
-                            runner.resume(at: .now)
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-
-                    Button("설정 수정") {
-                        router.push(IntervalRoute.programEdit(id: programID))
-                    }
-                    .buttonStyle(.bordered)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .task(id: TickKey(stepID: progress?.step.id, remainingSeconds: progress?.remainingSeconds)) {
+                    triggerCuesIfNeeded(progress: progress)
                 }
             }
-            .task(id: TickKey(stepID: progress?.step.id, remainingSeconds: progress?.remainingSeconds)) {
-                triggerCuesIfNeeded(progress: progress)
-            }
+        }
+    }
+
+    private func statusLabel(for step: IntervalStep) -> String {
+        switch step.kind {
+        case .prepare: "준비"
+        case .work: "운동"
+        case .rest: "휴식"
+        }
+    }
+
+    private func statusColor(for step: IntervalStep, runnerState: TimerState) -> Color {
+        if runnerState == .paused {
+            return .accentColor
+        }
+        switch step.kind {
+        case .prepare: return .prepare
+        case .work: return .work
+        case .rest: return .rest
         }
     }
 

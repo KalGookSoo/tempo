@@ -5,8 +5,8 @@
 //  Created by doyevskyi on 8/12/26.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 @main
 struct tempoApp: App {
@@ -49,15 +49,15 @@ struct tempoApp: App {
             IntervalNewView()
         case .programs:
             IntervalProgramsView()
-        case .programDetail(let id):
+        case let .programDetail(id):
             IntervalProgramDetailView(id: id)
-        case .programEdit(let id):
+        case let .programEdit(id):
             IntervalProgramEditView(id: id)
         case .help:
             IntervalHelpView()
-        case .helpDetail(let id):
+        case let .helpDetail(id):
             IntervalHelpDetailView(id: id)
-        case .run(let programID):
+        case let .run(programID):
             IntervalRunView(programID: programID)
         }
     }

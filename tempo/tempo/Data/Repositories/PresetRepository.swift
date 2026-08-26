@@ -36,12 +36,12 @@ final class PresetRepository {
         cueProfileID: UUID? = nil
     ) throws -> TimerPreset {
         let now = Date()
-        let preset = TimerPreset(
+        let preset = try TimerPreset(
             kind: .custom,
             name: name,
             config: config,
             cueProfileID: cueProfileID,
-            sortOrder: try nextSortOrder(),
+            sortOrder: nextSortOrder(),
             createdAt: now,
             updatedAt: now
         )

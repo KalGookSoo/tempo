@@ -10,43 +10,67 @@ import SwiftData
 
 @main
 struct tempoApp: App {
-    @State private var router = Router()
+    @State private var intervalRouter = Router()
+    @State private var settingsRouter = Router()
     private let modelContainer = SharedModelContainer.make()
 
     var body: some Scene {
         WindowGroup {
-            NavigationStack(path: $router.path) {
-                HomeView()
-                    .navigationDestination(for: Route.self, destination: destination(for:))
+            TabView {
+                Tab("타이머", systemImage: "timer") {
+                    TimerView()
+                }
+                Tab("스톱워치", systemImage: "stopwatch") {
+                    StopwatchView()
+                }
+                Tab("인터벌", systemImage: "repeat") {
+                    NavigationStack(path: $intervalRouter.path) {
+                        IntervalHomeView()
+                            .navigationDestination(for: IntervalRoute.self, destination: intervalDestination(for:))
+                    }
+                    .environment(intervalRouter)
+                }
+                Tab("설정", systemImage: "gearshape.fill") {
+                    NavigationStack(path: $settingsRouter.path) {
+                        SettingsHomeView()
+                            .navigationDestination(for: SettingsRoute.self, destination: settingsDestination(for:))
+                    }
+                    .environment(settingsRouter)
+                }
             }
-            .environment(router)
         }
         .modelContainer(modelContainer)
     }
 
     @ViewBuilder
-    private func destination(for route: Route) -> some View {
+    private func intervalDestination(for route: IntervalRoute) -> some View {
         switch route {
-        case .timer:
-            TimerView()
-        case .stopwatch:
-            StopwatchView()
-        case .interval:
-            IntervalHomeView()
-        case .intervalNew:
+        case .new:
             IntervalNewView()
-        case .intervalPrograms:
+        case .programs:
             IntervalProgramsView()
-        case .intervalProgramDetail(let id):
+        case .programDetail(let id):
             IntervalProgramDetailView(id: id)
-        case .intervalProgramEdit(let id):
+        case .programEdit(let id):
             IntervalProgramEditView(id: id)
-        case .intervalHelp:
+        case .help:
             IntervalHelpView()
-        case .intervalHelpDetail(let id):
+        case .helpDetail(let id):
             IntervalHelpDetailView(id: id)
-        case .intervalRun(let programID):
+        case .run(let programID):
             IntervalRunView(programID: programID)
+        }
+    }
+
+    @ViewBuilder
+    private func settingsDestination(for route: SettingsRoute) -> some View {
+        switch route {
+        case .help:
+            SettingsHelpView()
+        case .onboarding:
+            SettingsOnboardingView()
+        case .version:
+            SettingsVersionView()
         }
     }
 }

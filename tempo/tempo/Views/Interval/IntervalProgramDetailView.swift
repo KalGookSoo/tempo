@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// `.intervalProgramDetail(id:)` 화면 자리. 저장된 인터벌 프로그램 설정 조회는 후속 이슈에서
+/// `.programDetail(id:)` 화면 자리. 저장된 인터벌 프로그램 설정 조회는 후속 이슈에서
 /// 연결한다. docs/navigation-structure.md "프로그램 상세 `.intervalProgramDetail(id:)`" 참고.
 struct IntervalProgramDetailView: View {
     let id: String
@@ -16,11 +16,11 @@ struct IntervalProgramDetailView: View {
         } description: {
             Text("프로그램 ID: \(id)")
         } actions: {
-            NavigationLink(value: Route.intervalRun(programID: id)) {
+            NavigationLink(value: IntervalRoute.run(programID: id)) {
                 Label("실행", systemImage: "play.fill")
             }
             .buttonStyle(.borderedProminent)
-            NavigationLink(value: Route.intervalProgramEdit(id: id)) {
+            NavigationLink(value: IntervalRoute.programEdit(id: id)) {
                 Label("수정", systemImage: "pencil")
             }
             .buttonStyle(.bordered)

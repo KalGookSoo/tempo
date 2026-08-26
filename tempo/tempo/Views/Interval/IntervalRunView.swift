@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// `.intervalRun(programID:)` 화면 자리. 실행 중 큰 시간 숫자와 현재 구간/라운드 정보 표시,
+/// `.run(programID:)` 화면 자리. 실행 중 큰 시간 숫자와 현재 구간/라운드 정보 표시,
 /// 미러링 대응 레이아웃은 후속 이슈에서 구현한다. docs/navigation-structure.md
 /// "인터벌 실행 `.intervalRun(programID:)`" 참고.
 struct IntervalRunView: View {
@@ -24,7 +24,7 @@ struct IntervalRunView: View {
             }
             .buttonStyle(.borderedProminent)
             Button("설정 수정") {
-                router.push(.interval)
+                router.push(IntervalRoute.programEdit(id: programID))
             }
             .buttonStyle(.bordered)
         }

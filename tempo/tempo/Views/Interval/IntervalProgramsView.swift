@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// `.intervalPrograms` 화면. 저장된 사용자 인터벌 프로그램 목록.
+/// `.programs` 화면. 저장된 사용자 인터벌 프로그램 목록.
 /// 실제 데이터 소스(SwiftData)는 후속 이슈에서 연결하고, 지금은 빈 상태(fallback)만 보여준다.
 /// docs/navigation-structure.md "프로그램 목록 `.intervalPrograms`" 참고.
 struct IntervalProgramsView: View {
@@ -19,13 +19,13 @@ struct IntervalProgramsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                NavigationLink(value: Route.intervalNew) {
+                NavigationLink(value: IntervalRoute.new) {
                     Image(systemName: "plus")
                 }
                 .accessibilityLabel("새 프로그램")
             }
             ToolbarItem(placement: .secondaryAction) {
-                NavigationLink(value: Route.intervalHelp) {
+                NavigationLink(value: IntervalRoute.help) {
                     Image(systemName: "questionmark.circle")
                 }
                 .accessibilityLabel("도움말")

@@ -9,7 +9,7 @@ body:
     attributes:
       label: 이슈 설명
       description: 무엇을 해결하려는지, 어떤 문제가 있는지 명확히 설명해 주세요.
-      placeholder: 예) 문서 정리가 필요합니다. 특정 섹션이 오래되었습니다...
+      placeholder: 예) docs/local-persistence-strategy.md의 설계를 실제 SwiftData 모델로 구현해야 합니다.
     validations:
       required: true
   - type: textarea
@@ -31,6 +31,11 @@ body:
     attributes:
       label: 해결 방안(선택)
       description: 해결을 위한 아이디어나 접근 방법이 있다면 제안해 주세요.
+  - type: textarea
+    id: docs
+    attributes:
+      label: 관련 문서(선택)
+      description: 관련된 docs/ 문서가 있으면 경로를 적어 주세요(예 docs/timer-functional-spec.md, docs/navigation-structure.md).
   - type: textarea
     id: extra
     attributes:

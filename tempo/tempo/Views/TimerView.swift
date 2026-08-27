@@ -13,6 +13,12 @@ struct TimerView: View {
     @State private var isEndSoundPickerPresented = false
     @State private var cueConfig: CueConfig?
     @State private var previousState: TimerState?
+    
+    // 모달 상태 변수
+    @State private var isLabelAlertPresented: Bool = false
+    
+    // 사용자가 레이블을 입력하다가 취소할 경우 원복하기 위한 임시 변수
+    @State private var draftLabel: String = ""
     @Query(filter: #Predicate<SoundAsset> { $0.deletedAt == nil })
     private var soundAssets: [SoundAsset]
 
@@ -32,12 +38,7 @@ struct TimerView: View {
                         timeDisplay
                         countdownPicker
                         controlButtons
-                        // 레이블 입력 중 키보드가 뜨면 이 영역만 남는 공간에 맞춰 스크롤돼
-                        // 포커스된 입력창을 가리지 않는다. 피커는 이 ScrollView 밖에 있어서
-                        // 휠을 돌릴 때 전체 화면이 끌려가는 문제는 그대로 없다.
-                        ScrollView {
-                            settingsForm
-                        }
+                        settingsForm
                     }
                     .padding(.vertical)
                 } else {
@@ -166,8 +167,18 @@ struct TimerView: View {
     /// 이 폼(레이블 입력 + 종료 시 사운드)은 화면에서 아예 뺀다.
     private var settingsForm: some View {
         Form {
-            // 빈 채로 두면 "타이머"로 처리한다 — placeholder로 그 사실을 그대로 보여준다.
-            TextField("타이머", text: Binding(get: { engine.label }, set: { engine.label = $0 }))
+            Button {
+                draftLabel = engine.label
+                isLabelAlertPresented = true
+            } label: {
+                HStack {
+                    Text("레이블")
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Text(effectiveLabel)
+                        .foregroundStyle(.secondary)
+                }
+            }
 
             Button {
                 isEndSoundPickerPresented = true
@@ -183,6 +194,15 @@ struct TimerView: View {
         }
         .frame(height: 160)
         .scrollDisabled(true)
+        .alert("레이블", isPresented: $isLabelAlertPresented) {
+            TextField("타이머", text: $draftLabel)
+            Button("취소", role: .cancel) {}
+            Button("저장") {
+                engine.label = draftLabel
+            }
+        } message: {
+            Text("비워두면 \"타이머\"로 표시됩니다.")
+        }
     }
 
     /// 시작 전에는 리셋할 대상이 없어 버튼을 보여주지 않는다. 일시정지 중에만 리셋을

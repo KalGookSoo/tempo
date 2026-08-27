@@ -23,7 +23,7 @@ struct StopwatchView: View {
                 }
 
                 HStack {
-                    Button(isRunning ? "랩" : "리셋") {
+                    RunningControlButton(title: isRunning ? "랩" : "리셋", style: .reset) {
                         if isRunning {
                             engine.recordLap(at: .now)
                         } else {
@@ -34,7 +34,7 @@ struct StopwatchView: View {
 
                     Spacer()
 
-                    Button(isRunning ? "정지" : "시작") {
+                    RunningControlButton(title: isRunning ? "정지" : "시작", style: isRunning ? .pause : .start) {
                         if isRunning {
                             engine.stop(at: .now)
                         } else if engine.state == .idle {
@@ -50,12 +50,17 @@ struct StopwatchView: View {
                 List(engine.laps.reversed()) { lap in
                     HStack {
                         Text("랩 \(lap.id)")
+                            .font(.title3)
                         Spacer()
                         Text(StopwatchEngine.formattedClock(elapsed: lap.lapDuration))
+                            .font(.title3)
+                            .monospacedDigit()
                             .foregroundStyle(.secondary)
                         Text(StopwatchEngine.formattedClock(elapsed: lap.cumulativeDuration))
+                            .font(.title3)
                             .monospacedDigit()
                     }
+                    .padding(.vertical, 6)
                 }
                 .listStyle(.plain)
             }

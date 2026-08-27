@@ -85,6 +85,8 @@ struct tempoApp: App {
         switch route {
         case .help:
             SettingsHelpView()
+        case let .helpDetail(id):
+            SettingsHelpDetailView(id: id)
         case .onboarding:
             SettingsOnboardingView()
         case .version:

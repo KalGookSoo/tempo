@@ -12,6 +12,9 @@ struct SettingsHomeView: View {
             NavigationLink(value: SettingsRoute.cue) {
                 Label("알림 큐", systemImage: "bell.badge")
             }
+            NavigationLink(value: SettingsRoute.recordings) {
+                Label("녹음한 사운드", systemImage: "mic")
+            }
             NavigationLink(value: SettingsRoute.help) {
                 Label("도움말", systemImage: "questionmark.circle")
             }

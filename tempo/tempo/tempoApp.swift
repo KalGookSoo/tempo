@@ -73,6 +73,8 @@ struct tempoApp: App {
             SettingsVersionView()
         case .cue:
             SettingsCueView()
+        case .recordings:
+            SettingsRecordingsView()
         }
     }
 }

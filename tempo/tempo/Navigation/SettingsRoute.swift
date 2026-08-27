@@ -11,4 +11,5 @@ enum SettingsRoute: Hashable {
     case onboarding
     case version
     case cue
+    case recordings
 }

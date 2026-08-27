@@ -23,17 +23,18 @@ struct TimerView: View {
 
     var body: some View {
         NavigationStack {
+            // 전체 화면을 스크롤 가능하게 두면 CountdownWheelPicker(자체 스크롤 휠)와 위아래
+            // 팬 제스처가 겹쳐서, 휠을 돌리려다 화면 전체가 스크롤되는 문제가 있었다. 이
+            // 화면은 콘텐츠가 화면 높이에 들어오므로 ScrollView 없이 고정 레이아웃으로 둔다.
             Group {
                 if engine.state == .idle {
-                    ScrollView {
-                        VStack(spacing: 24) {
-                            timeDisplay
-                            countdownPicker
-                            controlButtons
-                            settingsForm
-                        }
-                        .padding(.vertical)
+                    VStack(spacing: 24) {
+                        timeDisplay
+                        countdownPicker
+                        controlButtons
+                        settingsForm
                     }
+                    .padding(.vertical)
                 } else {
                     // 실행 중에는 피커와 레이블/사운드 입력 폼이 필요 없어서 숨기고, 남는
                     // 공간만큼 시간 표시를 화면 가운데로 띄운다. 레이블은 timeDisplay 안
@@ -124,13 +125,12 @@ struct TimerView: View {
                 ? engine.configuredSeconds
                 : engine.remainingOrElapsedSeconds(at: context.date)
             let status = defaultRunningStatusInfo(for: engine.state)
-            let trimmedLabel = engine.label.trimmingCharacters(in: .whitespaces)
 
             RunningDisplayView(
                 primaryText: formatted(seconds: seconds),
                 statusLabel: status.label,
                 statusColor: status.color,
-                secondaryText: engine.state == .idle || trimmedLabel.isEmpty ? nil : trimmedLabel,
+                secondaryText: engine.state == .idle ? nil : effectiveLabel,
                 fontSize: timerFontSize
             )
             .task(id: TickKey(state: engine.state, seconds: seconds)) {
@@ -161,7 +161,8 @@ struct TimerView: View {
     /// 이 폼(레이블 입력 + 종료 시 사운드)은 화면에서 아예 뺀다.
     private var settingsForm: some View {
         Form {
-            TextField("레이블", text: Binding(get: { engine.label }, set: { engine.label = $0 }))
+            // 빈 채로 두면 "타이머"로 처리한다 — placeholder로 그 사실을 그대로 보여준다.
+            TextField("타이머", text: Binding(get: { engine.label }, set: { engine.label = $0 }))
 
             Button {
                 isEndSoundPickerPresented = true
@@ -208,6 +209,12 @@ struct TimerView: View {
     private var selectedEndSoundName: String {
         guard let id = engine.endSoundAssetID else { return "없음" }
         return soundAssets.first(where: { $0.id == id })?.name ?? "없음"
+    }
+
+    /// 레이블을 비워두면 "타이머"로 처리한다.
+    private var effectiveLabel: String {
+        let trimmed = engine.label.trimmingCharacters(in: .whitespaces)
+        return trimmed.isEmpty ? "타이머" : trimmed
     }
 
     private func formatted(seconds: Int) -> String {

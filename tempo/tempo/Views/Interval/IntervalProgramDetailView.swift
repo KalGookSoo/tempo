@@ -40,12 +40,6 @@ struct IntervalProgramDetailView: View {
                             Label("실행", systemImage: "play.fill")
                         }
 
-                        if preset.kind == .custom {
-                            NavigationLink(value: IntervalRoute.programEdit(id: id)) {
-                                Label("수정", systemImage: "pencil")
-                            }
-                        }
-
                         Button {
                             duplicate()
                         } label: {
@@ -73,6 +67,13 @@ struct IntervalProgramDetailView: View {
         }
         .navigationTitle("프로그램 상세")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if let preset, preset.kind == .custom {
+                ToolbarItem(placement: .primaryAction) {
+                    NavigationLink("수정", value: IntervalRoute.programEdit(id: id))
+                }
+            }
+        }
         .alert(
             "실패했습니다",
             isPresented: Binding(get: { errorMessage != nil }, set: {

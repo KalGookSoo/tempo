@@ -11,7 +11,7 @@ struct StopwatchView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                TimelineView(.periodic(from: .now, by: 0.1)) { context in
+                TimelineView(.periodic(from: .now, by: 0.01)) { context in
                     let status = defaultRunningStatusInfo(for: engine.state)
 
                     RunningDisplayView(

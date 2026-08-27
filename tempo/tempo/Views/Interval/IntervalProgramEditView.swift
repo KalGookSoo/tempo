@@ -48,9 +48,6 @@ struct IntervalProgramEditView: View {
         .navigationTitle("프로그램 수정")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("취소") { router.pop() }
-            }
             ToolbarItem(placement: .confirmationAction) {
                 Button("저장") { save() }
                     .disabled(!isValid)

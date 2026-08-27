@@ -57,7 +57,7 @@ struct IntervalConfigFormFields: View {
 
         Section("인터벌 세트 (최대 9개)") {
             ForEach($sets) { $set in
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 16) {
                     Stepper(
                         "운동 \(IntervalRunner.formattedClock(seconds: set.workSeconds))",
                         value: $set.workSeconds,

@@ -8,6 +8,12 @@ struct IntervalProgramsView: View {
     @Query(filter: #Predicate<TimerPreset> { $0.deletedAt == nil }, sort: \TimerPreset.sortOrder)
     private var presets: [TimerPreset]
 
+    @Environment(\.modelContext)
+    private var modelContext
+
+    @Environment(Router.self)
+    private var router
+
     var body: some View {
         Group {
             if presets.isEmpty {
@@ -24,6 +30,22 @@ struct IntervalProgramsView: View {
                             Text(preset.kind == .default ? "기본 프리셋" : "내 프리셋")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                        }
+                    }
+                    .swipeActions {
+                        if preset.kind == .custom {
+                            Button(role: .destructive) {
+                                try? PresetRepository(modelContext: modelContext).delete(preset)
+                            } label: {
+                                Label("삭제", systemImage: "trash")
+                            }
+
+                            Button {
+                                router.push(IntervalRoute.programEdit(id: preset.id.uuidString))
+                            } label: {
+                                Label("수정", systemImage: "pencil")
+                            }
+                            .tint(.blue)
                         }
                     }
                 }

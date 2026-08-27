@@ -23,60 +23,29 @@ struct TimerView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    TimelineView(.periodic(from: .now, by: 1)) { context in
-                        let seconds = engine.state == .idle
-                            ? engine.configuredSeconds
-                            : engine.remainingOrElapsedSeconds(at: context.date)
-                        let status = defaultRunningStatusInfo(for: engine.state)
-
-                        RunningDisplayView(
-                            primaryText: formatted(seconds: seconds),
-                            statusLabel: status.label,
-                            statusColor: status.color,
-                            fontSize: timerFontSize
-                        )
-                        .task(id: TickKey(state: engine.state, seconds: seconds)) {
-                            triggerCuesIfNeeded(state: engine.state, seconds: seconds)
+            Group {
+                if engine.state == .idle {
+                    ScrollView {
+                        VStack(spacing: 24) {
+                            timeDisplay
+                            countdownPicker
+                            controlButtons
+                            settingsForm
                         }
+                        .padding(.vertical)
                     }
-
-                    CountdownWheelPicker(
-                        hours: Binding(get: { engine.hours }, set: { engine.hours = $0 }),
-                        minutes: Binding(get: { engine.minutes }, set: { engine.minutes = $0 }),
-                        seconds: Binding(get: { engine.seconds }, set: { engine.seconds = $0 })
-                    )
-                    .frame(height: 180)
-                    .disabled(engine.state != .idle)
-
-                    HStack {
-                        leadingButton
+                } else {
+                    // 실행 중에는 피커가 필요 없어서 숨기고, 남는 공간만큼 시간 표시를
+                    // 화면 가운데로 띄운다.
+                    VStack(spacing: 24) {
                         Spacer()
-                        trailingButton
+                        timeDisplay
+                        Spacer()
+                        controlButtons
+                        settingsForm
                     }
-                    .padding(.horizontal)
-
-                    Form {
-                        TextField("레이블", text: Binding(get: { engine.label }, set: { engine.label = $0 }))
-
-                        Button {
-                            isEndSoundPickerPresented = true
-                        } label: {
-                            HStack {
-                                Text("타이머 종료 시")
-                                    .foregroundStyle(.primary)
-                                Spacer()
-                                Text(selectedEndSoundName)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-                    .frame(height: 160)
-                    .scrollDisabled(true)
-                    .disabled(engine.state != .idle)
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
             }
             .navigationTitle("타이머")
             .navigationBarTitleDisplayMode(.inline)
@@ -148,15 +117,70 @@ struct TimerView: View {
         ).first
     }
 
+    private var timeDisplay: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            let seconds = engine.state == .idle
+                ? engine.configuredSeconds
+                : engine.remainingOrElapsedSeconds(at: context.date)
+            let status = defaultRunningStatusInfo(for: engine.state)
+
+            RunningDisplayView(
+                primaryText: formatted(seconds: seconds),
+                statusLabel: status.label,
+                statusColor: status.color,
+                fontSize: timerFontSize
+            )
+            .task(id: TickKey(state: engine.state, seconds: seconds)) {
+                triggerCuesIfNeeded(state: engine.state, seconds: seconds)
+            }
+        }
+    }
+
+    private var countdownPicker: some View {
+        CountdownWheelPicker(
+            hours: Binding(get: { engine.hours }, set: { engine.hours = $0 }),
+            minutes: Binding(get: { engine.minutes }, set: { engine.minutes = $0 }),
+            seconds: Binding(get: { engine.seconds }, set: { engine.seconds = $0 })
+        )
+        .frame(height: 180)
+    }
+
+    private var controlButtons: some View {
+        HStack {
+            leadingButton
+            Spacer()
+            trailingButton
+        }
+        .padding(.horizontal)
+    }
+
+    private var settingsForm: some View {
+        Form {
+            TextField("레이블", text: Binding(get: { engine.label }, set: { engine.label = $0 }))
+
+            Button {
+                isEndSoundPickerPresented = true
+            } label: {
+                HStack {
+                    Text("타이머 종료 시")
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Text(selectedEndSoundName)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .frame(height: 160)
+        .scrollDisabled(true)
+        .disabled(engine.state != .idle)
+    }
+
+    /// 시작 전에는 리셋할 대상이 없어 버튼을 보여주지 않는다. 일시정지 중에만 리셋을
+    /// 제공한다(완료 시 리셋은 trailingButton이 담당).
     @ViewBuilder
     private var leadingButton: some View {
-        switch engine.state {
-        case .idle:
-            Button("취소") { cancel() }
-        case .paused:
-            Button("리셋") { engine.reset() }
-        default:
-            EmptyView()
+        if engine.state == .paused {
+            RunningControlButton(title: "리셋", style: .reset) { engine.reset() }
         }
     }
 
@@ -164,24 +188,17 @@ struct TimerView: View {
     private var trailingButton: some View {
         switch engine.state {
         case .idle:
-            Button("시작") { engine.start(at: .now) }
+            RunningControlButton(title: "시작", style: .start) { engine.start(at: .now) }
                 .disabled(engine.configuredSeconds == 0)
         case .running:
-            Button("일시정지") { engine.pause(at: .now) }
+            RunningControlButton(title: "일시정지", style: .pause) { engine.pause(at: .now) }
         case .paused:
-            Button("재개") { engine.resume(at: .now) }
+            RunningControlButton(title: "재개", style: .start) { engine.resume(at: .now) }
         case .completed:
-            Button("리셋") { engine.reset() }
+            RunningControlButton(title: "리셋", style: .reset) { engine.reset() }
         default:
             EmptyView()
         }
-    }
-
-    private func cancel() {
-        engine.reset()
-        engine.configuredSeconds = 0
-        engine.label = "타이머"
-        engine.endSoundAssetID = nil
     }
 
     private var selectedEndSoundName: String {

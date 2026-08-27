@@ -18,6 +18,10 @@ struct SettingsRecordingsView: View {
     @State private var errorMessage: String?
     @State private var renamingAsset: SoundAsset?
     @State private var renameText = ""
+    
+    private var isValid: Bool {
+        !renameText.isEmpty && renameText.count <= 20
+    }
 
     private var recordings: [SoundAsset] {
         assets.filter { $0.kind == .recorded }
@@ -104,6 +108,7 @@ struct SettingsRecordingsView: View {
             Button("저장") {
                 confirmRenaming()
             }
+            .disabled(!isValid)
         }
         .task {
             recorder.refreshPermissionStatus()

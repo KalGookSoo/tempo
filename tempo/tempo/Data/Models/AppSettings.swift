@@ -13,15 +13,18 @@ import SwiftData
 final class AppSettings {
     var themeMode: ThemeMode
     var bigTimerDigitsEnabled: Bool
+    var hasCompletedOnboarding: Bool = false
     var updatedAt: Date
 
     init(
         themeMode: ThemeMode = .system,
         bigTimerDigitsEnabled: Bool = false,
+        hasCompletedOnboarding: Bool = false,
         updatedAt: Date
     ) {
         self.themeMode = themeMode
         self.bigTimerDigitsEnabled = bigTimerDigitsEnabled
+        self.hasCompletedOnboarding = hasCompletedOnboarding
         self.updatedAt = updatedAt
     }
 }

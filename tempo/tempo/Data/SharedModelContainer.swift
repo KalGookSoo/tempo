@@ -12,13 +12,14 @@ enum SharedModelContainer {
         let configuration = ModelConfiguration(isStoredInMemoryOnly: false)
         do {
             let container = try ModelContainer(
-                for: Schema(versionedSchema: SchemaV1.self),
+                for: Schema(versionedSchema: SchemaV2.self),
                 migrationPlan: MigrationPlan.self,
                 configurations: [configuration]
             )
             try PresetSeeder.seedDefaultsIfNeeded(in: container.mainContext)
             try SoundAssetSeeder.seedDefaultsIfNeeded(in: container.mainContext)
             try CueProfileSeeder.seedDefaultIfNeeded(in: container.mainContext)
+            try SettingsRepository(modelContext: container.mainContext).seedDefaultIfNeeded()
             return container
         } catch {
             fatalError("Could not create ModelContainer: \(error)")

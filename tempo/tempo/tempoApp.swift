@@ -12,6 +12,7 @@ import SwiftUI
 struct tempoApp: App {
     @State private var intervalRouter = Router()
     @State private var settingsRouter = Router()
+    @State private var showsOnboarding = false
     private let modelContainer = SharedModelContainer.make()
 
     var body: some Scene {
@@ -38,8 +39,25 @@ struct tempoApp: App {
                     .environment(settingsRouter)
                 }
             }
+            .fullScreenCover(isPresented: $showsOnboarding) {
+                OnboardingView(onComplete: completeOnboarding)
+            }
+            .task {
+                checkOnboarding()
+            }
         }
         .modelContainer(modelContainer)
+    }
+
+    /// 최초 실행이면(또는 아직 완료/건너뛰지 않았으면) 온보딩을 띄운다.
+    private func checkOnboarding() {
+        guard let settings = try? SettingsRepository(modelContext: modelContainer.mainContext).find() else { return }
+        showsOnboarding = !settings.hasCompletedOnboarding
+    }
+
+    private func completeOnboarding() {
+        try? SettingsRepository(modelContext: modelContainer.mainContext).completeOnboarding()
+        showsOnboarding = false
     }
 
     @ViewBuilder

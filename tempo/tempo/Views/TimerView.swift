@@ -42,39 +42,20 @@ struct TimerView: View {
                         }
                     }
 
+                    CountdownWheelPicker(
+                        hours: Binding(get: { engine.hours }, set: { engine.hours = $0 }),
+                        minutes: Binding(get: { engine.minutes }, set: { engine.minutes = $0 }),
+                        seconds: Binding(get: { engine.seconds }, set: { engine.seconds = $0 })
+                    )
+                    .frame(height: 180)
+                    .disabled(engine.state != .idle)
+
                     HStack {
-                        VStack {
-                            Text("시").font(.caption)
-                            Picker("시", selection: Binding(get: { engine.hours }, set: { engine.hours = $0 })) {
-                                ForEach(0 ..< 24, id: \.self) { value in
-                                    Text("\(value)").tag(value)
-                                }
-                            }
-                            .pickerStyle(.wheel)
-                        }
-
-                        VStack {
-                            Text("분").font(.caption)
-                            Picker("분", selection: Binding(get: { engine.minutes }, set: { engine.minutes = $0 })) {
-                                ForEach(0 ..< 60, id: \.self) { value in
-                                    Text("\(value)").tag(value)
-                                }
-                            }
-                            .pickerStyle(.wheel)
-                        }
-
-                        VStack {
-                            Text("초").font(.caption)
-                            Picker("초", selection: Binding(get: { engine.seconds }, set: { engine.seconds = $0 })) {
-                                ForEach(0 ..< 60, id: \.self) { value in
-                                    Text("\(value)").tag(value)
-                                }
-                            }
-                            .pickerStyle(.wheel)
-                        }
+                        leadingButton
+                        Spacer()
+                        trailingButton
                     }
                     .padding(.horizontal)
-                    .disabled(engine.state != .idle)
 
                     Form {
                         TextField("레이블", text: Binding(get: { engine.label }, set: { engine.label = $0 }))
@@ -94,13 +75,6 @@ struct TimerView: View {
                     .frame(height: 160)
                     .scrollDisabled(true)
                     .disabled(engine.state != .idle)
-
-                    HStack {
-                        leadingButton
-                        Spacer()
-                        trailingButton
-                    }
-                    .padding(.horizontal)
                 }
                 .padding(.vertical)
             }

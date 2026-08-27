@@ -32,7 +32,12 @@ struct TimerView: View {
                         timeDisplay
                         countdownPicker
                         controlButtons
-                        settingsForm
+                        // 레이블 입력 중 키보드가 뜨면 이 영역만 남는 공간에 맞춰 스크롤돼
+                        // 포커스된 입력창을 가리지 않는다. 피커는 이 ScrollView 밖에 있어서
+                        // 휠을 돌릴 때 전체 화면이 끌려가는 문제는 그대로 없다.
+                        ScrollView {
+                            settingsForm
+                        }
                     }
                     .padding(.vertical)
                 } else {

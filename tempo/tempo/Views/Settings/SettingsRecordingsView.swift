@@ -18,7 +18,7 @@ struct SettingsRecordingsView: View {
     @State private var errorMessage: String?
     @State private var renamingAsset: SoundAsset?
     @State private var renameText = ""
-    
+
     private var isValid: Bool {
         !renameText.isEmpty && renameText.count <= 20
     }

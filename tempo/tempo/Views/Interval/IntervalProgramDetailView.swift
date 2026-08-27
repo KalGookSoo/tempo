@@ -1,8 +1,4 @@
-//
-//  IntervalProgramDetailView.swift
-//  tempo
-//
-
+import SwiftData
 import SwiftUI
 
 /// `.programDetail(id:)` 화면. `id`로 실제 `TimerPreset`을 조회해서 이름/구성을 보여주고,

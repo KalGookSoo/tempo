@@ -26,7 +26,7 @@ struct tempoApp: App {
                 }
                 Tab("인터벌", systemImage: "repeat") {
                     NavigationStack(path: $intervalRouter.path) {
-                        IntervalHomeView()
+                        IntervalProgramsView()
                             .navigationDestination(for: IntervalRoute.self, destination: intervalDestination(for:))
                     }
                     .environment(intervalRouter)
@@ -71,10 +71,6 @@ struct tempoApp: App {
             IntervalProgramDetailView(id: id)
         case let .programEdit(id):
             IntervalProgramEditView(id: id)
-        case .help:
-            IntervalHelpView()
-        case let .helpDetail(id):
-            IntervalHelpDetailView(id: id)
         case let .run(programID):
             IntervalRunView(programID: programID)
         }

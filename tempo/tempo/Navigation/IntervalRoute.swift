@@ -12,7 +12,5 @@ enum IntervalRoute: Hashable {
     case programs
     case programDetail(id: String)
     case programEdit(id: String)
-    case help
-    case helpDetail(id: String)
     case run(programID: String)
 }

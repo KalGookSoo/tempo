@@ -1,8 +1,3 @@
-//
-//  CueEventDetector.swift
-//  tempo
-//
-
 import Foundation
 
 /// `docs/timer-functional-spec.md` "알림 큐"가 정의한 8개 이벤트.

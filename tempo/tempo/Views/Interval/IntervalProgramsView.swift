@@ -1,8 +1,3 @@
-//
-//  IntervalProgramsView.swift
-//  tempo
-//
-
 import SwiftData
 import SwiftUI
 
@@ -42,12 +37,6 @@ struct IntervalProgramsView: View {
                     Image(systemName: "plus")
                 }
                 .accessibilityLabel("새 프로그램")
-            }
-            ToolbarItem(placement: .secondaryAction) {
-                NavigationLink(value: IntervalRoute.help) {
-                    Image(systemName: "questionmark.circle")
-                }
-                .accessibilityLabel("도움말")
             }
         }
     }

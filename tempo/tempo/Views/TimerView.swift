@@ -13,11 +13,11 @@ struct TimerView: View {
     @State private var isEndSoundPickerPresented = false
     @State private var cueConfig: CueConfig?
     @State private var previousState: TimerState?
-    
-    // 모달 상태 변수
+
+    /// 모달 상태 변수
     @State private var isLabelAlertPresented: Bool = false
-    
-    // 사용자가 레이블을 입력하다가 취소할 경우 원복하기 위한 임시 변수
+
+    /// 사용자가 레이블을 입력하다가 취소할 경우 원복하기 위한 임시 변수
     @State private var draftLabel: String = ""
     @Query(filter: #Predicate<SoundAsset> { $0.deletedAt == nil })
     private var soundAssets: [SoundAsset]

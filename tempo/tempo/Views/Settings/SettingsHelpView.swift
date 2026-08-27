@@ -1,13 +1,7 @@
-//
-//  SettingsHelpView.swift
-//  tempo
-//
-
 import SwiftUI
 
 /// `.help` 화면. 앱 전체 기능 개요를 주제별 목록으로 보여준다. `docs/use-cases/*.md`가
-/// 원본이고, 콘텐츠는 `HelpLibrary`에서 관리한다. 인터벌 프로그램 입력 방법처럼 좁은
-/// 도움말은 인터벌 탭 자체 도움말(`IntervalHelpView`)의 역할이라 여기서 다루지 않는다.
+/// 원본이고, 콘텐츠는 `HelpLibrary`에서 관리한다.
 struct SettingsHelpView: View {
     var body: some View {
         List(HelpLibrary.topics) { topic in

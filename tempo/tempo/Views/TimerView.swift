@@ -35,14 +35,15 @@ struct TimerView: View {
                         .padding(.vertical)
                     }
                 } else {
-                    // 실행 중에는 피커가 필요 없어서 숨기고, 남는 공간만큼 시간 표시를
-                    // 화면 가운데로 띄운다.
+                    // 실행 중에는 피커와 레이블/사운드 입력 폼이 필요 없어서 숨기고, 남는
+                    // 공간만큼 시간 표시를 화면 가운데로 띄운다. 레이블은 timeDisplay 안
+                    // secondaryText로 대신 보여준다.
                     VStack(spacing: 24) {
                         Spacer()
                         timeDisplay
                         Spacer()
                         controlButtons
-                        settingsForm
+                        Spacer()
                     }
                     .padding(.vertical)
                 }
@@ -123,11 +124,13 @@ struct TimerView: View {
                 ? engine.configuredSeconds
                 : engine.remainingOrElapsedSeconds(at: context.date)
             let status = defaultRunningStatusInfo(for: engine.state)
+            let trimmedLabel = engine.label.trimmingCharacters(in: .whitespaces)
 
             RunningDisplayView(
                 primaryText: formatted(seconds: seconds),
                 statusLabel: status.label,
                 statusColor: status.color,
+                secondaryText: engine.state == .idle || trimmedLabel.isEmpty ? nil : trimmedLabel,
                 fontSize: timerFontSize
             )
             .task(id: TickKey(state: engine.state, seconds: seconds)) {
@@ -154,6 +157,8 @@ struct TimerView: View {
         .padding(.horizontal)
     }
 
+    /// idle 상태에서만 쓴다 — 실행 중에는 레이블만 timeDisplay 위에 대신 보여주고,
+    /// 이 폼(레이블 입력 + 종료 시 사운드)은 화면에서 아예 뺀다.
     private var settingsForm: some View {
         Form {
             TextField("레이블", text: Binding(get: { engine.label }, set: { engine.label = $0 }))
@@ -172,7 +177,6 @@ struct TimerView: View {
         }
         .frame(height: 160)
         .scrollDisabled(true)
-        .disabled(engine.state != .idle)
     }
 
     /// 시작 전에는 리셋할 대상이 없어 버튼을 보여주지 않는다. 일시정지 중에만 리셋을

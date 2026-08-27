@@ -42,7 +42,7 @@ final class TimerEngine {
     init(
         mode: TimerMode = .countdown,
         configuredSeconds: Int = 0,
-        label: String = "타이머",
+        label: String = "알림",
         endSoundAssetID: UUID? = nil
     ) {
         self.mode = mode

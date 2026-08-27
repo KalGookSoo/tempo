@@ -13,6 +13,7 @@ struct IntervalProgramDetailView: View {
     @State private var preset: TimerPreset?
     @State private var presetNotFound = false
     @State private var errorMessage: String?
+    @State private var isDeleteConfirmationPresented: Bool = false
 
     var body: some View {
         Group {
@@ -53,7 +54,7 @@ struct IntervalProgramDetailView: View {
 
                         if preset.kind == .custom {
                             Button(role: .destructive) {
-                                delete()
+                                isDeleteConfirmationPresented = true
                             } label: {
                                 Label("삭제", systemImage: "trash")
                             }
@@ -82,6 +83,17 @@ struct IntervalProgramDetailView: View {
             actions: { Button("확인") {} },
             message: { Text(errorMessage ?? "") }
         )
+        .alert(
+            "프로그램을 삭제할까요?",
+            isPresented: $isDeleteConfirmationPresented
+        ) {
+            Button("취소", role: .cancel) {}
+            Button("삭제", role: .destructive) {
+                delete()
+            }
+        } message: {
+            Text("\(preset?.name ?? "") 프로그램을 삭제하면 되돌릴 수 없습니다.")
+        }
         .task {
             load()
         }

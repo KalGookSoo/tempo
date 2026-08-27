@@ -1,8 +1,3 @@
-//
-//  SettingsVersionView.swift
-//  tempo
-//
-
 import SwiftUI
 
 /// `.version` 화면. 앱 버전/빌드 번호를 `Bundle.main`에서 읽어 그대로 보여준다.

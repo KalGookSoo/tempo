@@ -1,8 +1,3 @@
-//
-//  CountdownWheelPicker.swift
-//  tempo
-//
-
 import SwiftUI
 import UIKit
 

@@ -1,8 +1,3 @@
-//
-//  OnboardingPagesView.swift
-//  tempo
-//
-
 import SwiftUI
 
 /// 온보딩 단계를 스와이프로 넘겨보는 페이지 콘텐츠. 최초 실행 온보딩과 설정의

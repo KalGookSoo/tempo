@@ -1,8 +1,3 @@
-//
-//  StopwatchView.swift
-//  tempo
-//
-
 import SwiftUI
 
 struct StopwatchView: View {

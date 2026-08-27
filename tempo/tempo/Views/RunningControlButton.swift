@@ -1,8 +1,3 @@
-//
-//  RunningControlButton.swift
-//  tempo
-//
-
 import SwiftUI
 
 /// 타이머/스톱워치/인터벌 실행 화면이 공유하는 원형 조작 버튼. iOS 기본 시계 앱처럼

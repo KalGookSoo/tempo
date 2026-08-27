@@ -1,8 +1,3 @@
-//
-//  IntervalConfigFormFields.swift
-//  tempo
-//
-
 import SwiftUI
 
 /// `IntervalConfig.segments`는 [운동, 휴식, 운동, 휴식, ...] 순서로 이어지는 평평한 배열이다.

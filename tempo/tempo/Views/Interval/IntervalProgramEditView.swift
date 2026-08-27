@@ -1,8 +1,3 @@
-//
-//  IntervalProgramEditView.swift
-//  tempo
-//
-
 import SwiftUI
 
 /// `.programEdit(id:)` 화면. `id`로 실제 `TimerPreset`을 불러와 `IntervalNewView`와 같은

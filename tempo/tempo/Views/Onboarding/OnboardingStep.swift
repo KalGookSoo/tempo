@@ -1,8 +1,3 @@
-//
-//  OnboardingStep.swift
-//  tempo
-//
-
 import Foundation
 
 /// 온보딩 한 페이지의 내용. `OnboardingView`(최초 실행)와 `SettingsOnboardingView`

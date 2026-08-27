@@ -1,8 +1,3 @@
-//
-//  SettingsOnboardingView.swift
-//  tempo
-//
-
 import SwiftUI
 
 /// `.onboarding` 화면. 최초 실행 온보딩(`OnboardingView`)과 같은 콘텐츠를 설정에서

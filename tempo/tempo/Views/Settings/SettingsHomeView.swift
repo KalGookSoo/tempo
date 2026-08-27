@@ -1,8 +1,3 @@
-//
-//  SettingsHomeView.swift
-//  tempo
-//
-
 import SwiftUI
 
 /// 설정 탭의 루트 화면. moov의 "관리" 탭처럼 도움말/온보딩/버전 정보를 모아 보여준다.

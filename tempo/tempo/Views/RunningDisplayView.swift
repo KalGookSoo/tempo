@@ -1,8 +1,3 @@
-//
-//  RunningDisplayView.swift
-//  tempo
-//
-
 import SwiftUI
 
 /// 준비/운동/휴식/일시정지/완료 같은 상태 색상 토큰. `docs/native-style-guide.md` "상태 색상"

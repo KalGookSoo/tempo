@@ -1,8 +1,3 @@
-//
-//  OnboardingView.swift
-//  tempo
-//
-
 import SwiftUI
 
 /// 앱 최초 실행 시 `.fullScreenCover`로 띄우는 온보딩 화면. "건너뛰기"/"시작하기" 둘 다

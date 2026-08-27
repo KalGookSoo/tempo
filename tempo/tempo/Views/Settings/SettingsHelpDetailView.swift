@@ -1,8 +1,3 @@
-//
-//  SettingsHelpDetailView.swift
-//  tempo
-//
-
 import SwiftUI
 
 /// `.helpDetail(id:)` 화면. `HelpLibrary`에서 주제를 찾아 문단을 순서대로 보여준다.

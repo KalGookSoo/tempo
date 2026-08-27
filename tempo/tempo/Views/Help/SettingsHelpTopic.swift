@@ -1,8 +1,3 @@
-//
-//  SettingsHelpTopic.swift
-//  tempo
-//
-
 import Foundation
 
 /// 설정 탭 "도움말"에서 보여줄 주제 하나. `id`는 `SettingsRoute.helpDetail(id:)`가 쓴다.

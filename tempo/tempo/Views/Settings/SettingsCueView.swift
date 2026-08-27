@@ -1,8 +1,3 @@
-//
-//  SettingsCueView.swift
-//  tempo
-//
-
 import SwiftData
 import SwiftUI
 

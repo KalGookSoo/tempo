@@ -44,6 +44,7 @@ struct tempoApp: App {
             }
             .task {
                 checkOnboarding()
+                CueTriggerPlayer.prewarmAudioSession()
             }
         }
         .modelContainer(modelContainer)

@@ -1,8 +1,3 @@
-//
-//  CueTriggerPlayer.swift
-//  tempo
-//
-
 import AudioToolbox
 import AVFoundation
 import UIKit
@@ -19,6 +14,13 @@ enum CueTriggerPlayer {
     /// 재생 중 해제되지 않도록 강한 참조를 들고 있는다.
     private static var audioPlayer: AVAudioPlayer?
 
+    /// 앱 시작 시 한 번 호출해서 오디오 세션을 미리 활성화한다. 첫 재생 시 발생하는
+    /// 하드웨어 예열 지연(이슈 #30)을 앱 실행 초반으로 옮겨, 인터벌 실행 화면 진입
+    /// 시점에는 이미 준비된 상태가 되게 한다.
+    static func prewarmAudioSession() {
+        try? AVAudioSession.sharedInstance().setActive(true)
+    }
+    
     static func play(_ event: CueConfig.Event, soundAsset: SoundAsset? = nil) {
         if event.mode.playsSound {
             if let url = resolvedURL(for: soundAsset) {

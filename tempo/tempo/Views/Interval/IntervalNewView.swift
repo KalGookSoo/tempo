@@ -51,6 +51,7 @@ struct IntervalNewView: View {
 
         do {
             let preset = try PresetRepository(modelContext: modelContext).createCustomPreset(name: name, config: config)
+            router.pop()
             router.push(IntervalRoute.programDetail(id: preset.id.uuidString))
         } catch {
             errorMessage = error.localizedDescription

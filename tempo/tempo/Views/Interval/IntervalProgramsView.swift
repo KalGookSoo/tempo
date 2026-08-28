@@ -27,25 +27,13 @@ struct IntervalProgramsView: View {
                     NavigationLink(value: IntervalRoute.programDetail(id: preset.id.uuidString)) {
                         VStack(alignment: .leading) {
                             Text(preset.name)
-                            Text(preset.kind == .default ? "기본 프리셋" : "내 프리셋")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
                         }
                     }
                     .swipeActions {
-                        if preset.kind == .custom {
-                            Button(role: .destructive) {
-                                try? PresetRepository(modelContext: modelContext).delete(preset)
-                            } label: {
-                                Label("삭제", systemImage: "trash")
-                            }
-
-                            Button {
-                                router.push(IntervalRoute.programEdit(id: preset.id.uuidString))
-                            } label: {
-                                Label("수정", systemImage: "pencil")
-                            }
-                            .tint(.blue)
+                        Button(role: .destructive) {
+                            try? PresetRepository(modelContext: modelContext).delete(preset)
+                        } label: {
+                            Label("삭제", systemImage: "trash")
                         }
                     }
                 }

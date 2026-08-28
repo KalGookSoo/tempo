@@ -20,7 +20,7 @@ enum CueTriggerPlayer {
     static func prewarmAudioSession() {
         try? AVAudioSession.sharedInstance().setActive(true)
     }
-    
+
     static func play(_ event: CueConfig.Event, soundAsset: SoundAsset? = nil) {
         if event.mode.playsSound {
             if let url = resolvedURL(for: soundAsset) {

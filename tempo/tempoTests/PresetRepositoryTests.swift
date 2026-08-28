@@ -91,28 +91,43 @@ struct PresetRepositoryTests {
         #expect(tabata.name == "Tabata")
     }
 
-    @Test("기본 프리셋은 수정할 수 없다")
-    func cannotUpdateDefaultPreset() throws {
+    @Test("기본 프리셋도 수정할 수 있다")
+    func updatingDefaultPresetSucceeds() throws {
         let store = try makeInMemoryStore()
         try PresetSeeder.seedDefaultsIfNeeded(in: store.context)
         let repository = PresetRepository(modelContext: store.context)
         let tabata = try #require(try repository.findIntervalPresets().first { $0.name == "Tabata" })
 
-        #expect(throws: PresetRepositoryError.self) {
-            try repository.update(tabata, name: "바꿔치기")
-        }
+        try repository.update(tabata, name: "내 타바타")
+
+        let updated = try #require(try repository.findIntervalPresets().first { $0.id == tabata.id })
+        #expect(updated.name == "내 타바타")
     }
 
-    @Test("기본 프리셋은 삭제할 수 없다")
-    func cannotDeleteDefaultPreset() throws {
+    @Test("기본 프리셋도 삭제할 수 있다")
+    func deletingDefaultPresetSucceeds() throws {
         let store = try makeInMemoryStore()
         try PresetSeeder.seedDefaultsIfNeeded(in: store.context)
         let repository = PresetRepository(modelContext: store.context)
         let tabata = try #require(try repository.findIntervalPresets().first { $0.name == "Tabata" })
 
-        #expect(throws: PresetRepositoryError.self) {
-            try repository.delete(tabata)
-        }
+        try repository.delete(tabata)
+
+        #expect(try repository.findIntervalPresets().first { $0.id == tabata.id } == nil)
+        #expect(tabata.deletedAt != nil)
+    }
+
+    @Test("삭제된 기본 프리셋은 재시드해도 되살아나지 않는다")
+    func deletedDefaultPresetIsNotReseeded() throws {
+        let store = try makeInMemoryStore()
+        try PresetSeeder.seedDefaultsIfNeeded(in: store.context)
+        let repository = PresetRepository(modelContext: store.context)
+        let tabata = try #require(try repository.findIntervalPresets().first { $0.name == "Tabata" })
+
+        try repository.delete(tabata)
+        try PresetSeeder.seedDefaultsIfNeeded(in: store.context)
+
+        #expect(try repository.findIntervalPresets().first { $0.name == "Tabata" } == nil)
     }
 
     @Test("커스텀 프리셋을 생성, 수정, 삭제할 수 있다")

@@ -10,7 +10,6 @@ enum IntervalRoute: Hashable {
     case new
     case programs
     case programDetail(id: String)
-    case programEdit(id: String)
     case help
     case helpDetail(id: String)
     case run(programID: String)
@@ -73,11 +72,8 @@ flowchart TD
     P --> P2[".programDetail(id:)"]
     P --> N
     P2 --> R
-    P2 --> E[".programEdit(id:)"]
-    E --> P2
     H1 --> N
     R -->|뒤로가기| P2
-    R -->|수정| E
 
     G --> GH[".help"]
     G --> GO[".onboarding"]
@@ -86,7 +82,7 @@ flowchart TD
     classDef primary fill:#FFF4BF,stroke:#111111,color:#111111;
     classDef screen fill:#FFFFFF,stroke:#111111,color:#111111;
     class TB,T,S,I,G,R primary;
-    class T1,T2,T3,S1,S2,N,P,H,H1,P2,E,GH,GO,GV screen;
+    class T1,T2,T3,S1,S2,N,P,H,H1,P2,GH,GO,GV screen;
 ```
 
 ## 타이머 탭
@@ -173,24 +169,13 @@ flowchart TD
 
 - 저장된 인터벌 프로그램 설정을 확인한다.
 - 실행하거나 목록으로 돌아간다.
+- 같은 화면에서 편집 모드로 전환해 이름, 준비/운동/휴식 시간, 라운드를 수정한다(기본 프리셋도 포함, 별도 화면으로 이동하지 않는다).
 
 주요 이동:
 
 - 실행: `.run(programID:)`
-- 수정: `.programEdit(id:)`
+- 수정: 같은 화면에서 편집 모드로 전환한다. 저장/취소하면 편집 모드가 끝나고 다시 조회 화면으로 돌아온다.
 - 목록으로가기: `.programs` (또는 `navigationPath.removeLast()`)
-
-### 프로그램 수정 `.programEdit(id:)`
-
-목적:
-
-- 저장된 인터벌 프로그램의 이름, 준비/운동/휴식 시간, 라운드, 알림 큐를 단계적으로 수정한다.
-- 화면 구성은 `.new`와 동일한 단계형 흐름을 재사용한다.
-
-주요 이동:
-
-- 저장: `.programDetail(id:)`로 복귀 (`navigationPath.removeLast()`)
-- 취소 또는 뒤로가기: `.programDetail(id:)`로 복귀 (`navigationPath.removeLast()`)
 
 ### 인터벌 실행 `.run(programID:)`
 
@@ -203,7 +188,6 @@ flowchart TD
 주요 이동:
 
 - 뒤로가기: 표준 백 버튼으로 `.programDetail(id:)`로 복귀한다 (진입 경로가 항상 프로그램 상세이므로 popToRoot 대신 표준 back을 쓴다).
-- 수정: 우측 상단 툴바의 `NavigationLink`로 `.programEdit(id:)`로 이동한다.
 
 ## 설정 탭
 

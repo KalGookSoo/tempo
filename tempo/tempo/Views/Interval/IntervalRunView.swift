@@ -40,12 +40,6 @@ struct IntervalRunView: View {
         }
         .navigationTitle("인터벌 실행")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                NavigationLink("수정", value: IntervalRoute.programEdit(id: programID))
-                    .accessibilityLabel("수정")
-            }
-        }
         .task {
             loadAndStart()
         }

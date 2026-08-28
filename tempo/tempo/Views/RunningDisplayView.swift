@@ -30,6 +30,7 @@ struct RunningDisplayView: View {
     let statusLabel: String?
     let statusColor: Color
     let secondaryText: String?
+    let secondaryFont: Font
     let fontSize: CGFloat
 
     init(
@@ -37,12 +38,14 @@ struct RunningDisplayView: View {
         statusLabel: String? = nil,
         statusColor: Color = .primary,
         secondaryText: String? = nil,
+        secondaryFont: Font = .headline,
         fontSize: CGFloat
     ) {
         self.primaryText = primaryText
         self.statusLabel = statusLabel
         self.statusColor = statusColor
         self.secondaryText = secondaryText
+        self.secondaryFont = secondaryFont
         self.fontSize = fontSize
     }
 
@@ -50,7 +53,7 @@ struct RunningDisplayView: View {
         VStack(spacing: 8) {
             if let secondaryText {
                 Text(secondaryText)
-                    .font(.headline)
+                    .font(secondaryFont)
                     .foregroundStyle(.secondary)
             }
 

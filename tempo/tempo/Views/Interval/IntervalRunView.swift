@@ -40,7 +40,12 @@ struct IntervalRunView: View {
         }
         .navigationTitle("인터벌 실행")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                NavigationLink("수정", value: IntervalRoute.programEdit(id: programID))
+                    .accessibilityLabel("수정")
+            }
+        }
         .task {
             loadAndStart()
         }
@@ -60,6 +65,7 @@ struct IntervalRunView: View {
                             secondaryText: progress.step.round > 0
                                 ? "라운드 \(progress.step.round) / \(progress.step.totalRounds)"
                                 : nil,
+                            secondaryFont: .title2,
                             fontSize: timerFontSize
                         )
                     } else {
@@ -71,27 +77,23 @@ struct IntervalRunView: View {
                     }
 
                     HStack {
-                        Button("완료") {
-                            router.popToRoot()
+                        if runner.state == .paused {
+                            RunningControlButton(title: "리셋", style: .reset) {
+                                runner.reset()
+                            }
                         }
-                        .buttonStyle(.bordered)
+
+                        Spacer()
 
                         if runner.state == .running || runner.state == .preparing {
-                            Button("일시정지") {
+                            RunningControlButton(title: "일시정지", style: .pause) {
                                 runner.pause(at: .now)
                             }
-                            .buttonStyle(.borderedProminent)
                         } else if runner.state == .paused {
-                            Button("재개") {
+                            RunningControlButton(title: "재개", style: .start) {
                                 runner.resume(at: .now)
                             }
-                            .buttonStyle(.borderedProminent)
                         }
-
-                        Button("설정 수정") {
-                            router.push(IntervalRoute.programEdit(id: programID))
-                        }
-                        .buttonStyle(.bordered)
                     }
                 }
                 .padding()

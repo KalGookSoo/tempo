@@ -76,8 +76,8 @@ flowchart TD
     P2 --> E[".programEdit(id:)"]
     E --> P2
     H1 --> N
-    R -->|완료: 탭 루트로 popToRoot| I
-    R -->|설정 수정| E
+    R -->|뒤로가기| P2
+    R -->|수정| E
 
     G --> GH[".help"]
     G --> GO[".onboarding"]
@@ -202,8 +202,8 @@ flowchart TD
 
 주요 이동:
 
-- 완료: 인터벌 탭 루트로 복귀 (`navigationPath.removeLast(navigationPath.count)`) — 앱 전체 홈이 아니라 **이 탭의 루트**로만 돌아간다.
-- 설정 수정: `.programEdit(id:)`
+- 뒤로가기: 표준 백 버튼으로 `.programDetail(id:)`로 복귀한다 (진입 경로가 항상 프로그램 상세이므로 popToRoot 대신 표준 back을 쓴다).
+- 수정: 우측 상단 툴바의 `NavigationLink`로 `.programEdit(id:)`로 이동한다.
 
 ## 설정 탭
 

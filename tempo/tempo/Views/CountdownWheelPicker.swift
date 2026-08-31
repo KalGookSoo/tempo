@@ -74,6 +74,9 @@ struct CountdownWheelPicker: UIViewRepresentable {
         ) -> UIView {
             let label = (view as? UILabel) ?? UILabel()
             label.font = .systemFont(ofSize: 23, weight: .regular)
+            // 재사용되는 뷰가 다른 경로로 인터랙션이 켜진 채 재사용될 가능성을 배제하기
+            // 위해 명시적으로 꺼둔다(기본값과 같아 효과가 없을 수 있음 — 이슈 #31).
+            label.isUserInteractionEnabled = false
 
             switch Component(rawValue: component) {
             case .hourValue:

@@ -47,8 +47,8 @@ struct IntervalRunView: View {
 
     private func runningContent(runner: IntervalRunner) -> some View {
         ScrollView {
-            TimelineView(.periodic(from: .now, by: 1)) { context in
-                let progress = runner.currentProgress(at: context.date)
+            TimelineView(.periodic(from: .now, by: 1)) { _ in
+                let progress = runner.currentProgress(at: Date())
 
                 VStack(spacing: 24) {
                     if let progress {

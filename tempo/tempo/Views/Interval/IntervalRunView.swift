@@ -52,7 +52,22 @@ struct IntervalRunView: View {
             VStack(spacing: 24) {
                 Spacer()
 
-                if let progress {
+                if let progress, progress.step.kind == .prepare {
+                    VStack(spacing: 16) {
+                        Text("준비")
+                            .font(.title3.bold())
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 4)
+                            .background(Color.prepare.opacity(0.15), in: Capsule())
+                            .foregroundStyle(Color.prepare)
+
+                        PrepareCountdownRing(
+                            remainingSeconds: progress.remainingSeconds,
+                            totalSeconds: progress.step.seconds,
+                            fontSize: timerFontSize
+                        )
+                    }
+                } else if let progress {
                     RunningDisplayView(
                         primaryText: IntervalRunner.formattedClock(seconds: progress.remainingSeconds),
                         statusLabel: statusLabel(for: progress.step),

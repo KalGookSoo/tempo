@@ -209,6 +209,27 @@ struct IntervalRunnerTests {
         #expect(runner.state == .running)
     }
 
+    @Test("전체 시퀀스가 끝난 뒤에 일시정지했다가 재개하면 곧바로 완료 상태여야 한다")
+    func resumingAfterSequenceEndedShouldStayCompleted() {
+        let config = IntervalConfig(
+            rounds: 1,
+            prepareSeconds: 0,
+            segments: [
+                IntervalSegment(type: .work, seconds: 10),
+                IntervalSegment(type: .rest, seconds: 0),
+            ]
+        )
+        let runner = IntervalRunner(config: config)
+        runner.start(at: base)
+
+        // F1(10초)짜리 구간 하나뿐인데, 13초(이미 다 끝난 뒤) 지나서 일시정지한다.
+        runner.pause(at: base.addingTimeInterval(13))
+        runner.resume(at: base.addingTimeInterval(50))
+
+        #expect(runner.state == .completed)
+        #expect(runner.currentProgress(at: base.addingTimeInterval(50)) == nil)
+    }
+
     @Test("준비 구간에서 시작하면 상태가 preparing이 된다")
     func startsInPreparingStateWhenPrepareStepExists() {
         let config = IntervalConfig(

@@ -153,8 +153,12 @@ final class IntervalRunner {
     }
 
     func resume(at now: Date) {
-        let kind = progress(atElapsed: pausedElapsed)?.step.kind
-        state = kind == .prepare ? .preparing : .running
+        guard let step = progress(atElapsed: pausedElapsed)?.step else {
+            state = .completed
+            startedAt = nil
+            return
+        }
+        state = step.kind == .prepare ? .preparing : .running
         startedAt = now
     }
 

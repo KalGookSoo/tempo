@@ -1,9 +1,11 @@
 import SwiftData
 import SwiftUI
 
-/// "타이머 종료 시" 사운드 선택 시트. `SoundAsset`(기본 제공/가져오기/직접 녹음)을 그대로
-/// 조회해서 보여준다 — 고정된 목록을 별도로 두지 않는다. docs/use-cases/timer.md 참고.
+/// 사운드 선택 시트. `SoundAsset`(기본 제공/가져오기/직접 녹음)을 그대로 조회해서
+/// 보여준다 — 고정된 목록을 별도로 두지 않는다. 타이머 화면("타이머 종료 시")과
+/// 알림 큐 설정 화면(이벤트별 사운드)이 공유한다. docs/use-cases/timer.md 참고.
 struct EndSoundPickerView: View {
+    let title: String
     @Environment(\.dismiss) private var dismiss
     @Query(filter: #Predicate<SoundAsset> { $0.deletedAt == nil })
     private var soundAssets: [SoundAsset]
@@ -28,7 +30,7 @@ struct EndSoundPickerView: View {
                     }
                 }
             }
-            .navigationTitle("타이머 종료 시")
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -51,6 +53,6 @@ struct EndSoundPickerView: View {
 }
 
 #Preview {
-    EndSoundPickerView(selection: .constant(nil))
+    EndSoundPickerView(title: "타이머 종료 시", selection: .constant(nil))
         .modelContainer(for: SoundAsset.self, inMemory: true)
 }

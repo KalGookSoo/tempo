@@ -62,6 +62,7 @@ struct TimerView: View {
             }
             .sheet(isPresented: $isEndSoundPickerPresented) {
                 EndSoundPickerView(
+                    title: "타이머 종료 시",
                     selection: Binding(get: { engine.endSoundAssetID }, set: { engine.endSoundAssetID = $0 })
                 )
             }

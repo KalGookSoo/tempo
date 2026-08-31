@@ -45,6 +45,23 @@ struct SoundAssetSeederTests {
         #expect(assets.count == 4)
     }
 
+    @Test("일부 기본 사운드만 이미 있으면 없는 것만 채워 넣는다")
+    func seedsOnlyMissingSounds() throws {
+        let store = try makeInMemoryStore()
+        // 앱 업데이트 전에 기본 사운드 3종만 시드된 기존 설치를 흉내낸다.
+        let now = Date()
+        store.context.insert(SoundAsset(kind: .builtin, name: "짧은 비프", relativePath: "beep.wav", createdAt: now))
+        store.context.insert(SoundAsset(kind: .builtin, name: "긴 비프", relativePath: "beep-long.wav", createdAt: now))
+        store.context.insert(SoundAsset(kind: .builtin, name: "종료음", relativePath: "finish.wav", createdAt: now))
+        try store.context.save()
+
+        try SoundAssetSeeder.seedDefaultsIfNeeded(in: store.context)
+
+        let assets = try store.context.fetch(FetchDescriptor<SoundAsset>())
+        #expect(assets.count == 4)
+        #expect(Set(assets.map(\.name)) == ["짧은 비프", "긴 비프", "종료음", "긴 비프 (3초)"])
+    }
+
     @Test("전체 종료 이벤트의 기본 사운드는 긴 비프(3초)이고, 나머지는 짧은 비프다")
     func defaultSoundNameMapsFinishToFinishSound() {
         #expect(SoundAssetSeeder.defaultSoundName(for: .finish) == "긴 비프 (3초)")

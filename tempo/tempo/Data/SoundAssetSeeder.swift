@@ -10,13 +10,19 @@ import SwiftData
 /// 파일은 `Resources/Sounds/`에 번들로 포함돼 있다. `docs/timer-functional-spec.md`
 /// "기본 사운드" 참고.
 enum SoundAssetSeeder {
+    /// 이미 있는 이름은 건너뛰고, 아직 없는 기본 사운드만 추가한다(앱 업데이트로 기본
+    /// 사운드가 늘어났을 때, 이미 일부가 시드된 기존 설치에도 새로 생긴 것만 채워 넣기 위함).
     static func seedDefaultsIfNeeded(in modelContext: ModelContext) throws {
-        let existing = try modelContext.fetch(FetchDescriptor<SoundAsset>())
-            .filter { $0.kind == .builtin }
-        guard existing.isEmpty else { return }
+        let existingNames = try Set(
+            modelContext.fetch(FetchDescriptor<SoundAsset>())
+                .filter { $0.kind == .builtin }
+                .map(\.name)
+        )
+        let missingSeeds = defaultSeeds.filter { !existingNames.contains($0.name) }
+        guard !missingSeeds.isEmpty else { return }
 
         let now = Date()
-        for seed in defaultSeeds {
+        for seed in missingSeeds {
             let asset = SoundAsset(kind: .builtin, name: seed.name, relativePath: seed.fileName, createdAt: now)
             modelContext.insert(asset)
         }

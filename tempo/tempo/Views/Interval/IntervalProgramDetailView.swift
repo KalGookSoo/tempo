@@ -167,7 +167,7 @@ struct IntervalProgramDetailView: View {
         guard let preset else { return }
         editName = preset.name
         editRounds = preset.config.rounds
-        editPrepareSeconds = preset.config.prepareSeconds
+        editPrepareSeconds = min(max(preset.config.prepareSeconds, 10), 60)
         editSets = EditableIntervalSet.pairs(from: preset.config.segments)
         isEditing = true
     }

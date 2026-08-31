@@ -41,7 +41,7 @@ struct IntervalConfigFormFields: View {
             Stepper(
                 "준비 \(IntervalRunner.formattedClock(seconds: prepareSeconds))",
                 value: $prepareSeconds,
-                in: 0 ... 60,
+                in: 10 ... 60,
                 step: 5
             )
         }

@@ -41,7 +41,7 @@ struct IntervalRunView: View {
         .navigationTitle("인터벌 실행")
         .navigationBarTitleDisplayMode(.inline)
         .task {
-            loadAndStart()
+            load()
         }
     }
 
@@ -87,13 +87,17 @@ struct IntervalRunView: View {
                             RunningControlButton(title: "재개", style: .start) {
                                 runner.resume(at: .now)
                             }
+                        } else {
+                            RunningControlButton(title: "시작", style: .start) {
+                                runner.start(at: .now)
+                            }
                         }
                     }
                 }
                 .padding()
                 .frame(maxWidth: .infinity)
                 .task(id: TickKey(stepID: progress?.step.id, remainingSeconds: progress?.remainingSeconds)) {
-                    triggerCuesIfNeeded(progress: progress)
+                    triggerCuesIfNeeded(progress: progress, state: runner.state)
                 }
             }
         }
@@ -118,8 +122,8 @@ struct IntervalRunView: View {
         }
     }
 
-    private func triggerCuesIfNeeded(progress: IntervalRunner.Progress?) {
-        guard let cueConfig else { return }
+    private func triggerCuesIfNeeded(progress: IntervalRunner.Progress?, state: TimerState) {
+        guard state != .idle, let cueConfig else { return }
 
         let events = CueEventDetector.events(
             previousStep: previousStep,
@@ -156,7 +160,7 @@ struct IntervalRunView: View {
         ).first
     }
 
-    private func loadAndStart() {
+    private func load() {
         guard runner == nil, !presetNotFound else { return }
 
         guard
@@ -168,10 +172,7 @@ struct IntervalRunView: View {
         }
 
         cueConfig = resolveCueConfig(cueProfileID: preset.cueProfileID)
-
-        let newRunner = IntervalRunner(config: preset.config)
-        newRunner.start(at: .now)
-        runner = newRunner
+        runner = IntervalRunner(config: preset.config)
     }
 
     private func resolveCueConfig(cueProfileID: UUID?) -> CueConfig? {

@@ -46,17 +46,6 @@ enum PresetSeeder {
             )
         ),
         (
-            "FGB 5R",
-            IntervalConfig(
-                rounds: 5,
-                prepareSeconds: 10,
-                segments: [
-                    IntervalSegment(type: .work, seconds: 300),
-                    IntervalSegment(type: .rest, seconds: 60),
-                ]
-            )
-        ),
-        (
             "FGB 3R",
             IntervalConfig(
                 rounds: 3,

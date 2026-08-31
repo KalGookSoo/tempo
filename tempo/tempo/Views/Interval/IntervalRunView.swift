@@ -46,59 +46,61 @@ struct IntervalRunView: View {
     }
 
     private func runningContent(runner: IntervalRunner) -> some View {
-        ScrollView {
-            TimelineView(.periodic(from: .now, by: 1)) { _ in
-                let progress = runner.currentProgress(at: Date())
+        TimelineView(.periodic(from: .now, by: 1)) { _ in
+            let progress = runner.currentProgress(at: Date())
 
-                VStack(spacing: 24) {
-                    if let progress {
-                        RunningDisplayView(
-                            primaryText: IntervalRunner.formattedClock(seconds: progress.remainingSeconds),
-                            statusLabel: statusLabel(for: progress.step),
-                            statusColor: statusColor(for: progress.step, runnerState: runner.state),
-                            secondaryText: progress.step.round > 0
-                                ? "라운드 \(progress.step.round) / \(progress.step.totalRounds)"
-                                : nil,
-                            secondaryFont: .title2,
-                            fontSize: timerFontSize
-                        )
+            VStack(spacing: 24) {
+                Spacer()
+
+                if let progress {
+                    RunningDisplayView(
+                        primaryText: IntervalRunner.formattedClock(seconds: progress.remainingSeconds),
+                        statusLabel: statusLabel(for: progress.step),
+                        statusColor: statusColor(for: progress.step, runnerState: runner.state),
+                        secondaryText: progress.step.round > 0
+                            ? "라운드 \(progress.step.round) / \(progress.step.totalRounds)"
+                            : nil,
+                        secondaryFont: .largeTitle.bold(),
+                        fontSize: timerFontSize
+                    )
+                } else {
+                    RunningDisplayView(
+                        primaryText: "완료",
+                        statusColor: .danger,
+                        fontSize: timerFontSize
+                    )
+                }
+
+                Spacer()
+
+                HStack {
+                    if runner.state == .paused {
+                        RunningControlButton(title: "리셋", style: .reset) {
+                            runner.reset()
+                        }
+                    }
+
+                    Spacer()
+
+                    if runner.state == .running || runner.state == .preparing {
+                        RunningControlButton(title: "일시정지", style: .pause) {
+                            runner.pause(at: .now)
+                        }
+                    } else if runner.state == .paused {
+                        RunningControlButton(title: "재개", style: .start) {
+                            runner.resume(at: .now)
+                        }
                     } else {
-                        RunningDisplayView(
-                            primaryText: "완료",
-                            statusColor: .danger,
-                            fontSize: timerFontSize
-                        )
-                    }
-
-                    HStack {
-                        if runner.state == .paused {
-                            RunningControlButton(title: "리셋", style: .reset) {
-                                runner.reset()
-                            }
-                        }
-
-                        Spacer()
-
-                        if runner.state == .running || runner.state == .preparing {
-                            RunningControlButton(title: "일시정지", style: .pause) {
-                                runner.pause(at: .now)
-                            }
-                        } else if runner.state == .paused {
-                            RunningControlButton(title: "재개", style: .start) {
-                                runner.resume(at: .now)
-                            }
-                        } else {
-                            RunningControlButton(title: "시작", style: .start) {
-                                runner.start(at: .now)
-                            }
+                        RunningControlButton(title: "시작", style: .start) {
+                            runner.start(at: .now)
                         }
                     }
                 }
-                .padding()
-                .frame(maxWidth: .infinity)
-                .task(id: TickKey(stepID: progress?.step.id, remainingSeconds: progress?.remainingSeconds)) {
-                    triggerCuesIfNeeded(progress: progress, state: runner.state)
-                }
+            }
+            .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .task(id: TickKey(stepID: progress?.step.id, remainingSeconds: progress?.remainingSeconds)) {
+                triggerCuesIfNeeded(progress: progress, state: runner.state)
             }
         }
     }

@@ -47,24 +47,47 @@ struct IntervalConfigFormFields: View {
         }
 
         Section("라운드") {
-            Stepper("\(rounds)라운드", value: $rounds, in: 1 ... 99)
+            HStack {
+                Text("라운드")
+                Spacer()
+                TextField(
+                    "라운드",
+                    value: Binding(get: { rounds }, set: { rounds = min(max($0, 1), 99) }),
+                    format: .number
+                )
+                .keyboardType(.numberPad)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 60)
+            }
         }
 
         Section("인터벌 세트 (최대 9개)") {
             ForEach($sets) { $set in
                 VStack(alignment: .leading, spacing: 16) {
-                    Stepper(
-                        "운동 \(IntervalRunner.formattedClock(seconds: set.workSeconds))",
-                        value: $set.workSeconds,
-                        in: 5 ... 5999,
-                        step: 5
-                    )
-                    Stepper(
-                        "휴식 \(IntervalRunner.formattedClock(seconds: set.restSeconds))",
-                        value: $set.restSeconds,
-                        in: 0 ... 5999,
-                        step: 5
-                    )
+                    HStack {
+                        Text("운동(초)")
+                        Spacer()
+                        TextField(
+                            "운동(초)",
+                            value: Binding(get: { set.workSeconds }, set: { set.workSeconds = min(max($0, 5), 5999) }),
+                            format: .number
+                        )
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 70)
+                    }
+                    HStack {
+                        Text("휴식(초)")
+                        Spacer()
+                        TextField(
+                            "휴식(초)",
+                            value: Binding(get: { set.restSeconds }, set: { set.restSeconds = min(max($0, 0), 5999) }),
+                            format: .number
+                        )
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 70)
+                    }
                 }
             }
             .onDelete { offsets in

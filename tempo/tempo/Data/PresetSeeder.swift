@@ -4,11 +4,11 @@ import SwiftData
 /// 앱 최초 실행 시 기본 프리셋을 삽입한다. docs/local-persistence-strategy.md
 /// "기본 프리셋 seed 전략", docs/timer-functional-spec.md "인터벌 프리셋" 참고.
 enum PresetSeeder {
-    /// 기본 프리셋이 하나도 없으면 4개(tabata, fgb_5r, fgb_3r, emom)를 삽입한다.
+    /// 기본 프리셋이 하나도 없으면 3개(tabata, fgb_3r, emom)를 삽입한다.
     /// 이미 있으면 아무 것도 하지 않는다.
     static func seedDefaultsIfNeeded(in modelContext: ModelContext) throws {
         // #Predicate 매크로가 `PresetKind.default` 케이스 비교를 키 경로로 풀어내지 못해
-        // 전체를 가져와 메모리에서 필터링한다. 기본 프리셋은 4개뿐이라 비용이 크지 않다.
+        // 전체를 가져와 메모리에서 필터링한다.
         let existingDefaults = try modelContext.fetch(FetchDescriptor<TimerPreset>())
             .filter { $0.kind == .default }
         guard existingDefaults.isEmpty else { return }
@@ -28,7 +28,7 @@ enum PresetSeeder {
         try modelContext.save()
     }
 
-    /// 기본 제공 프리셋 4종. Tabata/FGB 5R/FGB 3R은 명세(docs/timer-functional-spec.md
+    /// 기본 제공 프리셋 3종. Tabata/FGB 3R은 명세(docs/timer-functional-spec.md
     /// "기본 제공 프리셋")의 수치를 그대로 쓴다. EMOM은 명세상 "반복 시간: 사용자가 설정"이라
     /// 고정값이 없어, 같은 문서의 "EMOM 예시"(반복 시간 1분, 반복 횟수 10)를 기본값으로 쓴다 —
     /// 즉시 실행 가능해야 한다는 요구사항을 충족하면서도 사용자가 바로 복제·수정하기 쉬운 값이다.

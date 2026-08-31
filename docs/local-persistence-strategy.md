@@ -243,7 +243,6 @@ enum ThemeMode: String, Codable {
 기본 프리셋은 앱 코드에 선언한다.
 
 - `tabata`
-- `fgb_5r`
 - `fgb_3r`
 - `emom`
 

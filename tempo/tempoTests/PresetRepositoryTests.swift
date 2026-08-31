@@ -23,15 +23,15 @@ struct PresetRepositoryTests {
         return (container, container.mainContext)
     }
 
-    @Test("최초 실행 시 기본 프리셋 4개가 seed된다")
+    @Test("최초 실행 시 기본 프리셋 3개가 seed된다")
     func seedsDefaultPresets() throws {
         let store = try makeInMemoryStore()
         try PresetSeeder.seedDefaultsIfNeeded(in: store.context)
 
         let presets = try PresetRepository(modelContext: store.context).findIntervalPresets()
 
-        #expect(presets.count == 4)
-        #expect(Set(presets.map(\.name)) == ["Tabata", "FGB 5R", "FGB 3R", "EMOM"])
+        #expect(presets.count == 3)
+        #expect(Set(presets.map(\.name)) == ["Tabata", "FGB 3R", "EMOM"])
         #expect(presets.allSatisfy { $0.kind == .default })
     }
 
@@ -42,7 +42,7 @@ struct PresetRepositoryTests {
         try PresetSeeder.seedDefaultsIfNeeded(in: store.context)
 
         let presets = try PresetRepository(modelContext: store.context).findIntervalPresets()
-        #expect(presets.count == 4)
+        #expect(presets.count == 3)
     }
 
     @Test("기본 프리셋 수치가 명세와 정확히 일치한다")
@@ -56,13 +56,6 @@ struct PresetRepositoryTests {
         #expect(tabata.config.segments == [
             IntervalSegment(type: .work, seconds: 20),
             IntervalSegment(type: .rest, seconds: 10),
-        ])
-
-        let fgb5 = try #require(presets.first { $0.name == "FGB 5R" })
-        #expect(fgb5.config.rounds == 5)
-        #expect(fgb5.config.segments == [
-            IntervalSegment(type: .work, seconds: 300),
-            IntervalSegment(type: .rest, seconds: 60),
         ])
 
         let fgb3 = try #require(presets.first { $0.name == "FGB 3R" })
@@ -174,11 +167,11 @@ struct PresetRepositoryTests {
                 ]
             )
         )
-        #expect(try repository.findIntervalPresets().count == 5)
+        #expect(try repository.findIntervalPresets().count == 4)
 
         try repository.delete(custom)
 
-        #expect(try repository.findIntervalPresets().count == 4)
+        #expect(try repository.findIntervalPresets().count == 3)
         #expect(custom.deletedAt != nil)
     }
 }

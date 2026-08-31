@@ -10,11 +10,13 @@ extension Color {
 }
 
 /// 준비/운동/휴식 구간이 없는 화면(타이머, 스톱워치)의 공통 상태->라벨/색상 매핑.
-/// 인터벌은 구간(`IntervalStep.Kind`)이 따로 있어 각자 매핑한다.
+/// 인터벌은 구간(`IntervalStep.Kind`)이 따로 있어 각자 매핑한다. 모든 상태에 라벨을
+/// 채워서(상태별로 nil을 섞지 않음) `RunningDisplayView`의 상태 배지 유무에 따라
+/// 화면 높이가 바뀌지 않도록 한다(이슈 #40).
 func defaultRunningStatusInfo(for state: TimerState) -> (label: String?, color: Color) {
     switch state {
-    case .idle: (nil, .secondary)
-    case .running: (nil, .primary)
+    case .idle: ("대기 중", .secondary)
+    case .running: ("진행 중", .primary)
     case .paused: ("일시정지", .accentColor)
     case .completed: ("완료", .danger)
     default: (nil, .primary)

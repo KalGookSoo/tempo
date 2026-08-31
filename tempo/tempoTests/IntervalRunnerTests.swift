@@ -262,4 +262,11 @@ struct IntervalRunnerTests {
         #expect(IntervalRunner.formattedClock(seconds: 90) == "01:30")
         #expect(IntervalRunner.formattedClock(seconds: 5) == "00:05")
     }
+
+    @Test("표시 가능한 최대치(99:59)를 넘거나 음수인 값은 clamp된다")
+    func formattedClockClampsOutOfRangeValues() {
+        #expect(IntervalRunner.formattedClock(seconds: 5999) == "99:59")
+        #expect(IntervalRunner.formattedClock(seconds: 9999) == "99:59")
+        #expect(IntervalRunner.formattedClock(seconds: -5) == "00:00")
+    }
 }

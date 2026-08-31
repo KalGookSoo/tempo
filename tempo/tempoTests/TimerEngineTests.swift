@@ -182,4 +182,10 @@ struct TimerEngineTests {
     func padsSingleDigitComponents() {
         #expect(TimerEngine.formattedClock(seconds: 3661) == "01:01:01") // 1시간 1분 1초
     }
+
+    @Test("표시 가능한 최대치(23:59:59)를 넘거나 음수인 값은 clamp된다")
+    func formattedClockClampsOutOfRangeValues() {
+        #expect(TimerEngine.formattedClock(seconds: 90000) == "23:59:59")
+        #expect(TimerEngine.formattedClock(seconds: -5) == "00:00:00")
+    }
 }

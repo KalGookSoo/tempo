@@ -129,4 +129,10 @@ struct StopwatchEngineTests {
     func formatsMinutesSecondsCentiseconds() {
         #expect(StopwatchEngine.formattedClock(elapsed: 65.43) == "01:05.43")
     }
+
+    @Test("표시 가능한 최대치(99:59.99)를 넘거나 음수인 값은 clamp된다")
+    func formattedClockClampsOutOfRangeValues() {
+        #expect(StopwatchEngine.formattedClock(elapsed: StopwatchEngine.maxElapsed + 100) == "99:59.99")
+        #expect(StopwatchEngine.formattedClock(elapsed: -5) == "00:00.00")
+    }
 }

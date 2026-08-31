@@ -86,8 +86,12 @@ final class StopwatchEngine {
     }
 
     /// `MM:SS.CS` 문자열로 표시한다 (`CS` = 1/100초). View 밖에서 테스트할 수 있도록 순수 함수로 둔다.
+    /// 화면에 표시 가능한 최대치(`maxElapsed`, 99:59.99)로 clamp한 뒤 포맷한다. 호출부가
+    /// 항상 유효한 범위의 값을 넘겨주지만, 그 보장이 깨지는 경우에도 항상 유효한 형식의
+    /// 문자열만 보여주기 위한 사전 안전장치다(이슈 #34).
     static func formattedClock(elapsed: TimeInterval) -> String {
-        let totalCentiseconds = Int(elapsed * 100)
+        let clamped = max(0, min(elapsed, Self.maxElapsed))
+        let totalCentiseconds = Int(clamped * 100)
         let minutes = totalCentiseconds / 6000
         let seconds = (totalCentiseconds % 6000) / 100
         let centiseconds = totalCentiseconds % 100

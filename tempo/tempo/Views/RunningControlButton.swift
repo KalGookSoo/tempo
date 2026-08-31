@@ -5,7 +5,7 @@ import SwiftUI
 /// 눈에 띄게 보이도록 한다.
 struct RunningControlButton: View {
     /// 색상은 동작의 의미가 직관적으로 읽히도록 고정한다: 시작/재개는 초록(진행),
-    /// 일시정지는 주황(주의), 리셋은 중립 회색(위험한 동작이 아님).
+    /// 일시정지는 빨강(중단), 리셋은 중립 회색(위험한 동작이 아님).
     enum Style {
         case start
         case pause
@@ -14,7 +14,7 @@ struct RunningControlButton: View {
         var backgroundColor: Color {
             switch self {
             case .start: .green
-            case .pause: .orange
+            case .pause: .red
             case .reset: Color(.systemGray5)
             }
         }

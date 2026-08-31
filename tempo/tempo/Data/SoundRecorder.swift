@@ -15,17 +15,21 @@ enum MicrophonePermissionStatus {
 
 /// 알림 큐용 사운드를 마이크로 녹음하고 미리듣기한다. `AVAudioSession`/`AVAudioRecorder`/
 /// `AVAudioPlayer`의 얇은 래퍼. 화면(`SettingsRecordingsView`)은 이 클래스를 통해서만
-/// 오디오 하드웨어를 다룬다.
+/// 오디오 하드웨어를 다룬다. 재생 종료를 감지해 `previewingAssetID`를 해제하려고
+/// `AVAudioPlayerDelegate`를 채택한다(이슈 #28).
 @Observable
-final class SoundRecorder {
+final class SoundRecorder: NSObject {
     private(set) var isRecording = false
     private(set) var permissionStatus: MicrophonePermissionStatus = .undetermined
+    /// 지금 미리듣기 재생 중인 `SoundAsset.id`. 재생 중이 아니면 `nil`.
+    private(set) var previewingAssetID: UUID?
 
     private var recorder: AVAudioRecorder?
     private var player: AVAudioPlayer?
     private var pendingID: UUID?
 
-    init() {
+    override init() {
+        super.init()
         refreshPermissionStatus()
     }
 
@@ -73,7 +77,8 @@ final class SoundRecorder {
     }
 
     /// 녹음을 멈추고 방금 만든 파일의 id/길이를 반환한다. 호출부가 이 값으로
-    /// `SoundAssetRepository.createRecordedAsset`을 호출해 메타데이터를 저장한다.
+    /// `SoundAssetRepository.createRecordedAsset`을 호출해 메타데이터를 저장하거나,
+    /// 사용자가 취소하면 `RecordedSoundFileStore.deleteFile(for:)`로 지운다.
     func stopRecording() -> (id: UUID, durationMs: Int)? {
         guard let recorder, let pendingID else { return nil }
         let durationMs = Int(recorder.currentTime * 1000)
@@ -84,10 +89,33 @@ final class SoundRecorder {
         return (pendingID, durationMs)
     }
 
-    /// 녹음을 미리듣기한다.
+    /// 녹음을 미리듣기한다. 같은 항목을 다시 탭하면 멈춘다. 무음 스위치와 무관하게 항상
+    /// 스피커로 들리도록 재생 전용 세션으로 전환한다(이슈 #28).
     func preview(_ asset: SoundAsset) {
+        if previewingAssetID == asset.id {
+            player?.stop()
+            player = nil
+            previewingAssetID = nil
+            return
+        }
+
         guard let url = try? RecordedSoundFileStore.fileURL(for: asset.id) else { return }
-        player = try? AVAudioPlayer(contentsOf: url)
-        player?.play()
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        try? AVAudioSession.sharedInstance().setActive(true)
+
+        guard let newPlayer = try? AVAudioPlayer(contentsOf: url) else { return }
+        newPlayer.delegate = self
+        player = newPlayer
+        previewingAssetID = asset.id
+        newPlayer.play()
+    }
+}
+
+extension SoundRecorder: AVAudioPlayerDelegate {
+    nonisolated func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully _: Bool) {
+        Task { @MainActor in
+            guard self.player === player else { return }
+            self.previewingAssetID = nil
+        }
     }
 }

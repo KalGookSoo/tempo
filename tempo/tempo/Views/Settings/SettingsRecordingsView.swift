@@ -13,6 +13,7 @@ struct SettingsRecordingsView: View {
     @State private var errorMessage: String?
     @State private var renamingAsset: SoundAsset?
     @State private var renameText = ""
+    @State private var isRecordSheetPresented = false
 
     private var isValid: Bool {
         !renameText.isEmpty && renameText.count <= 20
@@ -41,14 +42,7 @@ struct SettingsRecordingsView: View {
                     Button {
                         recorder.preview(asset)
                     } label: {
-                        VStack(alignment: .leading) {
-                            Text(asset.name)
-                            if let durationMs = asset.durationMs {
-                                Text(formattedDuration(durationMs))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
+                        recordingRow(for: asset)
                     }
                     .buttonStyle(.plain)
                     .swipeActions {
@@ -72,12 +66,17 @@ struct SettingsRecordingsView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    toggleRecording()
+                    isRecordSheetPresented = true
                 } label: {
-                    Image(systemName: recorder.isRecording ? "stop.circle.fill" : "mic.circle")
+                    Image(systemName: "mic.circle")
                 }
                 .disabled(recorder.permissionStatus == .denied)
-                .accessibilityLabel(recorder.isRecording ? "녹음 정지" : "녹음 시작")
+                .accessibilityLabel("녹음하기")
+            }
+        }
+        .sheet(isPresented: $isRecordSheetPresented) {
+            RecordingSheetView(recorder: recorder) { id, durationMs in
+                saveRecording(id: id, durationMs: durationMs)
             }
         }
         .alert(
@@ -113,24 +112,15 @@ struct SettingsRecordingsView: View {
         }
     }
 
-    private func toggleRecording() {
-        if recorder.isRecording {
-            guard let result = recorder.stopRecording() else { return }
-            do {
-                try SoundAssetRepository(modelContext: modelContext).createRecordedAsset(
-                    id: result.id,
-                    name: "녹음 \(recordings.count + 1)",
-                    durationMs: result.durationMs
-                )
-            } catch {
-                errorMessage = error.localizedDescription
-            }
-        } else {
-            do {
-                try recorder.startRecording()
-            } catch {
-                errorMessage = error.localizedDescription
-            }
+    private func saveRecording(id: UUID, durationMs: Int) {
+        do {
+            try SoundAssetRepository(modelContext: modelContext).createRecordedAsset(
+                id: id,
+                name: "녹음 \(recordings.count + 1)",
+                durationMs: durationMs
+            )
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 
@@ -159,6 +149,22 @@ struct SettingsRecordingsView: View {
     private func formattedDuration(_ durationMs: Int) -> String {
         let totalSeconds = durationMs / 1000
         return String(format: "%d:%02d", totalSeconds / 60, totalSeconds % 60)
+    }
+
+    private func recordingRow(for asset: SoundAsset) -> some View {
+        let isPlaying = recorder.previewingAssetID == asset.id
+        return HStack {
+            Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                .foregroundStyle(Color.accentColor)
+            VStack(alignment: .leading) {
+                Text(asset.name)
+                if let durationMs = asset.durationMs {
+                    Text(formattedDuration(durationMs))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
     }
 }
 

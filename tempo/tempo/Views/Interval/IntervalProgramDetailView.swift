@@ -119,9 +119,6 @@ struct IntervalProgramDetailView: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button("저장") { saveEdit() }
             }
-            ToolbarItem(placement: .cancellationAction) {
-                Button("취소") { isEditing = false }
-            }
         } else if preset != nil {
             ToolbarItem(placement: .primaryAction) {
                 Button("수정") { startEdit() }

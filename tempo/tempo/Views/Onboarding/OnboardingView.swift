@@ -11,13 +11,7 @@ struct OnboardingView: View {
             OnboardingPagesView(steps: OnboardingContent.steps)
 
             HStack {
-                Button("건너뛰기") {
-                    onComplete()
-                }
-                .foregroundStyle(.secondary)
-
                 Spacer()
-
                 Button("시작하기") {
                     onComplete()
                 }

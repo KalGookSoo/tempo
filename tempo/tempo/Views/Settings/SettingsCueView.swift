@@ -21,7 +21,7 @@ struct SettingsCueView: View {
 
     @State private var soundPickerTarget: SoundPickerTarget?
 
-    private static let countdownLeadOptions = [0, 1, 3, 5, 10]
+    private static let countdownLeadOptions = [0, 3, 5, 10]
 
     private static let eventRows: [(title: String, keyPath: WritableKeyPath<CueConfig, CueConfig.Event>)] = [
         ("준비 카운트다운 시작", \.prepareStart),

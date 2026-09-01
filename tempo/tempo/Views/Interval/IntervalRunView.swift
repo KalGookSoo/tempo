@@ -52,32 +52,28 @@ struct IntervalRunView: View {
             VStack(spacing: 24) {
                 Spacer()
 
-                if let progress, progress.step.kind == .prepare {
+                if let progress {
                     VStack(spacing: 16) {
-                        Text("준비")
+                        if progress.step.round > 0 {
+                            Text("라운드 \(progress.step.round) / \(progress.step.totalRounds)")
+                                .font(.largeTitle.bold())
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Text(statusLabel(for: progress.step))
                             .font(.title3.bold())
                             .padding(.horizontal, 12)
                             .padding(.vertical, 4)
-                            .background(Color.prepare.opacity(0.15), in: Capsule())
-                            .foregroundStyle(Color.prepare)
+                            .background(statusColor(for: progress.step, runnerState: runner.state).opacity(0.15), in: Capsule())
+                            .foregroundStyle(statusColor(for: progress.step, runnerState: runner.state))
 
-                        PrepareCountdownRing(
+                        IntervalCountdownRing(
                             remainingSeconds: progress.remainingSeconds,
                             totalSeconds: progress.step.seconds,
+                            color: statusColor(for: progress.step, runnerState: runner.state),
                             fontSize: timerFontSize
                         )
                     }
-                } else if let progress {
-                    RunningDisplayView(
-                        primaryText: IntervalRunner.formattedClock(seconds: progress.remainingSeconds),
-                        statusLabel: statusLabel(for: progress.step),
-                        statusColor: statusColor(for: progress.step, runnerState: runner.state),
-                        secondaryText: progress.step.round > 0
-                            ? "라운드 \(progress.step.round) / \(progress.step.totalRounds)"
-                            : nil,
-                        secondaryFont: .largeTitle.bold(),
-                        fontSize: timerFontSize
-                    )
                 } else {
                     RunningDisplayView(
                         primaryText: "완료",

@@ -3,9 +3,9 @@
 //  tempoTests
 //
 
-import Testing
 import SwiftData
 @testable import tempo
+import Testing
 
 /// docs/testing-strategy.md 2, 6번 항목: 기본 프리셋 값 회귀 + SwiftData 통합 테스트.
 /// `ModelContainer.mainContext`가 MainActor 격리라 스위트 전체를 MainActor에서 실행한다.

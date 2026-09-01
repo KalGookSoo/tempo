@@ -75,6 +75,8 @@ struct tempoApp: App {
             IntervalProgramsView()
         case let .programDetail(id):
             IntervalProgramDetailView(id: id)
+        case let .programEdit(id):
+            IntervalProgramEditView(id: id)
         case let .run(programID):
             IntervalRunView(programID: programID)
         }

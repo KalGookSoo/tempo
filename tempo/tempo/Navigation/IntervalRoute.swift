@@ -6,5 +6,6 @@ enum IntervalRoute: Hashable {
     case new
     case programs
     case programDetail(id: String)
+    case programEdit(id: String)
     case run(programID: String)
 }

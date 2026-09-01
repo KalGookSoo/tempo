@@ -33,90 +33,90 @@ struct IntervalConfigFormFields: View {
     @Binding var sets: [EditableIntervalSet]
 
     @FocusState private var focusedField: Field?
+    @State private var timeTarget: SetTimeTarget?
 
     private enum Field: Hashable {
         case rounds
-        case work(UUID)
-        case rest(UUID)
+    }
+
+    /// 세트의 운동/휴식 시간 팝업을 띄우기 위한 대상. 팝업이 확정되면 `seconds`에 바로
+    /// 값이 반영되도록, 해당 세트 필드로 향하는 `Binding`을 그대로 들고 있는다.
+    private struct SetTimeTarget: Identifiable {
+        let id: String
+        let title: String
+        let range: ClosedRange<Int>
+        let seconds: Binding<Int>
     }
 
     var body: some View {
-        Section("이름") {
-            TextField("이름", text: $name)
-        }
+        Group {
+            Section("이름") {
+                TextField("이름", text: $name)
+            }
 
-        Section("준비 시간") {
-            Stepper(
-                "준비 \(IntervalRunner.formattedClock(seconds: prepareSeconds))",
-                value: $prepareSeconds,
-                in: 10 ... 60,
-                step: 5
-            )
-        }
-
-        Section("라운드") {
-            HStack {
-                Text("라운드")
-                Spacer()
-                TextField(
-                    "라운드",
-                    value: Binding(get: { rounds }, set: { rounds = min(max($0, 1), 99) }),
-                    format: .number
+            Section("준비 시간") {
+                Stepper(
+                    "준비 \(IntervalRunner.formattedClock(seconds: prepareSeconds))",
+                    value: $prepareSeconds,
+                    in: 10 ... 60,
+                    step: 5
                 )
-                .focused($focusedField, equals: .rounds)
-                .keyboardType(.numberPad)
-                .multilineTextAlignment(.trailing)
-                .frame(width: 60)
             }
-            .contentShape(Rectangle())
-            .onTapGesture { focusedField = .rounds }
+
+            Section("라운드") {
+                HStack {
+                    Text("라운드")
+                    Spacer()
+                    TextField(
+                        "라운드",
+                        value: Binding(get: { rounds }, set: { rounds = min(max($0, 1), 99) }),
+                        format: .number
+                    )
+                    .focused($focusedField, equals: .rounds)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.trailing)
+                    .frame(width: 60)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture { focusedField = .rounds }
+            }
+
+            Section("인터벌 세트 (최대 9개)") {
+                ForEach($sets) { $set in
+                    VStack(alignment: .leading, spacing: 16) {
+                        timeRow(title: "운동", seconds: $set.workSeconds, range: 5 ... 5999, idSuffix: "work-\(set.id)")
+                        timeRow(title: "휴식", seconds: $set.restSeconds, range: 0 ... 5999, idSuffix: "rest-\(set.id)")
+                    }
+                }
+                .onDelete { offsets in
+                    sets.remove(atOffsets: offsets)
+                }
+
+                if sets.count < 9 {
+                    Button {
+                        sets.append(EditableIntervalSet(workSeconds: 20, restSeconds: 10))
+                    } label: {
+                        Label("세트 추가", systemImage: "plus")
+                    }
+                }
+            }
         }
+        .sheet(item: $timeTarget) { target in
+            IntervalSetTimePickerView(title: target.title, range: target.range, seconds: target.seconds)
+        }
+    }
 
-        Section("인터벌 세트 (최대 9개)") {
-            ForEach($sets) { $set in
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        Text("운동(초)")
-                        Spacer()
-                        TextField(
-                            "운동(초)",
-                            value: Binding(get: { set.workSeconds }, set: { set.workSeconds = min(max($0, 5), 5999) }),
-                            format: .number
-                        )
-                        .focused($focusedField, equals: .work(set.id))
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 70)
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture { focusedField = .work(set.id) }
-                    HStack {
-                        Text("휴식(초)")
-                        Spacer()
-                        TextField(
-                            "휴식(초)",
-                            value: Binding(get: { set.restSeconds }, set: { set.restSeconds = min(max($0, 0), 5999) }),
-                            format: .number
-                        )
-                        .focused($focusedField, equals: .rest(set.id))
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 70)
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture { focusedField = .rest(set.id) }
-                }
-            }
-            .onDelete { offsets in
-                sets.remove(atOffsets: offsets)
-            }
-
-            if sets.count < 9 {
-                Button {
-                    sets.append(EditableIntervalSet(workSeconds: 20, restSeconds: 10))
-                } label: {
-                    Label("세트 추가", systemImage: "plus")
-                }
+    /// 세트의 운동/휴식 시간 한 줄. 탭하면 텍스트필드 대신 휠 피커 팝업이 뜬다. 이슈 #46 참고.
+    private func timeRow(title: String, seconds: Binding<Int>, range: ClosedRange<Int>, idSuffix: String) -> some View {
+        Button {
+            timeTarget = SetTimeTarget(id: idSuffix, title: "\(title) 시간", range: range, seconds: seconds)
+        } label: {
+            HStack {
+                Text(title)
+                    .foregroundStyle(.primary)
+                Spacer()
+                Text(IntervalRunner.formattedClock(seconds: seconds.wrappedValue))
+                    .foregroundStyle(.secondary)
             }
         }
     }

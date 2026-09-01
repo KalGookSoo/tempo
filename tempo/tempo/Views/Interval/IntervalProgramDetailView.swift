@@ -2,8 +2,10 @@ import SwiftData
 import SwiftUI
 
 /// `.programDetail(id:)` 화면. `id`로 실제 `TimerPreset`을 조회해서 이름/구성을 보여주고,
-/// 실행/복제/수정/삭제를 제공한다. 수정은 같은 화면에서 편집 모드로 전환해서 처리한다.
-/// docs/navigation-structure.md "프로그램 상세 `.intervalProgramDetail(id:)`" 참고.
+/// 실행/복제/수정/삭제를 제공한다. 수정은 `.programEdit(id:)`(`IntervalProgramEditView`)
+/// 별도 화면으로 이동해서 처리한다 — 상세/수정을 한 화면 안에서 조건 분기로 전환하던
+/// 방식(#33)에서 다시 분리한 배경은 이슈 #46. docs/navigation-structure.md
+/// "프로그램 상세 `.programDetail(id:)`" 참고.
 struct IntervalProgramDetailView: View {
     let id: String
 
@@ -14,11 +16,6 @@ struct IntervalProgramDetailView: View {
     @State private var presetNotFound = false
     @State private var errorMessage: String?
     @State private var isDeleteConfirmationPresented: Bool = false
-    @State private var isEditing = false
-    @State private var editName: String = ""
-    @State private var editRounds = 1
-    @State private var editPrepareSeconds: Int = 0
-    @State private var editSets: [EditableIntervalSet] = []
 
     var body: some View {
         content
@@ -54,11 +51,7 @@ struct IntervalProgramDetailView: View {
     @ViewBuilder
     private var content: some View {
         if let preset {
-            if isEditing {
-                editForm
-            } else {
-                detailList(for: preset)
-            }
+            detailList(for: preset)
         } else if presetNotFound {
             ContentUnavailableView {
                 Label("프로그램을 찾을 수 없음", systemImage: "exclamationmark.triangle")
@@ -67,12 +60,6 @@ struct IntervalProgramDetailView: View {
             }
         } else {
             ProgressView()
-        }
-    }
-
-    private var editForm: some View {
-        Form {
-            IntervalConfigFormFields(name: $editName, rounds: $editRounds, prepareSeconds: $editPrepareSeconds, sets: $editSets)
         }
     }
 
@@ -115,13 +102,9 @@ struct IntervalProgramDetailView: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        if isEditing {
-            ToolbarItem(placement: .confirmationAction) {
-                Button("저장") { saveEdit() }
-            }
-        } else if preset != nil {
+        if preset != nil {
             ToolbarItem(placement: .primaryAction) {
-                Button("수정") { startEdit() }
+                Button("수정") { router.push(IntervalRoute.programEdit(id: id)) }
             }
         }
     }
@@ -155,30 +138,6 @@ struct IntervalProgramDetailView: View {
         do {
             try PresetRepository(modelContext: modelContext).delete(preset)
             router.pop()
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    private func startEdit() {
-        guard let preset else { return }
-        editName = preset.name
-        editRounds = preset.config.rounds
-        editPrepareSeconds = min(max(preset.config.prepareSeconds, 10), 60)
-        editSets = EditableIntervalSet.pairs(from: preset.config.segments)
-        isEditing = true
-    }
-
-    private func saveEdit() {
-        guard let preset else { return }
-        let config = IntervalConfig(
-            rounds: editRounds,
-            prepareSeconds: editPrepareSeconds,
-            segments: EditableIntervalSet.segments(from: editSets)
-        )
-        do {
-            try PresetRepository(modelContext: modelContext).update(preset, name: editName, config: config)
-            isEditing = false
         } catch {
             errorMessage = error.localizedDescription
         }

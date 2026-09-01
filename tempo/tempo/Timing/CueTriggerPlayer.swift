@@ -11,8 +11,11 @@ enum CueTriggerPlayer {
     /// 실제 사운드 에셋을 못 찾았을 때의 대체 시스템 사운드("Tock").
     private static let placeholderSystemSoundID: SystemSoundID = 1057
 
-    /// 재생 중 해제되지 않도록 강한 참조를 들고 있는다.
-    private static var audioPlayer: AVAudioPlayer?
+    /// 재생 중인 플레이어들을 강한 참조로 들고 있는다. 하나만 들고 있으면 같은 틱에
+    /// 이벤트가 두 개 겹칠 때(예: 구간 종료 + 다음 구간 시작) 나중 재생이 먼저 재생 중이던
+    /// 플레이어를 밀어내 소리가 끊겼다 — 배열로 여러 개를 동시에 재생하게 한다(이슈 참고:
+    /// 알림초가 구간 길이보다 길면 시작 알림과 카운트다운 알림이 같은 틱에 겹칠 수 있음).
+    private static var activePlayers: [AVAudioPlayer] = []
 
     /// 앱 시작 시 한 번 호출해서 오디오 세션을 미리 활성화한다. 첫 재생 시 발생하는
     /// 하드웨어 예열 지연(이슈 #30)을 앱 실행 초반으로 옮겨, 인터벌 실행 화면 진입
@@ -57,7 +60,8 @@ enum CueTriggerPlayer {
             let player = try AVAudioPlayer(contentsOf: url)
             player.prepareToPlay()
             player.play()
-            audioPlayer = player
+            activePlayers.removeAll { !$0.isPlaying }
+            activePlayers.append(player)
         } catch {
             AudioServicesPlaySystemSound(placeholderSystemSoundID)
         }

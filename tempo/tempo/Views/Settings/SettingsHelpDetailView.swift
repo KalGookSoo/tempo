@@ -25,6 +25,7 @@ struct SettingsHelpDetailView: View {
                 .navigationTitle("도움말")
             }
         }
+        .constrainedWidth()
         .navigationBarTitleDisplayMode(.inline)
     }
 }

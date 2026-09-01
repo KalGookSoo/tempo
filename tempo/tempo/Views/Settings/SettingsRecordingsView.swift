@@ -61,6 +61,7 @@ struct SettingsRecordingsView: View {
                 }
             }
         }
+        .constrainedWidth()
         .navigationTitle("녹음한 사운드")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

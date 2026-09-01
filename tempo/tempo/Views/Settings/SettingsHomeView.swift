@@ -20,7 +20,6 @@ struct SettingsHomeView: View {
                 Label("버전 정보", systemImage: "info.circle")
             }
         }
-        .constrainedWidth()
         .navigationTitle("설정")
     }
 }

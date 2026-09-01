@@ -5,7 +5,6 @@ import SwiftUI
 struct SettingsOnboardingView: View {
     var body: some View {
         OnboardingPagesView(steps: OnboardingContent.steps)
-            .constrainedWidth()
             .navigationTitle("사용법 다시 보기")
             .navigationBarTitleDisplayMode(.inline)
     }

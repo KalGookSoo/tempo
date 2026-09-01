@@ -5,7 +5,7 @@ import UIKit
 /// `UIDatePicker(datePickerMode: .countDownTimer)`는 시/분까지만 지원하고 초 단위가
 /// 없어서 쓸 수 없다. SwiftUI `Picker`를 3개 나란히 놓으면 각 Picker가 선택 하이라이트
 /// 바를 따로 그려서(칸이 나뉘어 보임) 네이티브와 다르게 보인다. 그래서 `UIPickerView`
-/// 하나를 6개 컴포넌트(시 숫자/"시간"/분 숫자/"분"/초 숫자/"초")로 직접 구성해, 하나의
+/// 하나를 6개 컴포넌트(시 숫자/"시"/분 숫자/"분"/초 숫자/"초")로 직접 구성해, 하나의
 /// 공유된 하이라이트 바 안에 표시되게 한다. 이슈 #18 참고.
 struct CountdownWheelPicker: UIViewRepresentable {
     @Binding var hours: Int
@@ -16,7 +16,7 @@ struct CountdownWheelPicker: UIViewRepresentable {
     private static let minuteCount = 60
     private static let secondCount = 60
 
-    /// 0: 시 숫자, 1: "시간" 라벨, 2: 분 숫자, 3: "분" 라벨, 4: 초 숫자, 5: "초" 라벨
+    /// 0: 시 숫자, 1: "시" 라벨, 2: 분 숫자, 3: "분" 라벨, 4: 초 숫자, 5: "초" 라벨
     private enum Component: Int, CaseIterable {
         case hourValue, hourUnit, minuteValue, minuteUnit, secondValue, secondUnit
     }
@@ -30,9 +30,19 @@ struct CountdownWheelPicker: UIViewRepresentable {
 
     func updateUIView(_ uiView: UIPickerView, context: Context) {
         context.coordinator.parent = self
-        uiView.selectRow(hours, inComponent: Component.hourValue.rawValue, animated: false)
-        uiView.selectRow(minutes, inComponent: Component.minuteValue.rawValue, animated: false)
-        uiView.selectRow(seconds, inComponent: Component.secondValue.rawValue, animated: false)
+        // 값이 실제로 다를 때만 selectRow를 호출한다. 매번 무조건 호출하면, 한 컴포넌트를
+        // 드르륵 돌리는 도중(아직 didSelectRow가 안 불려 값이 안 바뀐 상태) 다른
+        // 컴포넌트를 조작해서 이 뷰가 갱신될 때마다, 돌리고 있는 컴포넌트가 강제로 이전
+        // 위치로 스냅되어 돌리던 값이 사라지는 버그가 있었다(이슈 #31).
+        if uiView.selectedRow(inComponent: Component.hourValue.rawValue) != hours {
+            uiView.selectRow(hours, inComponent: Component.hourValue.rawValue, animated: false)
+        }
+        if uiView.selectedRow(inComponent: Component.minuteValue.rawValue) != minutes {
+            uiView.selectRow(minutes, inComponent: Component.minuteValue.rawValue, animated: false)
+        }
+        if uiView.selectedRow(inComponent: Component.secondValue.rawValue) != seconds {
+            uiView.selectRow(seconds, inComponent: Component.secondValue.rawValue, animated: false)
+        }
     }
 
     func makeCoordinator() -> Coordinator {
@@ -83,7 +93,7 @@ struct CountdownWheelPicker: UIViewRepresentable {
                 label.text = "\(row)"
                 label.textAlignment = .right
             case .hourUnit:
-                label.text = "시간"
+                label.text = "시"
                 label.textAlignment = .left
             case .minuteValue:
                 label.text = "\(row)"

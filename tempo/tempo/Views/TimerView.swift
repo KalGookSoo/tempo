@@ -29,8 +29,9 @@ struct TimerView: View {
             // 화면은 콘텐츠가 화면 높이에 들어오므로 ScrollView 없이 고정 레이아웃으로 둔다.
             Group {
                 if engine.state == .idle {
+                    // 대기 중에는 피커가 이미 설정된 시간을 그대로 보여주므로, 큰 숫자
+                    // 표시(timeDisplay)는 굳이 중복해서 띄우지 않는다.
                     VStack(spacing: 24) {
-                        timeDisplay
                         countdownPicker
                         controlButtons
                         settingsForm

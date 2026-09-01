@@ -32,6 +32,14 @@ struct IntervalConfigFormFields: View {
     @Binding var prepareSeconds: Int
     @Binding var sets: [EditableIntervalSet]
 
+    @FocusState private var focusedField: Field?
+
+    private enum Field: Hashable {
+        case rounds
+        case work(UUID)
+        case rest(UUID)
+    }
+
     var body: some View {
         Section("이름") {
             TextField("이름", text: $name)
@@ -55,10 +63,13 @@ struct IntervalConfigFormFields: View {
                     value: Binding(get: { rounds }, set: { rounds = min(max($0, 1), 99) }),
                     format: .number
                 )
+                .focused($focusedField, equals: .rounds)
                 .keyboardType(.numberPad)
                 .multilineTextAlignment(.trailing)
                 .frame(width: 60)
             }
+            .contentShape(Rectangle())
+            .onTapGesture { focusedField = .rounds }
         }
 
         Section("인터벌 세트 (최대 9개)") {
@@ -72,10 +83,13 @@ struct IntervalConfigFormFields: View {
                             value: Binding(get: { set.workSeconds }, set: { set.workSeconds = min(max($0, 5), 5999) }),
                             format: .number
                         )
+                        .focused($focusedField, equals: .work(set.id))
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
                         .frame(width: 70)
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture { focusedField = .work(set.id) }
                     HStack {
                         Text("휴식(초)")
                         Spacer()
@@ -84,10 +98,13 @@ struct IntervalConfigFormFields: View {
                             value: Binding(get: { set.restSeconds }, set: { set.restSeconds = min(max($0, 0), 5999) }),
                             format: .number
                         )
+                        .focused($focusedField, equals: .rest(set.id))
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
                         .frame(width: 70)
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture { focusedField = .rest(set.id) }
                 }
             }
             .onDelete { offsets in

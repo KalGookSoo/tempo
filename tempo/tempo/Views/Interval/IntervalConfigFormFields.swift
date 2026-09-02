@@ -107,17 +107,23 @@ struct IntervalConfigFormFields: View {
     }
 
     /// 세트의 운동/휴식 시간 한 줄. 탭하면 텍스트필드 대신 휠 피커 팝업이 뜬다. 이슈 #46 참고.
+    ///
+    /// `Button`이 아니라 `.onTapGesture`로 구현한다 — 한 세트(운동+휴식)를 `Form` 행 하나로
+    /// 묶다 보니(84-89번째 줄) 같은 행 안에 `Button`이 두 개 있게 되는데, `Form`/`List`는
+    /// 한 행에 `Button`이 여러 개면 탭을 행 단위로 가로채 항상 같은 버튼으로 몰거나 팝업이
+    /// 뜨자마자 닫히는 문제가 있었다. 라운드 필드(66-82번째 줄, 이슈 #44)와 같은 방식으로
+    /// 맞춘다.
     private func timeRow(title: String, seconds: Binding<Int>, range: ClosedRange<Int>, idSuffix: String) -> some View {
-        Button {
+        HStack {
+            Text(title)
+                .foregroundStyle(Color.accentColor)
+            Spacer()
+            Text(IntervalRunner.formattedClock(seconds: seconds.wrappedValue))
+                .foregroundStyle(.secondary)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
             timeTarget = SetTimeTarget(id: idSuffix, title: "\(title) 시간", range: range, seconds: seconds)
-        } label: {
-            HStack {
-                Text(title)
-                    .foregroundStyle(.primary)
-                Spacer()
-                Text(IntervalRunner.formattedClock(seconds: seconds.wrappedValue))
-                    .foregroundStyle(.secondary)
-            }
         }
     }
 }

@@ -39,6 +39,7 @@ struct IntervalProgramsView: View {
                 }
             }
         }
+        .constrainedWidth()
         .navigationTitle("프로그램 목록")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

@@ -62,6 +62,7 @@ struct SettingsCueView: View {
                 ProgressView()
             }
         }
+        .constrainedWidth()
         .navigationTitle("알림 큐")
         .navigationBarTitleDisplayMode(.inline)
     }

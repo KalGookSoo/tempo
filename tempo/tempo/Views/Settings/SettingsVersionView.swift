@@ -15,6 +15,7 @@ struct SettingsVersionView: View {
             LabeledContent("버전", value: shortVersion)
             LabeledContent("빌드", value: buildNumber)
         }
+        .constrainedWidth()
         .navigationTitle("버전 정보")
         .navigationBarTitleDisplayMode(.inline)
     }

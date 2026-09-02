@@ -19,7 +19,6 @@ struct IntervalProgramDetailView: View {
 
     var body: some View {
         content
-            .constrainedWidth()
             .navigationTitle("프로그램 상세")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbarContent }

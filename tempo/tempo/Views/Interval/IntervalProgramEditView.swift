@@ -39,7 +39,6 @@ struct IntervalProgramEditView: View {
                 ProgressView()
             }
         }
-        .constrainedWidth()
         .navigationTitle("프로그램 수정")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

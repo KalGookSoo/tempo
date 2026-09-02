@@ -32,6 +32,12 @@ struct tempoApp: App {
                     .environment(settingsRouter)
                 }
             }
+            // 넓은 화면(아이패드 가로 등)에서 콘텐츠가 화면 폭 그대로 늘어나지 않도록 앱
+            // 전체를 태블릿 세로 폭으로 제한한다. 타이머/스톱워치/인터벌 실행 화면도 지금은
+            // 함께 제한된다 — 자식 뷰가 부모(TabView)보다 넓어질 수 없어 modifier로 자동
+            // 예외 처리할 수 없었다(이슈 #47). 대신 나중에 이 화면들에 수동 "전체 화면" 버튼을
+            // 추가해 사용자가 직접 전환하게 할 계획이다. 이슈 #45, #47 참고.
+            .constrainedWidth()
             .fullScreenCover(isPresented: $showsOnboarding) {
                 OnboardingView(onComplete: completeOnboarding)
             }

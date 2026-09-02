@@ -46,8 +46,13 @@ struct IntervalRunView: View {
     }
 
     private func runningContent(runner: IntervalRunner) -> some View {
-        TimelineView(.periodic(from: .now, by: 1)) { _ in
-            let progress = runner.currentProgress(at: Date())
+        // 원형 프로그레스 링을 정수 초 단위가 아니라 실제 경과 시간 그대로 매끄럽게
+        // 채우기 위해, 1초에 한 번이 아니라 화면 갱신에 맞춰 촘촘한 주기로 다시 계산한다.
+        // 진행 중이 아닐 때(대기/일시정지/완료)는 어차피 값이 안 바뀌므로 타임라인을
+        // 멈춰 불필요한 갱신을 막는다.
+        let isPaused = runner.state != .running && runner.state != .preparing
+        return TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: isPaused)) { context in
+            let progress = runner.currentProgress(at: context.date)
 
             VStack(spacing: 24) {
                 Spacer()
@@ -69,6 +74,7 @@ struct IntervalRunView: View {
 
                         IntervalCountdownRing(
                             remainingSeconds: progress.remainingSeconds,
+                            elapsedInStep: progress.elapsedInStep,
                             totalSeconds: progress.step.seconds,
                             color: statusColor(for: progress.step, runnerState: runner.state),
                             fontSize: timerFontSize

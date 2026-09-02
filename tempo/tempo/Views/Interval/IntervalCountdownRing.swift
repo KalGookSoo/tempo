@@ -5,20 +5,23 @@ import SwiftUI
 /// 그대로 넘겨준다.
 struct IntervalCountdownRing: View {
     let remainingSeconds: Int
+    let elapsedInStep: TimeInterval
     let totalSeconds: Int
     let color: Color
     let fontSize: CGFloat
 
     private static let lineWidth: CGFloat = 10
 
-    /// 남은 시간이 아니라 "이 초가 끝나는 시점"을 기준으로 계산한다. `remainingSeconds`는
-    /// 절대 0이 되지 않고 1에서 바로 다음 구간으로 넘어가므로, 단순히
-    /// `1 - remaining/total`로 계산하면 마지막 1초 동안 목표값이 `(total-1)/total`에서
-    /// 멈춰 절대 100%에 도달하지 못한 채 다음 구간으로 전환돼버린다(이슈 #38). 그래서
-    /// 마지막 남은 초가 끝나는 시점에 정확히 1.0이 되도록 한 틱 앞당겨 계산한다.
+    /// 정수 초 단위(`remainingSeconds`)가 아니라 실제 경과 시간(`elapsedInStep`)을 그대로
+    /// 진행률로 쓴다. 예전엔 초당 한 번만 갱신되는 정수 값을 `.animation`으로 매끄럽게
+    /// 보이도록 흉내 내면서 "이 초가 끝나는 시점" 기준으로 한 틱 앞당겨 계산했는데(이슈
+    /// #38), 그 보정이 구간이 막 시작된 시점에도 똑같이 적용돼서 시작하자마자 링이
+    /// `1/totalSeconds`만큼 미리 차 있는 부작용이 있었다. 호출부(`IntervalRunView`)가
+    /// 이제 실제 경과 시간을 촘촘한 주기로 다시 계산해서 넘겨주므로, 이 값을 그대로 쓰면
+    /// 시작은 정확히 0, 끝은 정확히 1이 되고 보정 자체가 필요 없다.
     private var progress: Double {
         guard totalSeconds > 0 else { return 1 }
-        return Double(totalSeconds - remainingSeconds + 1) / Double(totalSeconds)
+        return min(max(elapsedInStep / Double(totalSeconds), 0), 1)
     }
 
     var body: some View {
@@ -30,7 +33,6 @@ struct IntervalCountdownRing: View {
                 .trim(from: 0, to: progress)
                 .stroke(color, style: StrokeStyle(lineWidth: Self.lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
-                .animation(.linear(duration: 1), value: progress)
 
             Text(IntervalRunner.formattedClock(seconds: remainingSeconds))
                 .font(.system(size: fontSize, weight: .bold, design: .monospaced))
@@ -43,5 +45,5 @@ struct IntervalCountdownRing: View {
 }
 
 #Preview {
-    IntervalCountdownRing(remainingSeconds: 7, totalSeconds: 10, color: .prepare, fontSize: 64)
+    IntervalCountdownRing(remainingSeconds: 7, elapsedInStep: 3.4, totalSeconds: 10, color: .prepare, fontSize: 64)
 }

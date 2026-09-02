@@ -31,7 +31,7 @@ struct CueEventDetectorTests {
     @Test("1구간(준비)에 진입하면 준비 카운트다운 시작 이벤트가 발동한다")
     func prepareStartFires() {
         let steps = makeSteps()
-        let progress = IntervalRunner.Progress(stepIndex: 0, step: steps[0], remainingSeconds: 5)
+        let progress = IntervalRunner.Progress(stepIndex: 0, step: steps[0], remainingSeconds: 5, elapsedInStep: 0)
 
         let events = CueEventDetector.events(previousStep: nil, currentProgress: progress, countdownLeadSeconds: 0)
 
@@ -41,7 +41,7 @@ struct CueEventDetectorTests {
     @Test("남은 시간이 알림 시점 이하로 떨어지면 시작 전 카운트다운 이벤트가 발동한다")
     func countdownLeadFires() {
         let steps = makeSteps()
-        let progress = IntervalRunner.Progress(stepIndex: 1, step: steps[1], remainingSeconds: 2)
+        let progress = IntervalRunner.Progress(stepIndex: 1, step: steps[1], remainingSeconds: 2, elapsedInStep: 18)
 
         let events = CueEventDetector.events(previousStep: steps[1], currentProgress: progress, countdownLeadSeconds: 3)
 
@@ -51,7 +51,7 @@ struct CueEventDetectorTests {
     @Test("구간이 안 바뀌고 알림 시점 범위 밖이면 아무 이벤트도 없다")
     func noEventsWhenNothingChangedAndOutsideLeadWindow() {
         let steps = makeSteps()
-        let progress = IntervalRunner.Progress(stepIndex: 1, step: steps[1], remainingSeconds: 15)
+        let progress = IntervalRunner.Progress(stepIndex: 1, step: steps[1], remainingSeconds: 15, elapsedInStep: 5)
 
         let events = CueEventDetector.events(previousStep: steps[1], currentProgress: progress, countdownLeadSeconds: 3)
 
@@ -61,7 +61,7 @@ struct CueEventDetectorTests {
     @Test("준비 구간에서 첫 운동 구간으로 넘어가면 구간 종료 + 운동 시작이 발동하고 라운드 종료는 발동하지 않는다")
     func workStartAndSegmentEndFireFromPrepare() {
         let steps = makeSteps()
-        let progress = IntervalRunner.Progress(stepIndex: 1, step: steps[1], remainingSeconds: 20)
+        let progress = IntervalRunner.Progress(stepIndex: 1, step: steps[1], remainingSeconds: 20, elapsedInStep: 0)
 
         let events = CueEventDetector.events(previousStep: steps[0], currentProgress: progress, countdownLeadSeconds: 0)
 
@@ -74,7 +74,7 @@ struct CueEventDetectorTests {
     @Test("운동 구간에서 휴식 구간으로 넘어가면 구간 종료 + 휴식 시작이 발동한다")
     func restStartAndSegmentEndFire() {
         let steps = makeSteps()
-        let progress = IntervalRunner.Progress(stepIndex: 2, step: steps[2], remainingSeconds: 10)
+        let progress = IntervalRunner.Progress(stepIndex: 2, step: steps[2], remainingSeconds: 10, elapsedInStep: 0)
 
         let events = CueEventDetector.events(previousStep: steps[1], currentProgress: progress, countdownLeadSeconds: 0)
 
@@ -85,7 +85,7 @@ struct CueEventDetectorTests {
     @Test("마지막 라운드로 넘어가면 라운드 종료 + 마지막 라운드 진입 + 운동 시작이 함께 발동한다")
     func roundEndAndFinalRoundEnterFireEnteringLastRound() {
         let steps = makeSteps()
-        let progress = IntervalRunner.Progress(stepIndex: 3, step: steps[3], remainingSeconds: 20)
+        let progress = IntervalRunner.Progress(stepIndex: 3, step: steps[3], remainingSeconds: 20, elapsedInStep: 0)
 
         let events = CueEventDetector.events(previousStep: steps[2], currentProgress: progress, countdownLeadSeconds: 0)
 
@@ -97,7 +97,7 @@ struct CueEventDetectorTests {
     @Test("마지막 라운드 안에서는 구간이 바뀌어도 마지막 라운드 진입이 다시 발동하지 않는다")
     func finalRoundEnterDoesNotRefireWithinSameRound() {
         let steps = makeSteps()
-        let progress = IntervalRunner.Progress(stepIndex: 4, step: steps[4], remainingSeconds: 10)
+        let progress = IntervalRunner.Progress(stepIndex: 4, step: steps[4], remainingSeconds: 10, elapsedInStep: 0)
 
         let events = CueEventDetector.events(previousStep: steps[3], currentProgress: progress, countdownLeadSeconds: 0)
 

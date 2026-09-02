@@ -165,6 +165,33 @@ struct IntervalRunnerTests {
         #expect(atFiftyFive?.remainingSeconds == 5)
     }
 
+    @Test("elapsedInStep은 구간이 막 시작되면 0이고, 이후 실제 경과 시간을 그대로 반영한다")
+    func elapsedInStepStartsAtZeroAndTracksWithinStep() {
+        // 원형 프로그레스 링이 구간 시작 직후 이미 채워져 있던 버그 — remainingSeconds
+        // 기반 "+1 보정"이 시작점에도 적용돼 1/totalSeconds만큼 미리 차 있었다. elapsedInStep은
+        // 그 보정 없이 실제 경과 시간을 그대로 담아 시작을 정확히 0으로 만든다.
+        let runner = IntervalRunner(config: makeSimpleTwoRoundConfig())
+        runner.start(at: base)
+
+        let atStart = runner.currentProgress(at: base)
+        #expect(atStart?.stepIndex == 0)
+        #expect(atStart?.elapsedInStep == 0)
+
+        let atFiveSeconds = runner.currentProgress(at: base.addingTimeInterval(5))
+        #expect(atFiveSeconds?.stepIndex == 0)
+        #expect(atFiveSeconds?.elapsedInStep == 5)
+
+        // C1(휴식, 20초 지점부터) 5초째 — 구간 경계(cursor)를 기준으로 다시 0에서 센다.
+        let atTwentyFive = runner.currentProgress(at: base.addingTimeInterval(25))
+        #expect(atTwentyFive?.stepIndex == 1)
+        #expect(atTwentyFive?.elapsedInStep == 5)
+
+        // 2라운드 F1 시작 경계(30초 지점) — 새 구간이라 다시 0.
+        let atThirty = runner.currentProgress(at: base.addingTimeInterval(30))
+        #expect(atThirty?.stepIndex == 2)
+        #expect(atThirty?.elapsedInStep == 0)
+    }
+
     @Test("모든 구간이 끝나면 completed 상태가 되고 진행 정보는 nil이다")
     func currentProgressReturnsNilAndCompletesAfterAllSteps() {
         let runner = IntervalRunner(config: makeSimpleTwoRoundConfig())

@@ -35,6 +35,10 @@ final class IntervalRunner {
         let stepIndex: Int
         let step: IntervalStep
         let remainingSeconds: Int
+        /// 이 구간 안에서 지금까지 지난 시간(초, 소수점 포함). `remainingSeconds`는 정수
+        /// 초 단위라 원형 프로그레스 링을 채우는 용도로 쓰면 매초 한 번씩만 갱신되는데,
+        /// 이 값은 실제 경과 시간 그대로라 더 촘촘한 주기로 갱신해도 매끄럽게 채워진다.
+        let elapsedInStep: TimeInterval
     }
 
     init(config: IntervalConfig) {
@@ -125,7 +129,12 @@ final class IntervalRunner {
             let elapsedInStep = elapsed - cursor
             if elapsedInStep < duration {
                 let remaining = step.seconds - Int(elapsedInStep)
-                return Progress(stepIndex: index, step: step, remainingSeconds: max(remaining, 0))
+                return Progress(
+                    stepIndex: index,
+                    step: step,
+                    remainingSeconds: max(remaining, 0),
+                    elapsedInStep: max(elapsedInStep, 0)
+                )
             }
             cursor += duration
         }

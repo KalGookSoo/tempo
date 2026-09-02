@@ -1,10 +1,3 @@
-//
-//  tempoApp.swift
-//  tempo
-//
-//  Created by doyevskyi on 8/12/26.
-//
-
 import SwiftData
 import SwiftUI
 

@@ -1,8 +1,3 @@
-//
-//  SoundAssetSeeder.swift
-//  tempo
-//
-
 import Foundation
 import SwiftData
 

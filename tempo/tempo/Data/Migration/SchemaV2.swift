@@ -1,8 +1,3 @@
-//
-//  SchemaV2.swift
-//  tempo
-//
-
 import SwiftData
 
 /// `AppSettings.hasCompletedOnboarding` 필드 추가. 기존 필드에 기본값이 있는 단순 추가라

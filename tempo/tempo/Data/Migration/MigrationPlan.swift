@@ -1,8 +1,3 @@
-//
-//  MigrationPlan.swift
-//  tempo
-//
-
 import SwiftData
 
 /// 스키마 버전 간 마이그레이션 계획. docs/local-persistence-strategy.md "마이그레이션 원칙" 참고.

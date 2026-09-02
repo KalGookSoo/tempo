@@ -1,8 +1,3 @@
-//
-//  IntervalConfig.swift
-//  tempo
-//
-
 import Foundation
 
 /// 인터벌 프리셋의 실행 설정. SwiftData `@Model` 프로퍼티 타입으로 직접 저장한다(JSON 문자열

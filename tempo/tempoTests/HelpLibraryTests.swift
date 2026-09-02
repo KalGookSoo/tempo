@@ -1,8 +1,3 @@
-//
-//  HelpLibraryTests.swift
-//  tempoTests
-//
-
 @testable import tempo
 import Testing
 

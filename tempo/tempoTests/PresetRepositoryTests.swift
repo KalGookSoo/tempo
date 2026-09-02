@@ -1,8 +1,3 @@
-//
-//  PresetRepositoryTests.swift
-//  tempoTests
-//
-
 import SwiftData
 @testable import tempo
 import Testing

@@ -1,8 +1,3 @@
-//
-//  SchemaV1.swift
-//  tempo
-//
-
 import Foundation
 import SwiftData
 

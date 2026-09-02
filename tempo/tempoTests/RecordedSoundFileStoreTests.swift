@@ -1,8 +1,3 @@
-//
-//  RecordedSoundFileStoreTests.swift
-//  tempoTests
-//
-
 import Foundation
 @testable import tempo
 import Testing

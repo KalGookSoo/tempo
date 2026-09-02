@@ -1,8 +1,3 @@
-//
-//  SharedModelContainer.swift
-//  tempo
-//
-
 import Foundation
 import SwiftData
 

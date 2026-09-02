@@ -1,8 +1,3 @@
-//
-//  SoundRecorder.swift
-//  tempo
-//
-
 import AVFoundation
 import Foundation
 

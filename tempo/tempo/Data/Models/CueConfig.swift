@@ -1,8 +1,3 @@
-//
-//  CueConfig.swift
-//  tempo
-//
-
 import Foundation
 
 /// 알림 큐 규칙. SwiftData `@Model` 프로퍼티 타입으로 직접 저장한다(JSON 문자열 직렬화 없음).

@@ -1,19 +1,10 @@
-//
-//  tempoTests.swift
-//  tempoTests
-//
-//  Created by doyevskyi on 8/12/26.
-//
-
-import Testing
 @testable import tempo
+import Testing
 
 struct tempoTests {
-
-    @Test func example() async throws {
+    @Test func example() {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.
         // Swift Testing Documentation
         // https://developer.apple.com/documentation/testing
     }
-
 }

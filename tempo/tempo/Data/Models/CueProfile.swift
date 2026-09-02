@@ -1,8 +1,3 @@
-//
-//  CueProfile.swift
-//  tempo
-//
-
 import Foundation
 import SwiftData
 

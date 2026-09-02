@@ -1,8 +1,3 @@
-//
-//  StopwatchEngine.swift
-//  tempo
-//
-
 import Foundation
 import Observation
 

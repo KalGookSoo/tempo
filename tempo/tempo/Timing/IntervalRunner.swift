@@ -1,8 +1,3 @@
-//
-//  IntervalRunner.swift
-//  tempo
-//
-
 import Foundation
 import Observation
 

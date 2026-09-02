@@ -1,8 +1,3 @@
-//
-//  SoundAssetSeederTests.swift
-//  tempoTests
-//
-
 import Foundation
 import SwiftData
 @testable import tempo

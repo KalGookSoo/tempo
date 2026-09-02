@@ -1,10 +1,3 @@
-//
-//  tempoUITestsLaunchTests.swift
-//  tempoUITests
-//
-//  Created by doyevskyi on 8/12/26.
-//
-
 import XCTest
 
 final class tempoUITestsLaunchTests: XCTestCase {

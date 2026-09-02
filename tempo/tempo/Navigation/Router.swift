@@ -1,8 +1,3 @@
-//
-//  Router.swift
-//  tempo
-//
-
 import SwiftUI
 
 /// 탭 하나의 `NavigationStack` 경로를 화면 계층 안에서 공유하기 위한 라우터.

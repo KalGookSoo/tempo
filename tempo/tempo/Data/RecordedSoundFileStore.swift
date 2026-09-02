@@ -1,8 +1,3 @@
-//
-//  RecordedSoundFileStore.swift
-//  tempo
-//
-
 import Foundation
 
 /// 녹음 파일의 저장 경로 규칙을 결정한다. `SoundAsset.id` 기반 파일명만 쓰고, 사용자가

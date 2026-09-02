@@ -68,7 +68,6 @@ struct TimerView: View {
                 )
             }
         }
-        .keepScreenAwake(while: engine.state == .running)
         .task {
             cueConfig = try? modelContext.fetch(
                 FetchDescriptor<CueProfile>(predicate: #Predicate { $0.isDefault })
@@ -139,6 +138,12 @@ struct TimerView: View {
             )
             .task(id: TickKey(state: engine.state, seconds: seconds)) {
                 triggerCuesIfNeeded(state: engine.state, seconds: seconds)
+            }
+            // 화면 자동 잠금 방지 신호(1초에 한 번이면 충분 — ScreenAwakeLease의 유예 시간
+            // 5초보다 훨씬 촘촘하다). 화면을 벗어나 이 TimelineView 틱이 멈추면 신호도
+            // 자연히 끊겨 유예 시간 뒤 자동 잠금이 복구된다. 이슈 #53 참고.
+            .task(id: seconds) {
+                if engine.state == .running { ScreenAwakeLease.renew() }
             }
         }
     }

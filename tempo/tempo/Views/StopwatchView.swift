@@ -20,6 +20,12 @@ struct StopwatchView: View {
                         statusColor: status.color,
                         fontSize: timerFontSize
                     )
+                    // 화면 자동 잠금 방지 신호. 0.01초마다 매번 부를 필요는 없어서 1초 단위로
+                    // 묶어 보낸다(ScreenAwakeLease의 유예 시간 5초보다 훨씬 촘촘하다). 화면을
+                    // 벗어나 이 TimelineView 틱이 멈추면 신호도 자연히 끊긴다. 이슈 #53 참고.
+                    .task(id: Int(context.date.timeIntervalSinceReferenceDate)) {
+                        if engine.state == .running { ScreenAwakeLease.renew() }
+                    }
                 }
 
                 HStack {
@@ -64,7 +70,6 @@ struct StopwatchView: View {
                 }
                 .listStyle(.plain)
             }
-            .keepScreenAwake(while: engine.state == .running)
             .navigationTitle("스톱워치")
             .navigationBarTitleDisplayMode(.inline)
         }

@@ -38,7 +38,6 @@ struct IntervalRunView: View {
                 ProgressView()
             }
         }
-        .keepScreenAwake(while: runner?.state == .running)
         .navigationTitle("인터벌 실행")
         .navigationBarTitleDisplayMode(.inline)
         .task {
@@ -119,6 +118,12 @@ struct IntervalRunView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .task(id: TickKey(stepID: progress?.step.id, remainingSeconds: progress?.remainingSeconds)) {
                 triggerCuesIfNeeded(progress: progress, state: runner.state)
+            }
+            // 화면 자동 잠금 방지 신호. 1초 단위로 묶어 보낸다(ScreenAwakeLease의 유예
+            // 시간 5초보다 훨씬 촘촘하다). 화면을 벗어나 이 TimelineView 틱이 멈추면
+            // 신호도 자연히 끊긴다. 이슈 #53 참고.
+            .task(id: Int(context.date.timeIntervalSinceReferenceDate)) {
+                if runner.state == .running { ScreenAwakeLease.renew() }
             }
         }
     }

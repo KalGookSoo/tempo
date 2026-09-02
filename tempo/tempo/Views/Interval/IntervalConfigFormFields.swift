@@ -123,6 +123,11 @@ struct IntervalConfigFormFields: View {
         }
         .contentShape(Rectangle())
         .onTapGesture {
+            // 라운드 필드가 포커스를 가진 채로 이 팝업을 열면, focusedField가 .rounds로
+            // 남아있어서 팝업을 닫을 때 SwiftUI가 라운드 텍스트필드에 포커스를 다시
+            // 돌려줘 숫자 키패드가 저절로 뜨는 버그가 있었다. 팝업을 열기 전에 포커스를
+            // 명시적으로 지운다.
+            focusedField = nil
             timeTarget = SetTimeTarget(id: idSuffix, title: "\(title) 시간", range: range, seconds: seconds)
         }
     }

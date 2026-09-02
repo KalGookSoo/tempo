@@ -38,6 +38,7 @@ struct IntervalRunView: View {
                 ProgressView()
             }
         }
+        .keepScreenAwake(while: runner?.state == .running)
         .navigationTitle("인터벌 실행")
         .navigationBarTitleDisplayMode(.inline)
         .task {

@@ -68,6 +68,7 @@ struct TimerView: View {
                 )
             }
         }
+        .keepScreenAwake(while: engine.state == .running)
         .task {
             cueConfig = try? modelContext.fetch(
                 FetchDescriptor<CueProfile>(predicate: #Predicate { $0.isDefault })

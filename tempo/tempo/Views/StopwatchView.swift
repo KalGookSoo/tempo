@@ -64,6 +64,7 @@ struct StopwatchView: View {
                 }
                 .listStyle(.plain)
             }
+            .keepScreenAwake(while: engine.state == .running)
             .navigationTitle("스톱워치")
             .navigationBarTitleDisplayMode(.inline)
         }

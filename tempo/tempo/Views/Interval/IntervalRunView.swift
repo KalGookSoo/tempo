@@ -90,7 +90,7 @@ struct IntervalRunView: View {
                 Spacer()
 
                 HStack {
-                    if runner.state == .paused {
+                    if runner.state == .paused || runner.state == .completed {
                         RunningControlButton(title: "리셋", style: .reset) {
                             runner.reset()
                         }

@@ -114,6 +114,14 @@ final class IntervalRunner {
     /// 지금 시각 기준으로 어느 구간의 몇 초가 남았는지 계산한다. 전체 시퀀스가 끝났으면
     /// `nil`을 반환하고 `state`를 `.completed`로 전이시킨다.
     func currentProgress(at now: Date) -> Progress? {
+        // 이미 완료된 뒤에는 항상 nil을 반환한다. 이 가드가 없으면, 완료 시점에
+        // state만 바뀌고 pausedElapsed는 그대로(0)라서, 같은 순간에 이 함수가
+        // 한 번 더 호출될 경우(@Observable state를 뷰 렌더링 도중에 바꾸면
+        // SwiftUI가 같은 프레임에서 다시 그리면서 실제로 그렇게 된다)
+        // totalElapsed가 다시 0부터 계산돼 첫 스텝(준비)이 되살아나는 버그가
+        // 있었다 — 완료 화면 대신 "준비" 화면으로 되돌아가 보였다.
+        guard state != .completed else { return nil }
+
         let progress = progress(atElapsed: totalElapsed(at: now))
         if progress == nil, state == .running || state == .preparing {
             state = .completed

@@ -34,6 +34,9 @@ struct IntervalConfigFormFields: View {
 
     @FocusState private var focusedField: Field?
     @State private var timeTarget: SetTimeTarget?
+    // 화면 진입 직후(NavigationStack 푸시 전환 도중)엔 세트 시간 팝업을 못 열게
+    // 막는다. NavigationTransitionGate 참고.
+    @State private var canOpenTimePicker = false
 
     private enum Field: Hashable {
         case rounds
@@ -101,6 +104,7 @@ struct IntervalConfigFormFields: View {
                 }
             }
         }
+        .background(NavigationTransitionGate { canOpenTimePicker = true })
         .sheet(item: $timeTarget) { target in
             IntervalSetTimePickerView(title: target.title, range: target.range, seconds: target.seconds)
         }
@@ -118,11 +122,18 @@ struct IntervalConfigFormFields: View {
             Text(title)
                 .foregroundStyle(Color.accentColor)
             Spacer()
-            Text(IntervalRunner.formattedClock(seconds: seconds.wrappedValue))
-                .foregroundStyle(.secondary)
+            // canOpenTimePicker가 false인 동안(화면 진입 전환 애니메이션 도중)은
+            // 아직 탭해도 팝업이 안 뜨는 상태임을 스피너로 보여준다.
+            if canOpenTimePicker {
+                Text(IntervalRunner.formattedClock(seconds: seconds.wrappedValue))
+                    .foregroundStyle(.secondary)
+            } else {
+                ProgressView()
+            }
         }
         .contentShape(Rectangle())
         .onTapGesture {
+            guard canOpenTimePicker else { return }
             // 라운드 필드가 포커스를 가진 채로 이 팝업을 열면, focusedField가 .rounds로
             // 남아있어서 팝업을 닫을 때 SwiftUI가 라운드 텍스트필드에 포커스를 다시
             // 돌려줘 숫자 키패드가 저절로 뜨는 버그가 있었다. 팝업을 열기 전에 포커스를

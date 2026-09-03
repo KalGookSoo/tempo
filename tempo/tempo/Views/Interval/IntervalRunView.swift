@@ -58,29 +58,28 @@ struct IntervalRunView: View {
                 Spacer()
 
                 if let progress {
-                    VStack(spacing: 16) {
-                        if progress.step.round > 0 {
-                            Text("라운드 \(progress.step.round) / \(progress.step.totalRounds)")
-                                .font(.largeTitle.bold())
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Text(statusLabel(for: progress.step))
-                            .font(.title3.bold())
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 4)
-                            .background(statusColor(for: progress.step, runnerState: runner.state).opacity(0.15), in: Capsule())
-                            .foregroundStyle(statusColor(for: progress.step, runnerState: runner.state))
-
-                        IntervalCountdownRing(
-                            remainingSeconds: progress.remainingSeconds,
-                            elapsedInStep: progress.elapsedInStep,
-                            totalSeconds: progress.step.seconds,
-                            color: statusColor(for: progress.step, runnerState: runner.state),
-                            fontSize: timerFontSize
-                        )
-                    }
+                    stepContent(
+                        roundLabel: roundLabel(for: progress.step),
+                        statusLabel: statusLabel(for: progress.step),
+                        statusColor: statusColor(for: progress.step, runnerState: runner.state),
+                        remainingSeconds: progress.remainingSeconds,
+                        elapsedInStep: progress.elapsedInStep,
+                        totalSeconds: progress.step.seconds
+                    )
+                } else if let lastStep = runner.steps.last {
+                    // 완료 후에도 대기/운동/휴식 화면과 같은 구성(라운드 표시 + 상태
+                    // 배지 + 링)을 그대로 쓰고, 라벨만 "완료"로 바꾼다 — 화면마다
+                    // 레이아웃이 갑자기 달라지지 않도록.
+                    stepContent(
+                        roundLabel: roundLabel(for: lastStep),
+                        statusLabel: "완료",
+                        statusColor: .danger,
+                        remainingSeconds: 0,
+                        elapsedInStep: Double(lastStep.seconds),
+                        totalSeconds: lastStep.seconds
+                    )
                 } else {
+                    // 라운드가 0이라 steps가 아예 비어있는 극단적인 경우의 최후 폴백.
                     RunningDisplayView(
                         primaryText: "완료",
                         statusColor: .danger,
@@ -126,6 +125,44 @@ struct IntervalRunView: View {
                 if runner.state == .running { ScreenAwakeLease.renew() }
             }
         }
+    }
+
+    /// 대기/운동/휴식/완료 화면이 공유하는 "라운드 표시 + 상태 배지 + 링" 구성.
+    private func stepContent(
+        roundLabel: String?,
+        statusLabel: String,
+        statusColor: Color,
+        remainingSeconds: Int,
+        elapsedInStep: TimeInterval,
+        totalSeconds: Int
+    ) -> some View {
+        VStack(spacing: 16) {
+            if let roundLabel {
+                Text(roundLabel)
+                    .font(.largeTitle.bold())
+                    .foregroundStyle(.secondary)
+            }
+
+            Text(statusLabel)
+                .font(.title3.bold())
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .background(statusColor.opacity(0.15), in: Capsule())
+                .foregroundStyle(statusColor)
+
+            IntervalCountdownRing(
+                remainingSeconds: remainingSeconds,
+                elapsedInStep: elapsedInStep,
+                totalSeconds: totalSeconds,
+                color: statusColor,
+                fontSize: timerFontSize
+            )
+        }
+    }
+
+    private func roundLabel(for step: IntervalStep) -> String? {
+        guard step.round > 0 else { return nil }
+        return "라운드 \(step.round) / \(step.totalRounds)"
     }
 
     private func statusLabel(for step: IntervalStep) -> String {

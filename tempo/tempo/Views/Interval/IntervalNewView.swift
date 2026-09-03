@@ -13,6 +13,10 @@ struct IntervalNewView: View {
     @State private var prepareSeconds = 10
     @State private var sets: [EditableIntervalSet] = [EditableIntervalSet(workSeconds: 20, restSeconds: 10)]
     @State private var errorMessage: String?
+    @State private var timeTarget: IntervalConfigFormFields.SetTimeTarget?
+    // 화면 전환 애니메이션 도중엔 세트 시간 팝업을 못 열게 막는다.
+    // IntervalProgramEditView.swift의 같은 프로퍼티 주석 참고.
+    @State private var canOpenTimePicker = false
 
     private var isValid: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty && !sets.isEmpty
@@ -20,7 +24,14 @@ struct IntervalNewView: View {
 
     var body: some View {
         Form {
-            IntervalConfigFormFields(name: $name, rounds: $rounds, prepareSeconds: $prepareSeconds, sets: $sets)
+            IntervalConfigFormFields(
+                name: $name,
+                rounds: $rounds,
+                prepareSeconds: $prepareSeconds,
+                sets: $sets,
+                timeTarget: $timeTarget,
+                canOpenTimePicker: canOpenTimePicker
+            )
         }
         .navigationTitle("새 프로그램")
         .navigationBarTitleDisplayMode(.inline)
@@ -40,6 +51,10 @@ struct IntervalNewView: View {
             actions: { Button("확인") {} },
             message: { Text(errorMessage ?? "") }
         )
+        .background(NavigationTransitionGate { canOpenTimePicker = true })
+        .sheet(item: $timeTarget) { target in
+            IntervalSetTimePickerView(title: target.title, range: target.range, seconds: target.seconds)
+        }
     }
 
     private func save() {

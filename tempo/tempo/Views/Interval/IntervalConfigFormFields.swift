@@ -31,12 +31,14 @@ struct IntervalConfigFormFields: View {
     @Binding var rounds: Int
     @Binding var prepareSeconds: Int
     @Binding var sets: [EditableIntervalSet]
+    // 세트 시간 팝업의 표시 대상과 "지금 열어도 되는지" 여부는 화면(IntervalNewView/
+    // IntervalProgramEditView) 쪽에서 관리한다 — `.sheet`/`NavigationTransitionGate`를
+    // Form 안(Section 하나)이 아니라 화면 최상위에 붙여야 하기 때문. 자세한 이유는
+    // 두 화면의 주석 참고.
+    @Binding var timeTarget: SetTimeTarget?
+    var canOpenTimePicker: Bool
 
     @FocusState private var focusedField: Field?
-    @State private var timeTarget: SetTimeTarget?
-    // 화면 진입 직후(NavigationStack 푸시 전환 도중)엔 세트 시간 팝업을 못 열게
-    // 막는다. NavigationTransitionGate 참고.
-    @State private var canOpenTimePicker = false
 
     private enum Field: Hashable {
         case rounds
@@ -44,7 +46,7 @@ struct IntervalConfigFormFields: View {
 
     /// 세트의 운동/휴식 시간 팝업을 띄우기 위한 대상. 팝업이 확정되면 `seconds`에 바로
     /// 값이 반영되도록, 해당 세트 필드로 향하는 `Binding`을 그대로 들고 있는다.
-    private struct SetTimeTarget: Identifiable {
+    struct SetTimeTarget: Identifiable {
         let id: String
         let title: String
         let range: ClosedRange<Int>
@@ -103,10 +105,6 @@ struct IntervalConfigFormFields: View {
                     }
                 }
             }
-        }
-        .background(NavigationTransitionGate { canOpenTimePicker = true })
-        .sheet(item: $timeTarget) { target in
-            IntervalSetTimePickerView(title: target.title, range: target.range, seconds: target.seconds)
         }
     }
 

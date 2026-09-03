@@ -18,6 +18,13 @@ struct IntervalProgramEditView: View {
     @State private var prepareSeconds = 0
     @State private var sets: [EditableIntervalSet] = []
     @State private var errorMessage: String?
+    @State private var timeTarget: IntervalConfigFormFields.SetTimeTarget?
+    // 화면 진입 직후(NavigationStack 푸시 전환 애니메이션 도중)엔 세트 시간 팝업을
+    // 못 열게 막는다. `.sheet`/`NavigationTransitionGate`를 Form 안(Section 하나)에
+    // 붙이면 그 Section이 속한 List 셀 안에 갇혀 실제 화면 전환의 transitionCoordinator를
+    // 못 읽어와, 전환 도중 탭했을 때 팝업이 열렸다 바로 닫히는(iPad에서는 "이미 다른
+    // 화면을 표시 중" 콘솔 에러까지 찍히는) 문제가 있었다. 그래서 화면 최상위에 붙인다.
+    @State private var canOpenTimePicker = false
 
     private var isValid: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty && !sets.isEmpty
@@ -27,7 +34,14 @@ struct IntervalProgramEditView: View {
         Group {
             if preset != nil {
                 Form {
-                    IntervalConfigFormFields(name: $name, rounds: $rounds, prepareSeconds: $prepareSeconds, sets: $sets)
+                    IntervalConfigFormFields(
+                        name: $name,
+                        rounds: $rounds,
+                        prepareSeconds: $prepareSeconds,
+                        sets: $sets,
+                        timeTarget: $timeTarget,
+                        canOpenTimePicker: canOpenTimePicker
+                    )
                 }
             } else if presetNotFound {
                 ContentUnavailableView {
@@ -57,6 +71,10 @@ struct IntervalProgramEditView: View {
             actions: { Button("확인") {} },
             message: { Text(errorMessage ?? "") }
         )
+        .background(NavigationTransitionGate { canOpenTimePicker = true })
+        .sheet(item: $timeTarget) { target in
+            IntervalSetTimePickerView(title: target.title, range: target.range, seconds: target.seconds)
+        }
         .task {
             load()
         }

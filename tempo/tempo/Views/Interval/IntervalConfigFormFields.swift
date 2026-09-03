@@ -54,55 +54,53 @@ struct IntervalConfigFormFields: View {
     }
 
     var body: some View {
-        Group {
-            Section("이름") {
-                TextField("이름", text: $name)
-            }
+        Section("이름") {
+            TextField("이름", text: $name)
+        }
 
-            Section("준비 시간") {
-                Stepper(
-                    "준비 \(IntervalRunner.formattedClock(seconds: prepareSeconds))",
-                    value: $prepareSeconds,
-                    in: 10 ... 60,
-                    step: 5
+        Section("준비 시간") {
+            Stepper(
+                "준비 \(IntervalRunner.formattedClock(seconds: prepareSeconds))",
+                value: $prepareSeconds,
+                in: 10 ... 60,
+                step: 5
+            )
+        }
+
+        Section("라운드") {
+            HStack {
+                Text("라운드")
+                Spacer()
+                TextField(
+                    "라운드",
+                    value: Binding(get: { rounds }, set: { rounds = min(max($0, 1), 99) }),
+                    format: .number
                 )
+                .focused($focusedField, equals: .rounds)
+                .keyboardType(.numberPad)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 60)
+            }
+            .contentShape(Rectangle())
+            .onTapGesture { focusedField = .rounds }
+        }
+
+        Section("인터벌 세트 (최대 9개)") {
+            ForEach($sets) { $set in
+                VStack(alignment: .leading, spacing: 16) {
+                    timeRow(title: "운동", seconds: $set.workSeconds, range: 5 ... 5999, idSuffix: "work-\(set.id)")
+                    timeRow(title: "휴식", seconds: $set.restSeconds, range: 0 ... 5999, idSuffix: "rest-\(set.id)")
+                }
+            }
+            .onDelete { offsets in
+                sets.remove(atOffsets: offsets)
             }
 
-            Section("라운드") {
-                HStack {
-                    Text("라운드")
-                    Spacer()
-                    TextField(
-                        "라운드",
-                        value: Binding(get: { rounds }, set: { rounds = min(max($0, 1), 99) }),
-                        format: .number
-                    )
-                    .focused($focusedField, equals: .rounds)
-                    .keyboardType(.numberPad)
-                    .multilineTextAlignment(.trailing)
-                    .frame(width: 60)
-                }
-                .contentShape(Rectangle())
-                .onTapGesture { focusedField = .rounds }
-            }
-
-            Section("인터벌 세트 (최대 9개)") {
-                ForEach($sets) { $set in
-                    VStack(alignment: .leading, spacing: 16) {
-                        timeRow(title: "운동", seconds: $set.workSeconds, range: 5 ... 5999, idSuffix: "work-\(set.id)")
-                        timeRow(title: "휴식", seconds: $set.restSeconds, range: 0 ... 5999, idSuffix: "rest-\(set.id)")
-                    }
-                }
-                .onDelete { offsets in
-                    sets.remove(atOffsets: offsets)
-                }
-
-                if sets.count < 9 {
-                    Button {
-                        sets.append(EditableIntervalSet(workSeconds: 20, restSeconds: 10))
-                    } label: {
-                        Label("세트 추가", systemImage: "plus")
-                    }
+            if sets.count < 9 {
+                Button {
+                    sets.append(EditableIntervalSet(workSeconds: 20, restSeconds: 10))
+                } label: {
+                    Label("세트 추가", systemImage: "plus")
                 }
             }
         }

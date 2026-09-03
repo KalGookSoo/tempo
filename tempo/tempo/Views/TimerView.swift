@@ -143,7 +143,9 @@ struct TimerView: View {
             // 5초보다 훨씬 촘촘하다). 화면을 벗어나 이 TimelineView 틱이 멈추면 신호도
             // 자연히 끊겨 유예 시간 뒤 자동 잠금이 복구된다. 이슈 #53 참고.
             .task(id: seconds) {
-                if engine.state == .running { ScreenAwakeLease.renew() }
+                if engine.state == .running {
+                    ScreenAwakeLease.renew()
+                }
             }
         }
     }

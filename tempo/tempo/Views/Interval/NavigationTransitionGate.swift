@@ -12,13 +12,13 @@ import UIKit
 struct NavigationTransitionGate: UIViewControllerRepresentable {
     let onComplete: () -> Void
 
-    func makeUIViewController(context: Context) -> GateViewController {
+    func makeUIViewController(context _: Context) -> GateViewController {
         let controller = GateViewController()
         controller.onComplete = onComplete
         return controller
     }
 
-    func updateUIViewController(_ uiViewController: GateViewController, context: Context) {}
+    func updateUIViewController(_: GateViewController, context _: Context) {}
 
     final class GateViewController: UIViewController {
         var onComplete: (() -> Void)?

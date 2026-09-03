@@ -14,8 +14,8 @@ struct IntervalNewView: View {
     @State private var sets: [EditableIntervalSet] = [EditableIntervalSet(workSeconds: 20, restSeconds: 10)]
     @State private var errorMessage: String?
     @State private var timeTarget: IntervalConfigFormFields.SetTimeTarget?
-    // 화면 전환 애니메이션 도중엔 세트 시간 팝업을 못 열게 막는다.
-    // IntervalProgramEditView.swift의 같은 프로퍼티 주석 참고.
+    /// 화면 전환 애니메이션 도중엔 세트 시간 팝업을 못 열게 막는다.
+    /// IntervalProgramEditView.swift의 같은 프로퍼티 주석 참고.
     @State private var canOpenTimePicker = false
 
     private var isValid: Bool {

@@ -167,7 +167,7 @@ struct IntervalRunView: View {
     /// 이 줄이 있다 없다 하면서 아래 배지/링이 위아래로 움직이지 않도록 한다.
     private func roundLabel(for step: IntervalStep) -> String? {
         guard step.totalRounds > 0 else { return nil }
-        return "라운드 \(max(step.round, 1)) / \(step.totalRounds)"
+        return "라운드 \(step.round) / \(step.totalRounds)"
     }
 
     private func statusLabel(for step: IntervalStep) -> String {

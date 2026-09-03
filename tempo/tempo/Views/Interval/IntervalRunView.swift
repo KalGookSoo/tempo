@@ -160,9 +160,12 @@ struct IntervalRunView: View {
         }
     }
 
+    /// 준비 구간(`step.round == 0`)에서도 "라운드 1 / N"으로 보여준다 — 준비/운동/휴식/완료
+    /// 화면이 전부 같은 레이아웃(라운드 표시 줄이 있는 상태)을 갖게 해서, 구간이 바뀔 때마다
+    /// 이 줄이 있다 없다 하면서 아래 배지/링이 위아래로 움직이지 않도록 한다.
     private func roundLabel(for step: IntervalStep) -> String? {
-        guard step.round > 0 else { return nil }
-        return "라운드 \(step.round) / \(step.totalRounds)"
+        guard step.totalRounds > 0 else { return nil }
+        return "라운드 \(max(step.round, 1)) / \(step.totalRounds)"
     }
 
     private func statusLabel(for step: IntervalStep) -> String {

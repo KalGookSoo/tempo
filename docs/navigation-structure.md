@@ -11,15 +11,16 @@ enum IntervalRoute: Hashable {
     case programs
     case programDetail(id: String)
     case programEdit(id: String)
-    case help
-    case helpDetail(id: String)
     case run(programID: String)
 }
 
 enum SettingsRoute: Hashable {
     case help
+    case helpDetail(id: String)
     case onboarding
     case version
+    case cue
+    case recordings
 }
 ```
 
@@ -33,7 +34,7 @@ enum SettingsRoute: Hashable {
 - 저장된 인터벌 구성은 `인터벌` 탭 안의 `프로그램 목록`에서 관리한다.
 - 실행 기록, 히스토리는 1차 MVP의 화면 IA에서 제외한다.
 - 실시간 시계와 하드웨어 전자시계 관련 화면은 제공하지 않는다.
-- 설정 탭에서 도움말, 사용법(온보딩) 다시 보기, 버전 정보를 확인할 수 있다.
+- 설정 탭에서 알림 큐, 녹음한 사운드, 도움말, 사용법(온보딩) 다시 보기, 버전 정보를 확인할 수 있다.
 
 ## 최상위 탭
 
@@ -41,8 +42,8 @@ enum SettingsRoute: Hashable {
 | --- | --- | --- |
 | 타이머 | `timer` | 카운트다운과 카운트업을 토글로 전환해 실행 |
 | 스톱워치 | `stopwatch` | 제한 시간 없이 경과 시간과 랩 측정 |
-| 인터벌 | `repeat` | 인터벌 프로그램 생성, 저장된 프로그램 선택, 도움말 확인 |
-| 설정 | `gearshape.fill` | 도움말, 사용법 다시 보기, 버전 정보 |
+| 인터벌 | `repeat` | 인터벌 프로그램 생성, 저장된 프로그램 선택/상세/수정 |
+| 설정 | `gearshape.fill` | 알림 큐, 녹음한 사운드, 도움말, 사용법 다시 보기, 버전 정보 |
 
 ## 전체 구조
 
@@ -65,8 +66,6 @@ flowchart TD
 
     I --> N[".new"]
     I --> P[".programs"]
-    I --> H[".help"]
-    H --> H1[".helpDetail(id:)"]
 
     N --> R[".run(programID:)"]
     N --> P
@@ -75,17 +74,19 @@ flowchart TD
     P2 --> R
     P2 --> E[".programEdit(id:)"]
     E --> P2
-    H1 --> N
     R -->|뒤로가기| P2
 
     G --> GH[".help"]
+    GH --> GH1[".helpDetail(id:)"]
     G --> GO[".onboarding"]
     G --> GV[".version"]
+    G --> GC[".cue"]
+    G --> GR[".recordings"]
 
     classDef primary fill:#FFF4BF,stroke:#111111,color:#111111;
     classDef screen fill:#FFFFFF,stroke:#111111,color:#111111;
     class TB,T,S,I,G,R primary;
-    class T1,T2,T3,S1,S2,N,P,H,H1,P2,E,GH,GO,GV screen;
+    class T1,T2,T3,S1,S2,N,P,P2,E,GH,GH1,GO,GV,GC,GR screen;
 ```
 
 ## 타이머 탭
@@ -212,25 +213,51 @@ flowchart TD
 
 목적:
 
-- 도움말, 사용법 다시 보기, 버전 정보로 이동하는 진입점이다.
+- 알림 큐, 녹음한 사운드, 도움말, 사용법 다시 보기, 버전 정보로 이동하는 진입점이다.
 
 주요 이동:
 
+- 알림 큐: `.cue`
+- 녹음한 사운드: `.recordings`
 - 도움말: `.help`
 - 사용법 다시 보기: `.onboarding`
 - 버전 정보: `.version`
+
+### 알림 큐 `.cue`
+
+목적:
+
+- 전역 기본 알림 큐(`CueProfile`)를 설정한다 — 시작 전 카운트다운 알림 시점, 이벤트별(준비/운동/휴식 시작, 구간·라운드 종료, 마지막 라운드 진입, 전체 종료) 모드와 사운드를 고른다. 자세한 내용은 `docs/use-cases/notification-cues.md` 참고.
+
+주요 이동:
+
+- 이벤트별 사운드 선택: 팝업 시트로 `SoundAsset` 목록을 보여준다.
+
+### 녹음한 사운드 `.recordings`
+
+목적:
+
+- 마이크로 직접 녹음한 알림 큐 사운드를 등록·재생·이름변경·삭제한다.
+
+주요 이동:
+
+- 녹음하기: 화면 하단에서 올라오는 녹음 시트.
 
 ### 도움말 `.help`
 
 목적:
 
-- 이용 가이드 콘텐츠(각 타이머 모드 설명, 알림 큐 설정법 등)를 제공한다. 콘텐츠는 후속 이슈에서 채운다.
+- 타이머/스톱워치/인터벌 타이밍/프리셋 관리/알림 큐/미러링 실행 화면, 6개 주제로 이용 가이드 콘텐츠를 제공한다(`HelpLibrary`, `docs/use-cases/*.md`가 원본).
+
+주요 이동:
+
+- 주제 상세: `.helpDetail(id:)`
 
 ### 사용법 다시 보기 `.onboarding`
 
 목적:
 
-- 최초 실행 온보딩과 같은 콘텐츠를 설정에서 다시 볼 수 있게 한다. 실제 온보딩 단계/콘텐츠는 후속 이슈에서 채운다.
+- 최초 실행 온보딩(`OnboardingView`)과 같은 3단계 콘텐츠를 설정에서 다시 볼 수 있게 한다(`OnboardingContent`).
 
 ### 버전 정보 `.version`
 

@@ -9,7 +9,7 @@ struct IntervalNewView: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var name = ""
-    @State private var rounds = 8
+    @State private var rounds = 1
     @State private var prepareSeconds = 10
     @State private var sets: [EditableIntervalSet] = [EditableIntervalSet(workSeconds: 20, restSeconds: 10)]
     @State private var errorMessage: String?

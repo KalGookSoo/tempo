@@ -38,12 +38,6 @@ struct IntervalConfigFormFields: View {
     @Binding var timeTarget: SetTimeTarget?
     var canOpenTimePicker: Bool
 
-    @FocusState private var focusedField: Field?
-
-    private enum Field: Hashable {
-        case rounds
-    }
-
     /// 세트의 운동/휴식 시간 팝업을 띄우기 위한 대상. 팝업이 확정되면 `seconds`에 바로
     /// 값이 반영되도록, 해당 세트 필드로 향하는 `Binding`을 그대로 들고 있는다.
     struct SetTimeTarget: Identifiable {
@@ -68,21 +62,11 @@ struct IntervalConfigFormFields: View {
         }
 
         Section("라운드") {
-            HStack {
-                Text("라운드")
-                Spacer()
-                TextField(
-                    "라운드",
-                    value: Binding(get: { rounds }, set: { rounds = min(max($0, 1), 99) }),
-                    format: .number
-                )
-                .focused($focusedField, equals: .rounds)
-                .keyboardType(.numberPad)
-                .multilineTextAlignment(.trailing)
-                .frame(width: 60)
-            }
-            .contentShape(Rectangle())
-            .onTapGesture { focusedField = .rounds }
+            Stepper(
+                "라운드 \(rounds)",
+                value: $rounds,
+                in: 1 ... 99
+            )
         }
 
         Section("인터벌 세트 (최대 9개)") {
@@ -130,11 +114,6 @@ struct IntervalConfigFormFields: View {
         .contentShape(Rectangle())
         .onTapGesture {
             guard canOpenTimePicker else { return }
-            // 라운드 필드가 포커스를 가진 채로 이 팝업을 열면, focusedField가 .rounds로
-            // 남아있어서 팝업을 닫을 때 SwiftUI가 라운드 텍스트필드에 포커스를 다시
-            // 돌려줘 숫자 키패드가 저절로 뜨는 버그가 있었다. 팝업을 열기 전에 포커스를
-            // 명시적으로 지운다.
-            focusedField = nil
             timeTarget = SetTimeTarget(id: idSuffix, title: "\(title) 시간", range: range, seconds: seconds)
         }
     }

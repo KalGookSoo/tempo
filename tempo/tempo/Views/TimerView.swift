@@ -16,7 +16,7 @@ struct TimerView: View {
     @State private var draftLabel: String = ""
     @Query(filter: #Predicate<SoundAsset> { $0.deletedAt == nil })
     private var soundAssets: [SoundAsset]
-
+    private static let notificationIdentifier = "timer.end"
     private struct TickKey: Equatable {
         let state: TimerState
         let seconds: Int
@@ -221,16 +221,33 @@ struct TimerView: View {
 
     @ViewBuilder
     private var trailingButton: some View {
+        let message = "타이머가 종료되었습니다"
         switch engine.state {
         case .idle:
-            RunningControlButton(title: "시작", style: .start) { engine.start(at: .now) }
-                .disabled(engine.configuredSeconds == 0)
+            RunningControlButton(title: "시작", style: .start) {
+                engine.start(at: .now)
+                if engine.mode == .countdown {
+                    NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: engine.configuredSeconds, title: effectiveLabel, message: message)
+                }
+            }
+            .disabled(engine.configuredSeconds == 0)
         case .running:
-            RunningControlButton(title: "일시정지", style: .pause) { engine.pause(at: .now) }
+            RunningControlButton(title: "일시정지", style: .pause) {
+                engine.pause(at: .now)
+                NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
+            }
         case .paused:
-            RunningControlButton(title: "재개", style: .start) { engine.resume(at: .now) }
+            RunningControlButton(title: "재개", style: .start) {
+                engine.resume(at: .now)
+                if engine.mode == .countdown, engine.state == .running {
+                    NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: engine.remainingOrElapsedSeconds(at: .now), title: effectiveLabel, message: message)
+                }
+            }
         case .completed:
-            RunningControlButton(title: "리셋", style: .reset) { engine.reset() }
+            RunningControlButton(title: "리셋", style: .reset) {
+                engine.reset()
+                NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
+            }
         default:
             EmptyView()
         }

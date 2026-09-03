@@ -18,6 +18,8 @@ struct IntervalRunView: View {
     @State private var presetNotFound = false
     @State private var cueConfig: CueConfig?
     @State private var previousStep: IntervalStep?
+    @State private var programName = ""
+    private static let notificationIdentifier = "interval.end"
 
     private struct TickKey: Equatable {
         let stepID: Int?
@@ -40,6 +42,11 @@ struct IntervalRunView: View {
         }
         .navigationTitle("인터벌 실행")
         .navigationBarTitleDisplayMode(.inline)
+        .onDisappear {
+            if runner?.state != .completed {
+                NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
+            }
+        }
         .task {
             load()
         }
@@ -51,6 +58,11 @@ struct IntervalRunView: View {
         // 진행 중이 아닐 때(대기/일시정지/완료)는 어차피 값이 안 바뀌므로 타임라인을
         // 멈춰 불필요한 갱신을 막는다.
         let isPaused = runner.state != .running && runner.state != .preparing
+
+        let totalDuration = runner.steps.reduce(0) { $0 + $1.seconds }
+        let remaining = totalDuration - Int(runner.totalElapsed(at: .now))
+        let message = "인터벌 프로그램이 종료되었습니다"
+
         return TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: isPaused)) { context in
             let progress = runner.currentProgress(at: context.date)
 
@@ -93,6 +105,7 @@ struct IntervalRunView: View {
                     if runner.state == .paused || runner.state == .completed {
                         RunningControlButton(title: "리셋", style: .reset) {
                             runner.reset()
+                            NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
                         }
                     }
 
@@ -101,14 +114,22 @@ struct IntervalRunView: View {
                     if runner.state == .running || runner.state == .preparing {
                         RunningControlButton(title: "일시정지", style: .pause) {
                             runner.pause(at: .now)
+                            NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
                         }
                     } else if runner.state == .paused {
                         RunningControlButton(title: "재개", style: .start) {
                             runner.resume(at: .now)
+                            NotificationScheduler.schedule(
+                                identifier: Self.notificationIdentifier,
+                                secondsRemaining: remaining,
+                                title: programName,
+                                message: message
+                            )
                         }
                     } else {
                         RunningControlButton(title: "시작", style: .start) {
                             runner.start(at: .now)
+                            NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: totalDuration, title: programName, message: message)
                         }
                     }
                 }
@@ -240,6 +261,7 @@ struct IntervalRunView: View {
 
         cueConfig = resolveCueConfig(cueProfileID: preset.cueProfileID)
         runner = IntervalRunner(config: preset.config)
+        programName = preset.name
     }
 
     private func resolveCueConfig(cueProfileID: UUID?) -> CueConfig? {

@@ -143,7 +143,7 @@ struct IntervalRunView: View {
             // 시간 5초보다 훨씬 촘촘하다). 화면을 벗어나 이 TimelineView 틱이 멈추면
             // 신호도 자연히 끊긴다. 이슈 #53 참고.
             .task(id: Int(context.date.timeIntervalSinceReferenceDate)) {
-                if runner.state == .running {
+                if runner.state == .running || runner.state == .preparing {
                     ScreenAwakeLease.renew()
                 }
             }

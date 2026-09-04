@@ -60,7 +60,14 @@
 
 1. 커밋 메시지는 [Conventional Commits](#커밋-메시지-가이드라인) 가이드라인을 따르세요.
 2. PR 설명은 [PR 템플릿](PULL_REQUEST_TEMPLATE.md)을 따르세요.
-3. 코드가 빌드되고 기존 테스트를 통과하는지 확인하세요.
+3. 코드가 빌드되고 기존 테스트를 통과하는지 확인하세요. CI(`.github/workflows/ci.yml`)는 빌드와 포맷만 자동으로 확인합니다 — GitHub 호스팅 러너의 시뮬레이터 런타임 구성 문제로 유닛/UI 테스트는 CI에 자동화돼 있지 않으므로, PR을 올리기 전에 로컬에서 직접 실행해 통과를 확인하세요:
+
+   ```
+   xcodebuild test -project tempo/tempo.xcodeproj -scheme tempo \
+     -destination 'platform=iOS Simulator,name=iPhone 17'
+   ```
+
+   (기기 이름은 로컬에 설치된 시뮬레이터 중 하나로 바꿔서 실행하세요.)
 
 ## 릴리스 프로세스
 

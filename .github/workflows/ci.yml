@@ -1,0 +1,88 @@
+name: CI
+
+# main 브랜치로의 push와 모든 PR에서 빌드/유닛 테스트/포맷 검사를 자동으로 돌린다.
+# 이슈 #72 참고.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# 같은 브랜치/PR에 새 커밋이 올라오면 이전 실행은 취소한다 — 오래된 결과가 뒤늦게
+# 완료되어 최신 커밋의 상태를 덮어쓰는 일을 막는다.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build & Unit Test
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: tempo
+    steps:
+      - uses: actions/checkout@v4
+
+      # 이 러너에 실제로 어떤 Xcode 버전들이 들어있는지는 GitHub의 macOS 이미지
+      # 구성에 달려 있다. 프로젝트가 요구하는 버전(현재 Xcode 26.5, iOS 26.5 SDK)이
+      # 기본 선택 Xcode와 다르면, 여기서 `sudo xcode-select -s /Applications/Xcode_*.app`로
+      # 명시적으로 골라야 한다 — 이 워크플로를 처음 실행해서 러너에 설치된 버전
+      # 목록(`ls /Applications | grep Xcode`)을 확인한 뒤 필요하면 채워 넣는다.
+      - name: Show available Xcode versions
+        run: ls /Applications | grep Xcode
+
+      - name: Show selected Xcode version
+        run: xcodebuild -version
+
+      # 프로젝트가 요구하는 iOS 시뮬레이터가 이 러너에 없을 수 있어서, 이름을
+      # 하드코딩하는 대신 실제로 사용 가능한 iPhone 시뮬레이터 중 하나를 골라 쓴다
+      # (iPhone이 하나도 없으면 iPad 등 다른 iOS 시뮬레이터로 대체한다).
+      - name: Pick an available iOS Simulator destination
+        id: destination
+        run: |
+          ALL_DESTINATIONS=$(xcodebuild -showdestinations -project tempo.xcodeproj -scheme tempo 2>/dev/null \
+            | grep "platform:iOS Simulator" \
+            | grep -v "Any iOS Simulator")
+          DESTINATION=$(echo "$ALL_DESTINATIONS" | grep "name:iPhone" | head -n 1)
+          if [ -z "$DESTINATION" ]; then
+            DESTINATION=$(echo "$ALL_DESTINATIONS" | head -n 1)
+          fi
+          NAME=$(echo "$DESTINATION" | sed -E 's/.*name:([^,}]+).*/\1/' | xargs)
+          if [ -z "$NAME" ]; then
+            echo "사용 가능한 iOS 시뮬레이터를 찾지 못했습니다." >&2
+            exit 1
+          fi
+          echo "이 시뮬레이터로 빌드/테스트합니다: $NAME"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: |
+          xcodebuild build \
+            -project tempo.xcodeproj \
+            -scheme tempo \
+            -destination "platform=iOS Simulator,name=${{ steps.destination.outputs.name }}"
+
+      # tempoUITests는 시뮬레이터 부팅/실행 화면 조작이 껴 있어 상대적으로 느리고
+      # 불안정할 수 있어서, 이번 워크플로는 우선 유닛 테스트(tempoTests)만 돈다.
+      - name: Run unit tests
+        run: |
+          xcodebuild test \
+            -project tempo.xcodeproj \
+            -scheme tempo \
+            -destination "platform=iOS Simulator,name=${{ steps.destination.outputs.name }}" \
+            -only-testing:tempoTests
+
+  lint:
+    name: SwiftFormat Lint
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SwiftFormat
+        run: brew install swiftformat
+
+      # .swiftformat 설정(--swiftversion 5.0 --indent 4)을 그대로 따른다.
+      # docs/swift-coding-conventions.md 참고.
+      - name: Check formatting
+        run: swiftformat --lint tempo

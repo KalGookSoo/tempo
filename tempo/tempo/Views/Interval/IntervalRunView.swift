@@ -1,5 +1,6 @@
 import SwiftData
 import SwiftUI
+import UIKit
 
 /// `.run(programID:)` 화면. `programID`로 실제 `TimerPreset`을 조회해서 `IntervalRunner`를
 /// 만들고, 화면에 들어오는 즉시 실행을 시작한다("실행" 액션은 프로그램 상세 화면에서 이미
@@ -19,7 +20,18 @@ struct IntervalRunView: View {
     @State private var cueConfig: CueConfig?
     @State private var previousStep: IntervalStep?
     @State private var programName = ""
+    @State private var isLeaveConfirmationPresented = false
     private static let notificationIdentifier = "interval.end"
+
+    /// 준비/운동·휴식/일시정지 중에는 뒤로가기 시 잃을 진행 상황이 있어 확인이
+    /// 필요하다. 아직 시작 전이거나 이미 끝난 상태는 잃을 게 없어 바로 나갈 수
+    /// 있다. 이슈 #74 참고.
+    private var needsLeaveConfirmation: Bool {
+        switch runner?.state {
+        case .preparing?, .running?, .paused?: true
+        default: false
+        }
+    }
 
     private struct TickKey: Equatable {
         let stepID: Int?
@@ -42,11 +54,37 @@ struct IntervalRunView: View {
         }
         .navigationTitle("인터벌 실행")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    if needsLeaveConfirmation {
+                        isLeaveConfirmationPresented = true
+                    } else {
+                        router.pop()
+                    }
+                } label: {
+                    Image(systemName: "chevron.backward")
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 AirPlayButton()
                     .frame(width: 28, height: 28)
             }
+        }
+        // 스와이프 뒤로가기 제스처도 같은 조건으로 막는다 — 커스텀 버튼만 막으면
+        // 스와이프로 확인 없이 빠져나갈 수 있다. 이슈 #74 참고.
+        .background(SwipeBackGestureControl(isEnabled: !needsLeaveConfirmation))
+        .alert(
+            "프로그램을 중단할까요?",
+            isPresented: $isLeaveConfirmationPresented
+        ) {
+            Button("계속하기", role: .cancel) {}
+            Button("중단하고 나가기", role: .destructive) {
+                router.pop()
+            }
+        } message: {
+            Text("지금 나가면 진행 중인 인터벌이 중단되고 처음부터 다시 시작해야 합니다.")
         }
         .onDisappear {
             if runner?.state != .completed {
@@ -317,6 +355,22 @@ struct IntervalRunView: View {
         return try? modelContext.fetch(
             FetchDescriptor<CueProfile>(predicate: #Predicate { $0.isDefault })
         ).first?.config
+    }
+}
+
+/// `NavigationStack`의 스와이프 뒤로가기 제스처를 켰다 껐다 하기 위한 얇은
+/// 래퍼. SwiftUI만으로는 화면 단위로 이 제스처를 제어할 수 없어
+/// `UINavigationController.interactivePopGestureRecognizer`에 직접 접근한다.
+/// 이슈 #74 참고.
+private struct SwipeBackGestureControl: UIViewControllerRepresentable {
+    let isEnabled: Bool
+
+    func makeUIViewController(context _: Context) -> UIViewController {
+        UIViewController()
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context _: Context) {
+        uiViewController.navigationController?.interactivePopGestureRecognizer?.isEnabled = isEnabled
     }
 }
 

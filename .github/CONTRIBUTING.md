@@ -64,7 +64,40 @@
 
 ## 릴리스 프로세스
 
-tempo는 [시맨틱 버전 관리](http://semver.org)를 따릅니다. 릴리스 노트는 [릴리스 템플릿](RELEASE_TEMPLATE.md)을 따라 작성됩니다.
+tempo는 [시맨틱 버전 관리](http://semver.org)(`MAJOR.MINOR.PATCH`)를 따릅니다. 릴리스 노트는 [릴리스 템플릿](RELEASE_TEMPLATE.md)을 따라 작성됩니다.
+
+### 버전 번호와 Xcode 빌드 설정의 매핑
+
+- **`MARKETING_VERSION`**(`project.pbxproj`) = 시맨틱 버전(`X.Y.Z`). 사람이 보는 릴리스 버전이자 App Store에 노출되는 버전이다.
+- **`CURRENT_PROJECT_VERSION`**(`project.pbxproj`) = 빌드 번호. App Store Connect에 업로드할 때마다 반드시 이전 값보다 커야 하므로, 같은 `MARKETING_VERSION` 안에서도 업로드할 때마다 1씩 올린다.
+- 메인 앱(`tempo`)과 위젯 익스텐션(`TempoWidget`) 타겟은 항상 같은 `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION`을 갖는다 — 둘을 따로 관리할 이유가 없어서, 버전을 올릴 때 두 타겟 모두 함께 바꾼다.
+
+### 버전을 올리는 기준
+
+[커밋 타입](#주요-커밋-타입)을 그대로 기준으로 삼는다.
+
+- **PATCH**(`X.Y.Z+1`): `fix` 커밋만 있는 릴리스.
+- **MINOR**(`X.Y+1.0`): `feat` 커밋이 하나라도 포함된 릴리스.
+- **MAJOR**(`X+1.0.0`): 기존 사용자 데이터나 동작 방식을 깨뜨리는 변경이 있는 릴리스(예: 마이그레이션 없이 저장 데이터 구조가 바뀌는 경우). 지금까지는 해당된 적이 없다.
+- `docs`/`refactor`/`chore`만 있는 변경은 그 자체로 버전을 올리지 않고, 다음 `fix`/`feat` 릴리스에 함께 포함시킨다.
+
+### git 태그 규칙
+
+릴리스 시점에 `MARKETING_VERSION`과 정확히 일치하는 태그를 `v` 접두사로 만든다.
+
+```
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+이 태그 push가 CD 파이프라인의 트리거가 된다(이슈 #73).
+
+### 릴리스 절차
+
+1. `project.pbxproj`에서 `tempo`, `TempoWidget` 두 타겟 모두 `MARKETING_VERSION`을 올린다(빌드 업로드 때마다 `CURRENT_PROJECT_VERSION`도 1씩 올린다).
+2. `chore: 버전을 X.Y.Z로 올림` 커밋을 만든다.
+3. 위 규칙대로 태그를 만들어 push한다.
+4. [릴리스 템플릿](RELEASE_TEMPLATE.md)에 따라 릴리스 노트를 작성한다.
 
 ## 응답 언어
 

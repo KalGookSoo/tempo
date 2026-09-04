@@ -25,4 +25,36 @@ enum SchemaV1: VersionedSchema {
             self.updatedAt = updatedAt
         }
     }
+
+    /// v1 시점 `SoundAsset`의 형태 스냅샷(`waveformSamples` 없음). 이슈 #64에서
+    /// `waveformSamples`가 추가되며 SchemaV3이 새로 생겼다 — AppSettings와 같은 이유로,
+    /// 바뀌기 전 형태를 여기 그대로 얼려둔다.
+    @Model
+    final class SoundAsset {
+        @Attribute(.unique) var id: UUID
+        var kind: SoundAssetKind
+        var name: String
+        var relativePath: String?
+        var durationMs: Int?
+        var createdAt: Date
+        var deletedAt: Date?
+
+        init(
+            id: UUID = UUID(),
+            kind: SoundAssetKind,
+            name: String,
+            relativePath: String? = nil,
+            durationMs: Int? = nil,
+            createdAt: Date,
+            deletedAt: Date? = nil
+        ) {
+            self.id = id
+            self.kind = kind
+            self.name = name
+            self.relativePath = relativePath
+            self.durationMs = durationMs
+            self.createdAt = createdAt
+            self.deletedAt = deletedAt
+        }
+    }
 }

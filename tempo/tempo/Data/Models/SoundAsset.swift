@@ -13,6 +13,10 @@ final class SoundAsset {
     var durationMs: Int?
     var createdAt: Date
     var deletedAt: Date? // soft delete
+    /// 녹음 중 수집한 음량 레벨(0...1) 샘플. 목록 화면에서 파형을 다시 계산하지 않고
+    /// 그대로 그릴 수 있도록 녹음 시점에 함께 저장한다. 빌트인/가져온 사운드는 빈
+    /// 배열이다. 이슈 #64 참고.
+    var waveformSamples: [Float] = []
 
     init(
         id: UUID = UUID(),
@@ -21,7 +25,8 @@ final class SoundAsset {
         relativePath: String? = nil,
         durationMs: Int? = nil,
         createdAt: Date,
-        deletedAt: Date? = nil
+        deletedAt: Date? = nil,
+        waveformSamples: [Float] = []
     ) {
         self.id = id
         self.kind = kind
@@ -30,6 +35,7 @@ final class SoundAsset {
         self.durationMs = durationMs
         self.createdAt = createdAt
         self.deletedAt = deletedAt
+        self.waveformSamples = waveformSamples
     }
 }
 

@@ -22,16 +22,19 @@ final class SoundAssetRepository {
     }
 
     /// 녹음을 마친 뒤 메타데이터를 저장한다. `id`는 파일명에 쓰인 것과 같은 값을 넘겨받는다
-    /// (`RecordedSoundFileStore.relativePath(for:)` 참고).
+    /// (`RecordedSoundFileStore.relativePath(for:)` 참고). `waveformSamples`는 녹음 중
+    /// 수집한 음량 레벨(0...1)로, 목록 화면이 파형을 다시 계산하지 않고 그대로 그릴 수
+    /// 있도록 함께 저장한다(이슈 #64).
     @discardableResult
-    func createRecordedAsset(id: UUID, name: String, durationMs: Int?) throws -> SoundAsset {
+    func createRecordedAsset(id: UUID, name: String, durationMs: Int?, waveformSamples: [Float] = []) throws -> SoundAsset {
         let asset = SoundAsset(
             id: id,
             kind: .recorded,
             name: name,
             relativePath: RecordedSoundFileStore.relativePath(for: id),
             durationMs: durationMs,
-            createdAt: Date()
+            createdAt: Date(),
+            waveformSamples: waveformSamples
         )
         modelContext.insert(asset)
         try modelContext.save()

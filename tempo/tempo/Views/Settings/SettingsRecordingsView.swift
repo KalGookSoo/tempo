@@ -75,8 +75,8 @@ struct SettingsRecordingsView: View {
             }
         }
         .sheet(isPresented: $isRecordSheetPresented) {
-            RecordingSheetView(recorder: recorder) { id, durationMs in
-                saveRecording(id: id, durationMs: durationMs)
+            RecordingSheetView(recorder: recorder) { id, durationMs, waveformSamples in
+                saveRecording(id: id, durationMs: durationMs, waveformSamples: waveformSamples)
             }
         }
         .alert(
@@ -112,12 +112,13 @@ struct SettingsRecordingsView: View {
         }
     }
 
-    private func saveRecording(id: UUID, durationMs: Int) {
+    private func saveRecording(id: UUID, durationMs: Int, waveformSamples: [Float]) {
         do {
             try SoundAssetRepository(modelContext: modelContext).createRecordedAsset(
                 id: id,
                 name: "녹음 \(recordings.count + 1)",
-                durationMs: durationMs
+                durationMs: durationMs,
+                waveformSamples: waveformSamples
             )
         } catch {
             errorMessage = error.localizedDescription
@@ -163,6 +164,11 @@ struct SettingsRecordingsView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+            }
+            if !asset.waveformSamples.isEmpty {
+                Spacer()
+                WaveformView(samples: asset.waveformSamples)
+                    .frame(width: 80, height: 28)
             }
         }
     }

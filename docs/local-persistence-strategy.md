@@ -206,6 +206,7 @@ final class SoundAsset {
     var durationMs: Int?
     var createdAt: Date
     var deletedAt: Date?        // soft delete
+    var waveformSamples: [Float] // 녹음 중 수집한 음량 레벨(0...1). 빌트인/가져온 사운드는 빈 배열
 }
 
 enum SoundAssetKind: String, Codable {

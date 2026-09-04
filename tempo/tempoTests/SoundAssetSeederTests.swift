@@ -11,7 +11,7 @@ import Testing
 struct SoundAssetSeederTests {
     private func makeInMemoryStore() throws -> (container: ModelContainer, context: ModelContext) {
         let container = try ModelContainer(
-            for: Schema(versionedSchema: SchemaV1.self),
+            for: Schema(versionedSchema: SchemaV3.self),
             configurations: [ModelConfiguration(isStoredInMemoryOnly: true)]
         )
         return (container, container.mainContext)

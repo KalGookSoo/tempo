@@ -7,7 +7,7 @@ enum SharedModelContainer {
         let configuration = ModelConfiguration(isStoredInMemoryOnly: false)
         do {
             let container = try ModelContainer(
-                for: Schema(versionedSchema: SchemaV2.self),
+                for: Schema(versionedSchema: SchemaV3.self),
                 migrationPlan: MigrationPlan.self,
                 configurations: [configuration]
             )

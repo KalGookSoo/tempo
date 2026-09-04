@@ -10,7 +10,7 @@ import Testing
 struct SoundAssetRepositoryTests {
     private func makeInMemoryStore() throws -> (container: ModelContainer, context: ModelContext) {
         let container = try ModelContainer(
-            for: Schema(versionedSchema: SchemaV1.self),
+            for: Schema(versionedSchema: SchemaV3.self),
             configurations: [ModelConfiguration(isStoredInMemoryOnly: true)]
         )
         return (container, container.mainContext)
@@ -27,6 +27,18 @@ struct SoundAssetRepositoryTests {
         #expect(asset.kind == .recorded)
         #expect(asset.relativePath == "sounds/recorded/sound_\(id.uuidString).m4a")
         #expect(asset.durationMs == 1500)
+        #expect(asset.waveformSamples.isEmpty)
+    }
+
+    @Test("녹음 생성 시 넘긴 파형 샘플이 그대로 저장된다")
+    func storesWaveformSamples() throws {
+        let store = try makeInMemoryStore()
+        let repository = SoundAssetRepository(modelContext: store.context)
+        let samples: [Float] = [0, 0.5, 1, 0.25]
+
+        let asset = try repository.createRecordedAsset(id: UUID(), name: "녹음 1", durationMs: 800, waveformSamples: samples)
+
+        #expect(asset.waveformSamples == samples)
     }
 
     @Test("빌트인 사운드가 섞여있어도 녹음 목록만 조회된다")

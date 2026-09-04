@@ -12,7 +12,7 @@ struct PresetRepositoryTests {
     /// 크래시한다 — 그래서 둘 다 묶어서 반환하고 호출부에서 함께 들고 있는다.
     private func makeInMemoryStore() throws -> (container: ModelContainer, context: ModelContext) {
         let container = try ModelContainer(
-            for: Schema(versionedSchema: SchemaV1.self),
+            for: Schema(versionedSchema: SchemaV3.self),
             configurations: [ModelConfiguration(isStoredInMemoryOnly: true)]
         )
         return (container, container.mainContext)

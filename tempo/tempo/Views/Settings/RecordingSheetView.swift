@@ -5,14 +5,16 @@ import SwiftUI
 /// 취소하면 임시로 쓰인 파일을 지운다. 이슈 #28 참고.
 struct RecordingSheetView: View {
     let recorder: SoundRecorder
-    let onSave: (_ id: UUID, _ durationMs: Int) -> Void
+    let onSave: (_ id: UUID, _ durationMs: Int, _ waveformSamples: [Float]) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var stoppedResult: (id: UUID, durationMs: Int)?
     @State private var errorMessage: String?
 
+    /// `recorder.lastRecordingResult`는 새 녹음을 시작하면 nil로 되돌아가므로, 아직
+    /// 한 번도 녹음을 멈추지 않은 상태와 방금 멈춘 상태를 그대로 구분해준다 — 최대
+    /// 길이 도달로 자동 정지됐을 때도(버튼을 누르지 않아도) 곧바로 반영된다.
     private var isStopped: Bool {
-        stoppedResult != nil
+        recorder.lastRecordingResult != nil
     }
 
     var body: some View {
@@ -20,6 +22,16 @@ struct RecordingSheetView: View {
             Text(statusText)
                 .font(.headline)
                 .foregroundStyle(.secondary)
+
+            if recorder.isRecording || isStopped {
+                Text(elapsedText)
+                    .font(.title3.monospacedDigit())
+                    .foregroundStyle(.secondary)
+
+                WaveformView(samples: recorder.levelSamples, color: recorder.isRecording ? .red : .accentColor)
+                    .frame(height: 48)
+                    .padding(.horizontal)
+            }
 
             Button {
                 toggleRecording()
@@ -63,13 +75,18 @@ struct RecordingSheetView: View {
         } else if isStopped {
             "녹음 완료 — 저장하시겠어요?"
         } else {
-            "버튼을 눌러 녹음을 시작하세요"
+            "버튼을 눌러 녹음을 시작하세요(최대 \(Int(SoundRecorder.maxDuration))초)"
         }
+    }
+
+    private var elapsedText: String {
+        let elapsed = recorder.isRecording ? recorder.elapsedTime : (Double(recorder.lastRecordingResult?.durationMs ?? 0) / 1000)
+        return String(format: "%.1f / %.0f초", elapsed, SoundRecorder.maxDuration)
     }
 
     private func toggleRecording() {
         if recorder.isRecording {
-            stoppedResult = recorder.stopRecording()
+            recorder.stopRecording()
         } else {
             do {
                 try recorder.startRecording()
@@ -80,19 +97,19 @@ struct RecordingSheetView: View {
     }
 
     private func discard() {
-        if let stoppedResult {
-            RecordedSoundFileStore.deleteFile(for: stoppedResult.id)
+        if let result = recorder.lastRecordingResult {
+            RecordedSoundFileStore.deleteFile(for: result.id)
         }
         dismiss()
     }
 
     private func save() {
-        guard let stoppedResult else { return }
-        onSave(stoppedResult.id, stoppedResult.durationMs)
+        guard let result = recorder.lastRecordingResult else { return }
+        onSave(result.id, result.durationMs, recorder.levelSamples)
         dismiss()
     }
 }
 
 #Preview {
-    RecordingSheetView(recorder: SoundRecorder(), onSave: { _, _ in })
+    RecordingSheetView(recorder: SoundRecorder(), onSave: { _, _, _ in })
 }

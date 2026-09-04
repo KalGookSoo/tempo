@@ -24,13 +24,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 이 러너에 실제로 어떤 Xcode 버전들이 들어있는지는 GitHub의 macOS 이미지
-      # 구성에 달려 있다. 프로젝트가 요구하는 버전(현재 Xcode 26.5, iOS 26.5 SDK)이
-      # 기본 선택 Xcode와 다르면, 여기서 `sudo xcode-select -s /Applications/Xcode_*.app`로
-      # 명시적으로 골라야 한다 — 이 워크플로를 처음 실행해서 러너에 설치된 버전
-      # 목록(`ls /Applications | grep Xcode`)을 확인한 뒤 필요하면 채워 넣는다.
-      - name: Show available Xcode versions
-        run: ls /Applications | grep Xcode
+      # 러너 기본 선택 Xcode(이 워크플로를 처음 돌렸을 때 16.4로 확인됨)는 이
+      # 프로젝트가 요구하는 버전(로컬 개발 기준 Xcode 26.5)보다 한참 낮다.
+      # 러너에 설치된 Xcode 중 가장 최신 버전을 매번 동적으로 골라 쓴다 — 특정
+      # 버전을 하드코딩하면 GitHub이 이미지를 갱신할 때마다 다시 손봐야 한다.
+      # (그래도 러너 이미지가 아직 26.5까지 못 따라왔을 수 있어 최신이 정확히
+      # 26.5가 아닐 수 있다 — 아래 "Show selected Xcode version" 로그로 확인한다.)
+      - name: Select latest available Xcode
+        run: |
+          LATEST=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -n 1)
+          if [ -z "$LATEST" ]; then
+            echo "Xcode_*.app을 찾지 못해 기본 /Applications/Xcode.app을 그대로 쓴다." >&2
+          else
+            echo "다음 Xcode를 선택한다: $LATEST"
+            sudo xcode-select -s "$LATEST"
+          fi
 
       - name: Show selected Xcode version
         run: xcodebuild -version

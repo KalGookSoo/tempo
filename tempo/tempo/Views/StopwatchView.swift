@@ -36,6 +36,7 @@ struct StopwatchView: View {
                             engine.recordLap(at: .now)
                         } else {
                             engine.reset()
+                            TimerLiveActivityController.end(kind: .stopwatch)
                         }
                     }
                     .disabled(engine.state == .idle && engine.laps.isEmpty)
@@ -45,10 +46,35 @@ struct StopwatchView: View {
                     RunningControlButton(title: isRunning ? "정지" : "시작", style: isRunning ? .pause : .start) {
                         if isRunning {
                             engine.stop(at: .now)
+                            TimerLiveActivityController.start(
+                                kind: .stopwatch,
+                                title: "스톱워치",
+                                displayMode: .paused,
+                                referenceDate: .now,
+                                staticText: StopwatchEngine.formattedClock(elapsed: engine.elapsed(at: .now)),
+                                statusLabel: "일시정지"
+                            )
                         } else if engine.state == .idle {
                             engine.start(at: .now)
+                            TimerLiveActivityController.start(
+                                kind: .stopwatch,
+                                title: "스톱워치",
+                                displayMode: .countUp,
+                                referenceDate: .now,
+                                staticText: StopwatchEngine.formattedClock(elapsed: 0),
+                                statusLabel: "진행 중"
+                            )
                         } else {
                             engine.resume(at: .now)
+                            let elapsed = engine.elapsed(at: .now)
+                            TimerLiveActivityController.start(
+                                kind: .stopwatch,
+                                title: "스톱워치",
+                                displayMode: .countUp,
+                                referenceDate: Date.now.addingTimeInterval(-elapsed),
+                                staticText: StopwatchEngine.formattedClock(elapsed: elapsed),
+                                statusLabel: "진행 중"
+                            )
                         }
                     }
                     .disabled(engine.state == .completed)

@@ -79,10 +79,17 @@ struct TimerView: View {
     /// 큐 설정으로 재생한다. 타이머에는 준비/운동/휴식/라운드 개념이 없어 인터벌보다 훨씬
     /// 단순하다 — 이슈 #15.
     private func triggerCuesIfNeeded(state: TimerState, seconds: Int) {
-        guard let cueConfig else { return }
         defer { previousState = state }
+        let didJustComplete = previousState != .completed && state == .completed
 
-        if previousState != .completed, state == .completed {
+        // Live Activity 종료는 알림 큐 설정(cueConfig) 유무와 무관하게 항상 처리한다.
+        if didJustComplete {
+            TimerLiveActivityController.end(kind: .timer)
+        }
+
+        guard let cueConfig else { return }
+
+        if didJustComplete {
             let finishEvent = cueConfig.finish
             // 이 타이머에서 직접 고른 "타이머 종료 시" 사운드가 있으면 그걸 우선한다.
             // 재생 여부(모드)는 전역 알림 큐 설정을 그대로 따른다.
@@ -108,6 +115,26 @@ struct TimerView: View {
             )
             CueTriggerPlayer.play(event, soundAsset: soundAsset)
         }
+    }
+
+    /// 시작/재개 시점에 지금 모드(카운트다운/카운트업) 기준으로 Live Activity를
+    /// (다시) 시작한다. `referenceDate`는 카운트다운이면 종료 예정 시각, 카운트업이면
+    /// 이미 지난 경과 시간만큼 과거로 당긴 시작 시각이다 — 두 경우 모두 위젯의
+    /// `Text(_:style:.timer)`가 그 시각 기준으로 알아서 실시간 카운트를 그린다.
+    private func refreshLiveActivity(statusLabel: String) {
+        let seconds = engine.remainingOrElapsedSeconds(at: .now)
+        let displayMode: TimerActivityAttributes.ContentState.DisplayMode = engine.mode == .countdown ? .countdown : .countUp
+        let referenceDate = engine.mode == .countdown
+            ? Date.now.addingTimeInterval(TimeInterval(seconds))
+            : Date.now.addingTimeInterval(-TimeInterval(seconds))
+        TimerLiveActivityController.start(
+            kind: .timer,
+            title: effectiveLabel,
+            displayMode: displayMode,
+            referenceDate: referenceDate,
+            staticText: formatted(seconds: seconds),
+            statusLabel: statusLabel
+        )
     }
 
     private func resolvedSoundAsset(soundAssetID: UUID?, defaultName: String) -> SoundAsset? {
@@ -215,7 +242,10 @@ struct TimerView: View {
     @ViewBuilder
     private var leadingButton: some View {
         if engine.state == .paused {
-            RunningControlButton(title: "리셋", style: .reset) { engine.reset() }
+            RunningControlButton(title: "리셋", style: .reset) {
+                engine.reset()
+                TimerLiveActivityController.end(kind: .timer)
+            }
         }
     }
 
@@ -229,12 +259,21 @@ struct TimerView: View {
                 if engine.mode == .countdown {
                     NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: engine.configuredSeconds, title: effectiveLabel, message: message)
                 }
+                refreshLiveActivity(statusLabel: "진행 중")
             }
             .disabled(engine.configuredSeconds == 0)
         case .running:
             RunningControlButton(title: "일시정지", style: .pause) {
                 engine.pause(at: .now)
                 NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
+                TimerLiveActivityController.start(
+                    kind: .timer,
+                    title: effectiveLabel,
+                    displayMode: .paused,
+                    referenceDate: .now,
+                    staticText: formatted(seconds: engine.remainingOrElapsedSeconds(at: .now)),
+                    statusLabel: "일시정지"
+                )
             }
         case .paused:
             RunningControlButton(title: "재개", style: .start) {
@@ -242,11 +281,15 @@ struct TimerView: View {
                 if engine.mode == .countdown, engine.state == .running {
                     NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: engine.remainingOrElapsedSeconds(at: .now), title: effectiveLabel, message: message)
                 }
+                if engine.state == .running {
+                    refreshLiveActivity(statusLabel: "진행 중")
+                }
             }
         case .completed:
             RunningControlButton(title: "리셋", style: .reset) {
                 engine.reset()
                 NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
+                TimerLiveActivityController.end(kind: .timer)
             }
         default:
             EmptyView()

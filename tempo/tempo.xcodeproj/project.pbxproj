@@ -6,7 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8534F24B6122C705C04B19DA /* TempoWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 89FA679E6CA249AD3997B5C6 /* TempoWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A88CED51DC2CA9D71C5AA6E2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3AA94C541F5537AF8D3EB40 /* Foundation.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
+		18A81652AB9029244D59B0FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9F7995F7302C5B96002984BD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9D55F96649749829D53C45A0;
+			remoteInfo = TempoWidget;
+		};
 		9F79960F302C5B97002984BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9F7995F7302C5B96002984BD /* Project object */;
@@ -23,10 +35,27 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		E2C6539269709F9B53A9E204 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				8534F24B6122C705C04B19DA /* TempoWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		89FA679E6CA249AD3997B5C6 /* TempoWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TempoWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F7995FF302C5B96002984BD /* tempo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tempo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F79960E302C5B97002984BD /* tempoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tempoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F799618302C5B97002984BD /* tempoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tempoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A3197AF8C385C52303D58A78 /* tempo/TempoWidget-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "TempoWidget-Info.plist"; sourceTree = "<group>"; };
+		D3AA94C541F5537AF8D3EB40 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -43,6 +72,16 @@
 		9F79961B302C5B97002984BD /* tempoUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = tempoUITests;
+			sourceTree = "<group>";
+		};
+		A753D15F239E83A636FA8648 /* TempoWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TempoWidget;
+			sourceTree = "<group>";
+		};
+		DA57310136B8E2FAFC9E788D /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -69,6 +108,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FDB372C1A82BAA2CFABC6F80 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A88CED51DC2CA9D71C5AA6E2 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -79,6 +126,10 @@
 				9F799611302C5B97002984BD /* tempoTests */,
 				9F79961B302C5B97002984BD /* tempoUITests */,
 				9F799600302C5B96002984BD /* Products */,
+				DA57310136B8E2FAFC9E788D /* Shared */,
+				A753D15F239E83A636FA8648 /* TempoWidget */,
+				B999DDBA9E30FC8C60A008D4 /* Frameworks */,
+				A3197AF8C385C52303D58A78 /* tempo/TempoWidget-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -88,13 +139,51 @@
 				9F7995FF302C5B96002984BD /* tempo.app */,
 				9F79960E302C5B97002984BD /* tempoTests.xctest */,
 				9F799618302C5B97002984BD /* tempoUITests.xctest */,
+				89FA679E6CA249AD3997B5C6 /* TempoWidget.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B999DDBA9E30FC8C60A008D4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FD37823F6C358D688D2833FD /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		FD37823F6C358D688D2833FD /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				D3AA94C541F5537AF8D3EB40 /* Foundation.framework */,
+			);
+			name = iOS;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		9D55F96649749829D53C45A0 /* TempoWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ACED8A4AF6EF901C4B37D3FE /* Build configuration list for PBXNativeTarget "TempoWidget" */;
+			buildPhases = (
+				DE37812696B370B6A50DCD88 /* Sources */,
+				FDB372C1A82BAA2CFABC6F80 /* Frameworks */,
+				6D0A72CAEF2FF41FAD6122CF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A753D15F239E83A636FA8648 /* TempoWidget */,
+				DA57310136B8E2FAFC9E788D /* Shared */,
+			);
+			name = TempoWidget;
+			productName = TempoWidget;
+			productReference = 89FA679E6CA249AD3997B5C6 /* TempoWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		9F7995FE302C5B96002984BD /* tempo */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9F799622302C5B97002984BD /* Build configuration list for PBXNativeTarget "tempo" */;
@@ -102,17 +191,18 @@
 				9F7995FB302C5B96002984BD /* Sources */,
 				9F7995FC302C5B96002984BD /* Frameworks */,
 				9F7995FD302C5B96002984BD /* Resources */,
+				E2C6539269709F9B53A9E204 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				EAD8185A8F10EF4E925A6F41 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				9F799601302C5B96002984BD /* tempo */,
+				DA57310136B8E2FAFC9E788D /* Shared */,
 			);
 			name = tempo;
-			packageProductDependencies = (
-			);
 			productName = tempo;
 			productReference = 9F7995FF302C5B96002984BD /* tempo.app */;
 			productType = "com.apple.product-type.application";
@@ -134,8 +224,6 @@
 				9F799611302C5B97002984BD /* tempoTests */,
 			);
 			name = tempoTests;
-			packageProductDependencies = (
-			);
 			productName = tempoTests;
 			productReference = 9F79960E302C5B97002984BD /* tempoTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -157,8 +245,6 @@
 				9F79961B302C5B97002984BD /* tempoUITests */,
 			);
 			name = tempoUITests;
-			packageProductDependencies = (
-			);
 			productName = tempoUITests;
 			productReference = 9F799618302C5B97002984BD /* tempoUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -203,11 +289,19 @@
 				9F7995FE302C5B96002984BD /* tempo */,
 				9F79960D302C5B97002984BD /* tempoTests */,
 				9F799617302C5B97002984BD /* tempoUITests */,
+				9D55F96649749829D53C45A0 /* TempoWidget */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6D0A72CAEF2FF41FAD6122CF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9F7995FD302C5B96002984BD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -253,6 +347,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DE37812696B370B6A50DCD88 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -266,9 +367,43 @@
 			target = 9F7995FE302C5B96002984BD /* tempo */;
 			targetProxy = 9F799619302C5B97002984BD /* PBXContainerItemProxy */;
 		};
+		EAD8185A8F10EF4E925A6F41 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = TempoWidget;
+			target = 9D55F96649749829D53C45A0 /* TempoWidget */;
+			targetProxy = 18A81652AB9029244D59B0FE /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		0DFE94380D196D014E685CBB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5BDB573D9N;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "TempoWidget-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.me.seesaw.tempo.TempoWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		9F799620302C5B97002984BD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -401,6 +536,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "운동 알림 사운드 큐를 직접 녹음하기 위해 마이크를 사용합니다. 녹음 파일은 기기 안에만 저장됩니다.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -434,6 +570,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "운동 알림 사운드 큐를 직접 녹음하기 위해 마이크를 사용합니다. 녹음 파일은 기기 안에만 저장됩니다.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -540,6 +677,33 @@
 			};
 			name = Release;
 		};
+		DDCAF0288D69185EB5BFF65D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5BDB573D9N;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "TempoWidget-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.me.seesaw.tempo.TempoWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -575,6 +739,15 @@
 			buildConfigurations = (
 				9F799629302C5B97002984BD /* Debug */,
 				9F79962A302C5B97002984BD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ACED8A4AF6EF901C4B37D3FE /* Build configuration list for PBXNativeTarget "TempoWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0DFE94380D196D014E685CBB /* Release */,
+				DDCAF0288D69185EB5BFF65D /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

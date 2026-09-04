@@ -6,25 +6,31 @@ struct tempoApp: App {
     @State private var intervalRouter = Router()
     @State private var settingsRouter = Router()
     @State private var showsOnboarding = false
+    @State private var selectedTab: AppTab = .timer
+    @State private var notificationDelegate = NotificationDelegate()
     private let modelContainer = SharedModelContainer.make()
+
+    enum AppTab: Hashable {
+        case timer, stopwatch, interval, settings
+    }
 
     var body: some Scene {
         WindowGroup {
-            TabView {
-                Tab("타이머", systemImage: "timer") {
+            TabView(selection: $selectedTab) {
+                Tab("타이머", systemImage: "timer", value: AppTab.timer) {
                     TimerView()
                 }
-                Tab("스톱워치", systemImage: "stopwatch") {
+                Tab("스톱워치", systemImage: "stopwatch", value: AppTab.stopwatch) {
                     StopwatchView()
                 }
-                Tab("인터벌", systemImage: "repeat") {
+                Tab("인터벌", systemImage: "repeat", value: AppTab.interval) {
                     NavigationStack(path: $intervalRouter.path) {
                         IntervalProgramsView()
                             .navigationDestination(for: IntervalRoute.self, destination: intervalDestination(for:))
                     }
                     .environment(intervalRouter)
                 }
-                Tab("설정", systemImage: "gearshape.fill") {
+                Tab("설정", systemImage: "gearshape.fill", value: AppTab.settings) {
                     NavigationStack(path: $settingsRouter.path) {
                         SettingsHomeView()
                             .navigationDestination(for: SettingsRoute.self, destination: settingsDestination(for:))
@@ -44,6 +50,9 @@ struct tempoApp: App {
             .task {
                 checkOnboarding()
                 CueTriggerPlayer.prewarmAudioSession()
+                UNUserNotificationCenter.current().delegate = notificationDelegate
+                notificationDelegate.onTapTimer = { selectedTab = .timer }
+                notificationDelegate.onTapInterval = { selectedTab = .interval }
             }
         }
         .modelContainer(modelContainer)
@@ -92,5 +101,26 @@ struct tempoApp: App {
         case .recordings:
             SettingsRecordingsView()
         }
+    }
+}
+
+final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
+    var onTapTimer: (() -> Void)?
+    var onTapInterval: (() -> Void)?
+
+    func userNotificationCenter(
+        _: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        switch response.notification.request.identifier {
+        case "timer.end":
+            onTapTimer?()
+        case "interval.end":
+            onTapInterval?()
+        default:
+            break
+        }
+        completionHandler()
     }
 }

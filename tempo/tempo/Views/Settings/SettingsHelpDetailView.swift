@@ -10,12 +10,12 @@ struct SettingsHelpDetailView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         ForEach(Array(topic.paragraphs.enumerated()), id: \.offset) { _, paragraph in
-                            Text(paragraph)
+                            Text(LocalizedStringKey(paragraph))
                         }
                     }
                     .padding()
                 }
-                .navigationTitle(topic.title)
+                .navigationTitle(LocalizedStringKey(topic.title))
             } else {
                 ContentUnavailableView {
                     Label("도움말", systemImage: "questionmark.circle")

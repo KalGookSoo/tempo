@@ -54,13 +54,13 @@ struct RunningDisplayView: View {
     var body: some View {
         VStack(spacing: 8) {
             if let secondaryText {
-                Text(secondaryText)
+                Text(LocalizedStringKey(secondaryText))
                     .font(secondaryFont)
                     .foregroundStyle(.secondary)
             }
 
             if let statusLabel {
-                Text(statusLabel)
+                Text(LocalizedStringKey(statusLabel))
                     .font(.title3.bold())
                     .padding(.horizontal, 12)
                     .padding(.vertical, 4)

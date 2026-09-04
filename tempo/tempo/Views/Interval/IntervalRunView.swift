@@ -215,7 +215,7 @@ struct IntervalRunView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Text(statusLabel)
+            Text(LocalizedStringKey(statusLabel))
                 .font(.title3.bold())
                 .padding(.horizontal, 12)
                 .padding(.vertical, 4)

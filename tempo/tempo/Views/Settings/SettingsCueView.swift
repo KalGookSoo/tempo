@@ -72,9 +72,9 @@ struct SettingsCueView: View {
         profile: CueProfile,
         keyPath: WritableKeyPath<CueConfig, CueConfig.Event>
     ) -> some View {
-        Picker(title, selection: eventBinding(profile, keyPath)) {
+        Picker(LocalizedStringKey(title), selection: eventBinding(profile, keyPath)) {
             ForEach(CueConfig.Mode.allCases) { mode in
-                Text(mode.displayName).tag(mode)
+                Text(LocalizedStringKey(mode.displayName)).tag(mode)
             }
         }
 
@@ -86,7 +86,7 @@ struct SettingsCueView: View {
                     Text("사운드")
                         .foregroundStyle(.primary)
                     Spacer()
-                    Text(soundName(for: profile, keyPath: keyPath))
+                    Text(LocalizedStringKey(soundName(for: profile, keyPath: keyPath)))
                         .foregroundStyle(.secondary)
                 }
             }

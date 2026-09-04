@@ -273,9 +273,10 @@
 				};
 			};
 			buildConfigurationList = 9F7995FA302C5B96002984BD /* Build configuration list for PBXProject "tempo" */;
-			developmentRegion = en;
+			developmentRegion = ko;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				ko,
 				en,
 				Base,
 			);

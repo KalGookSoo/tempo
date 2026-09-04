@@ -222,7 +222,7 @@ struct TimerView: View {
                     Text("레이블")
                         .foregroundStyle(.primary)
                     Spacer()
-                    Text(effectiveLabel)
+                    Text(LocalizedStringKey(effectiveLabel))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -234,7 +234,7 @@ struct TimerView: View {
                     Text("타이머 종료 시")
                         .foregroundStyle(.primary)
                     Spacer()
-                    Text(selectedEndSoundName)
+                    Text(LocalizedStringKey(selectedEndSoundName))
                         .foregroundStyle(.secondary)
                 }
             }

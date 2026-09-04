@@ -1,0 +1,1246 @@
+{
+  "sourceLanguage": "ko",
+  "strings": {
+    "Tabata, FGB, EMOM 같은 기본 프리셋은 목록에서 바로 실행할 수 있습니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Built-in presets like Tabata, FGB, and EMOM can be run right from the list."
+          }
+        }
+      }
+    },
+    "Tabata, FGB, EMOM처럼 자주 쓰는 인터벌 구성이 기본으로 준비돼 있어요.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popular interval setups like Tabata, FGB, and EMOM come built in."
+          }
+        }
+      }
+    },
+    "계속하기": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Going"
+          }
+        }
+      }
+    },
+    "구간 종료": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segment End"
+          }
+        }
+      }
+    },
+    "구간이 바뀔 때 들려줄 소리를 직접 녹음해서 등록할 수 있어요.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record and set your own sound for when a segment changes."
+          }
+        }
+      }
+    },
+    "구성": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuration"
+          }
+        }
+      }
+    },
+    "기본 알림": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default Alert"
+          }
+        }
+      }
+    },
+    "기본 제공 사운드 외에 설정 > 녹음한 사운드에서 직접 녹음한 음성도 알림 큐로 쓸 수 있습니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Besides the built-in sounds, you can use your own recordings from Settings > Recorded Sounds as cues."
+          }
+        }
+      }
+    },
+    "기본 프리셋도 내 프리셋과 마찬가지로 이름 변경·편집·삭제가 자유롭고, 복제해서 별도 프리셋으로 만들 수도 있습니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Built-in presets can be renamed, edited, or deleted just like your own, and duplicated into a separate preset."
+          }
+        }
+      }
+    },
+    "기본 프리셋을 바로 실행하거나, 내 프리셋을 만들고 관리합니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run built-in presets right away, or create and manage your own."
+          }
+        }
+      }
+    },
+    "기본값": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default"
+          }
+        }
+      }
+    },
+    "긴 비프": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Long Beep"
+          }
+        }
+      }
+    },
+    "긴 비프 (3초)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Long Beep (3s)"
+          }
+        }
+      }
+    },
+    "내 목소리로 알림 큐 만들기": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Make Cues in Your Own Voice"
+          }
+        }
+      }
+    },
+    "녹음 완료 — 저장하시겠어요?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recording complete — save it?"
+          }
+        }
+      }
+    },
+    "녹음 중...": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recording..."
+          }
+        }
+      }
+    },
+    "녹음하기": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record"
+          }
+        }
+      }
+    },
+    "녹음한 사운드": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recorded Sounds"
+          }
+        }
+      }
+    },
+    "녹음한 사운드가 없어요": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Recorded Sounds"
+          }
+        }
+      }
+    },
+    "닫기": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        }
+      }
+    },
+    "대기 중": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting"
+          }
+        }
+      }
+    },
+    "더블 비프": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double Beep"
+          }
+        }
+      }
+    },
+    "도움말": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help"
+          }
+        }
+      }
+    },
+    "라운드": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rounds"
+          }
+        }
+      }
+    },
+    "라운드 종료": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Round End"
+          }
+        }
+      }
+    },
+    "랩": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lap"
+          }
+        }
+      }
+    },
+    "레이블": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Label"
+          }
+        }
+      }
+    },
+    "리셋": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset"
+          }
+        }
+      }
+    },
+    "마이크 권한이 필요해요": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microphone Access Needed"
+          }
+        }
+      }
+    },
+    "마이크 버튼을 눌러 알림 큐로 쓸 소리를 녹음해보세요.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap the microphone button to record a sound for your cues."
+          }
+        }
+      }
+    },
+    "마지막 라운드 진입": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entering Final Round"
+          }
+        }
+      }
+    },
+    "미러링 실행 화면": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mirrored Display"
+          }
+        }
+      }
+    },
+    "바로 쓰는 기본 프리셋": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready-to-Use Presets"
+          }
+        }
+      }
+    },
+    "버전": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        }
+      }
+    },
+    "버전 정보": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version Info"
+          }
+        }
+      }
+    },
+    "복제": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate"
+          }
+        }
+      }
+    },
+    "분": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "min"
+          }
+        }
+      }
+    },
+    "비워두면 \"타이머\"로 표시됩니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave empty to show \"Timer\"."
+          }
+        }
+      }
+    },
+    "빌드": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build"
+          }
+        }
+      }
+    },
+    "사용법 다시 보기": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View Tutorial Again"
+          }
+        }
+      }
+    },
+    "사운드": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sound"
+          }
+        }
+      }
+    },
+    "사운드 + 진동": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sound + Vibration"
+          }
+        }
+      }
+    },
+    "삭제": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        }
+      }
+    },
+    "새 프로그램": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Program"
+          }
+        }
+      }
+    },
+    "새 프로그램을 만들어 저장해보세요.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create and save a new program."
+          }
+        }
+      }
+    },
+    "새 프리셋을 만들려면 이름과 인터벌 세트·라운드·알림 큐를 설정하고 저장하면 목록에 추가됩니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To create a new preset, set a name, interval sets, rounds, and cues, then save — it's added to the list."
+          }
+        }
+      }
+    },
+    "설정": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        }
+      }
+    },
+    "설정 앱 > tempo에서 마이크 권한을 허용해주세요.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Please allow microphone access in Settings > tempo."
+          }
+        }
+      }
+    },
+    "세로·가로 화면을 모두 지원하며, 미러링 중에도 기기에서 시작·일시정지·재개·리셋을 그대로 조작할 수 있습니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Works in both portrait and landscape, and you can still start, pause, resume, and reset from the device while mirroring."
+          }
+        }
+      }
+    },
+    "세트 추가": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Set"
+          }
+        }
+      }
+    },
+    "수정": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        }
+      }
+    },
+    "스톱워치": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopwatch"
+          }
+        }
+      }
+    },
+    "시": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hr"
+          }
+        }
+      }
+    },
+    "시간·분·초는 드래그 picker로 설정하고, 레이블과 종료 시 사운드도 지정할 수 있습니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set hours, minutes, and seconds with a drag picker, and choose a label and end sound."
+          }
+        }
+      }
+    },
+    "시작": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
+          }
+        }
+      }
+    },
+    "시작 전 알림": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Before-Start Alert"
+          }
+        }
+      }
+    },
+    "시작을 누르면 00:00.00부터 시간이 올라갑니다. 준비 카운트다운이나 알림 큐 없이 바로 실행됩니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap start and time counts up from 00:00.00. It runs immediately, with no prepare countdown or cues."
+          }
+        }
+      }
+    },
+    "시작하기": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get Started"
+          }
+        }
+      }
+    },
+    "시작하면 입력이 잠기고 설정한 모드로 실행됩니다. 실행 중에는 일시정지·재개·리셋이 가능하고, 종료되면 사운드·진동·알림으로 알려줍니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting locks the inputs and runs in your chosen mode. While running you can pause, resume, or reset, and you'll be notified by sound, vibration, or alert when it ends."
+          }
+        }
+      }
+    },
+    "시작하면 필요 시 준비 카운트다운을 거쳐 운동·휴식 구간이 순서대로 반복되고, 마지막 라운드가 끝나면 종료됩니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting runs an optional prepare countdown, then repeats work and rest segments in order until the final round ends."
+          }
+        }
+      }
+    },
+    "실패했습니다": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed"
+          }
+        }
+      }
+    },
+    "실행": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run"
+          }
+        }
+      }
+    },
+    "실행 중 좌측 버튼으로 랩을 기록하면 목록 맨 위에 랩 번호·구간 시간·누적 시간이 함께 쌓입니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap the left button while running to record a lap — the lap number, split time, and total time all appear at the top of the list."
+          }
+        }
+      }
+    },
+    "실행 화면은 시간 숫자와 현재 상태(준비/운동/휴식 등)를 가장 크게 보여주도록 만들어져 있습니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The running screen shows the time and current state (prepare/work/rest, etc.) as large as possible."
+          }
+        }
+      }
+    },
+    "알림 방식은 없음/사운드/진동/사운드+진동 중에서 고르고, 시작 전 알림 시점(없음·1·3·5·10초)도 설정할 수 있습니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose an alert style — none, sound, vibration, or both — and set a lead time before start (none, 1, 3, 5, or 10 seconds)."
+          }
+        }
+      }
+    },
+    "알림 시점": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alert Timing"
+          }
+        }
+      }
+    },
+    "알림 큐": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notification Cues"
+          }
+        }
+      }
+    },
+    "없음": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        }
+      }
+    },
+    "완료": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        }
+      }
+    },
+    "운동": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work"
+          }
+        }
+      }
+    },
+    "운동 시간": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work Time"
+          }
+        }
+      }
+    },
+    "운동 시작": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work Start"
+          }
+        }
+      }
+    },
+    "운동/휴식 시간과 라운드 수를 입력해 최대 9개 세트, 99라운드까지 구성할 수 있습니다. 휴식이 00:00이면 해당 구간은 건너뜁니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter work/rest times and round count to set up to 9 sets and 99 rounds. A rest of 00:00 skips that segment."
+          }
+        }
+      }
+    },
+    "운동·휴식 구간을 라운드 단위로 반복 실행합니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeats work and rest segments round by round."
+          }
+        }
+      }
+    },
+    "이름": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        }
+      }
+    },
+    "이름 변경": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename"
+          }
+        }
+      }
+    },
+    "이벤트별 알림": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per-Event Alerts"
+          }
+        }
+      }
+    },
+    "인터벌": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interval"
+          }
+        }
+      }
+    },
+    "인터벌 세트 (최대 9개)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interval Sets (up to 9)"
+          }
+        }
+      }
+    },
+    "인터벌 실행": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interval Run"
+          }
+        }
+      }
+    },
+    "인터벌 타이밍": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interval Timing"
+          }
+        }
+      }
+    },
+    "인터벌 프로그램을 직접 만드는 방법은 인터벌 탭의 \"새 프로그램\" 화면에서 직접 입력해보며 확인할 수 있습니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To learn how to build your own interval program, try the \"New Program\" screen in the Interval tab."
+          }
+        }
+      }
+    },
+    "일시정지": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause"
+          }
+        }
+      }
+    },
+    "재개": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume"
+          }
+        }
+      }
+    },
+    "저장": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        }
+      }
+    },
+    "저장된 프로그램이 없어요": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Saved Programs"
+          }
+        }
+      }
+    },
+    "저장하지 못했습니다": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't Save"
+          }
+        }
+      }
+    },
+    "전체 종료": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overall Finish"
+          }
+        }
+      }
+    },
+    "정지": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop"
+          }
+        }
+      }
+    },
+    "정지 후 재개하거나 리셋할 수 있고, 리셋하면 경과 시간과 랩 목록이 함께 초기화됩니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can resume after stopping, or reset — resetting clears both the elapsed time and the lap list."
+          }
+        }
+      }
+    },
+    "종료 시간 없이 경과 시간을 재고, 랩을 기록합니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Measures elapsed time with no end time, and records laps."
+          }
+        }
+      }
+    },
+    "종료음": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish Sound"
+          }
+        }
+      }
+    },
+    "준비": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prepare"
+          }
+        }
+      }
+    },
+    "준비 시간": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prepare Time"
+          }
+        }
+      }
+    },
+    "준비 카운트다운 시작": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prepare Countdown Start"
+          }
+        }
+      }
+    },
+    "준비·운동 시작·휴식 시작·구간 종료·라운드 종료·전체 종료 같은 이벤트마다 알림 방식을 따로 지정할 수 있습니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set a different alert for each event — prepare, work start, rest start, segment end, round end, and overall finish."
+          }
+        }
+      }
+    },
+    "중단하고 나가기": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop and Exit"
+          }
+        }
+      }
+    },
+    "지금 나가면 진행 중인 인터벌이 중단되고 처음부터 다시 시작해야 합니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leaving now will stop the current interval — you'll have to start over."
+          }
+        }
+      }
+    },
+    "진동": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vibration"
+          }
+        }
+      }
+    },
+    "진행 중": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Progress"
+          }
+        }
+      }
+    },
+    "짧은 비프": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Short Beep"
+          }
+        }
+      }
+    },
+    "초": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sec"
+          }
+        }
+      }
+    },
+    "취소": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "카운트다운": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Countdown"
+          }
+        }
+      }
+    },
+    "카운트다운과 카운트업을 토글로 오가며 실행합니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch between countdown and count-up with a toggle."
+          }
+        }
+      }
+    },
+    "카운트업": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Count Up"
+          }
+        }
+      }
+    },
+    "타이머": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer"
+          }
+        }
+      }
+    },
+    "타이머 상태 변화를 소리·진동·녹음 음성으로 알려줍니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Announces timer state changes with sound, vibration, or your own recordings."
+          }
+        }
+      }
+    },
+    "타이머 종료 시": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When Timer Ends"
+          }
+        }
+      }
+    },
+    "타이머, 스톱워치, 인터벌을 한 앱에서 오가며 쓸 수 있어요.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch between Timer, Stopwatch, and Interval — all in one app."
+          }
+        }
+      }
+    },
+    "타이머는 카운트다운 모드로 열리며, 화면 우측 상단 토글로 언제든 카운트업으로 전환할 수 있습니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The timer opens in countdown mode — switch to count-up anytime with the toggle in the top right."
+          }
+        }
+      }
+    },
+    "프로그램 목록": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Programs"
+          }
+        }
+      }
+    },
+    "프로그램 상세": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Program Details"
+          }
+        }
+      }
+    },
+    "프로그램 수정": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Program"
+          }
+        }
+      }
+    },
+    "프로그램을 삭제할까요?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this program?"
+          }
+        }
+      }
+    },
+    "프로그램을 중단할까요?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop this program?"
+          }
+        }
+      }
+    },
+    "프로그램을 찾을 수 없음": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Program Not Found"
+          }
+        }
+      }
+    },
+    "프리셋 관리": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preset Management"
+          }
+        }
+      }
+    },
+    "하나의 앱, 세 가지 타이밍": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One App, Three Timing Modes"
+          }
+        }
+      }
+    },
+    "화면을 TV나 모니터에 미러링하면 컨트롤 버튼에 방해받지 않고 멀리서도 크게 볼 수 있습니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mirroring to a TV or monitor keeps control buttons out of the way, so it reads clearly from a distance."
+          }
+        }
+      }
+    },
+    "화면을 외부 디스플레이에 미러링해 멀리서도 타이머를 확인합니다.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mirror the screen to an external display to check the timer from a distance."
+          }
+        }
+      }
+    },
+    "확인": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        }
+      }
+    },
+    "휴식": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest"
+          }
+        }
+      }
+    },
+    "휴식 시작": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest Start"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

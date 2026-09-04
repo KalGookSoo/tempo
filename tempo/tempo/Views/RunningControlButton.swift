@@ -37,7 +37,7 @@ struct RunningControlButton: View {
 
     var body: some View {
         Button(action: action) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.headline)
                 .foregroundStyle(style.foregroundColor)
                 .frame(width: Self.diameter, height: Self.diameter)

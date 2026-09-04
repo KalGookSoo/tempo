@@ -14,10 +14,10 @@ struct OnboardingPagesView: View {
                     Image(systemName: step.systemImage)
                         .font(.system(size: 64))
                         .foregroundStyle(.tint)
-                    Text(step.title)
+                    Text(LocalizedStringKey(step.title))
                         .font(.title2.bold())
                         .multilineTextAlignment(.center)
-                    Text(step.description)
+                    Text(LocalizedStringKey(step.description))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                 }

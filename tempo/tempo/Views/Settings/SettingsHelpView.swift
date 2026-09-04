@@ -7,8 +7,8 @@ struct SettingsHelpView: View {
         List(HelpLibrary.topics) { topic in
             NavigationLink(value: SettingsRoute.helpDetail(id: topic.id)) {
                 VStack(alignment: .leading) {
-                    Text(topic.title)
-                    Text(topic.summary)
+                    Text(LocalizedStringKey(topic.title))
+                    Text(LocalizedStringKey(topic.summary))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

@@ -30,7 +30,7 @@ struct EndSoundPickerView: View {
                     }
                 }
             }
-            .navigationTitle(title)
+            .navigationTitle(LocalizedStringKey(title))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -42,7 +42,7 @@ struct EndSoundPickerView: View {
 
     private func row(title: String, isSelected: Bool) -> some View {
         HStack {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .foregroundStyle(.primary)
             Spacer()
             if isSelected {

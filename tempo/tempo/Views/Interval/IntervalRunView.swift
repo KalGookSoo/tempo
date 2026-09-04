@@ -42,6 +42,12 @@ struct IntervalRunView: View {
         }
         .navigationTitle("인터벌 실행")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                AirPlayButton()
+                    .frame(width: 28, height: 28)
+            }
+        }
         .onDisappear {
             if runner?.state != .completed {
                 NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
@@ -65,6 +71,7 @@ struct IntervalRunView: View {
 
         return TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: isPaused)) { context in
             let progress = runner.currentProgress(at: context.date)
+            let externalContent = externalDisplayContent(progress: progress, lastStep: runner.steps.last)
 
             VStack(spacing: 24) {
                 Spacer()
@@ -139,6 +146,10 @@ struct IntervalRunView: View {
             .task(id: TickKey(stepID: progress?.step.id, remainingSeconds: progress?.remainingSeconds)) {
                 triggerCuesIfNeeded(progress: progress, state: runner.state)
             }
+            // 외부 디스플레이(TV)에 지금 보이는 값을 그대로 반영한다. 이슈 #63 참고.
+            .task(id: TickKey(stepID: progress?.step.id, remainingSeconds: progress?.remainingSeconds)) {
+                ExternalDisplayController.shared.update(externalContent)
+            }
             // 화면 자동 잠금 방지 신호. 1초 단위로 묶어 보낸다(ScreenAwakeLease의 유예
             // 시간 5초보다 훨씬 촘촘하다). 화면을 벗어나 이 TimelineView 틱이 멈추면
             // 신호도 자연히 끊긴다. 이슈 #53 참고.
@@ -189,6 +200,36 @@ struct IntervalRunView: View {
     private func roundLabel(for step: IntervalStep) -> String? {
         guard step.totalRounds > 0 else { return nil }
         return "라운드 \(step.round) / \(step.totalRounds)"
+    }
+
+    /// 외부 디스플레이(TV)용 표시 내용. `stepContent`가 그리는 링 대신, 그 안의
+    /// 숫자와 배지만 `RunningDisplayView`에 넣을 수 있는 형태로 뽑아낸다.
+    private func externalDisplayContent(
+        progress: IntervalRunner.Progress?,
+        lastStep: IntervalStep?
+    ) -> ExternalDisplayController.Content {
+        if let progress {
+            return ExternalDisplayController.Content(
+                primaryText: IntervalRunner.formattedClock(seconds: progress.remainingSeconds),
+                statusLabel: statusLabel(for: progress.step),
+                statusColor: statusColor(for: progress.step, runnerState: runner?.state ?? .idle),
+                secondaryText: roundLabel(for: progress.step)
+            )
+        } else if let lastStep {
+            return ExternalDisplayController.Content(
+                primaryText: IntervalRunner.formattedClock(seconds: 0),
+                statusLabel: "완료",
+                statusColor: .danger,
+                secondaryText: roundLabel(for: lastStep)
+            )
+        } else {
+            return ExternalDisplayController.Content(
+                primaryText: "완료",
+                statusLabel: nil,
+                statusColor: .danger,
+                secondaryText: nil
+            )
+        }
     }
 
     private func statusLabel(for step: IntervalStep) -> String {

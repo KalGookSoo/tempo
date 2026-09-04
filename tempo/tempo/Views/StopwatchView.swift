@@ -28,6 +28,17 @@ struct StopwatchView: View {
                             ScreenAwakeLease.renew()
                         }
                     }
+                    // 외부 디스플레이(TV)에 지금 보이는 값을 그대로 반영한다. 이슈 #63 참고.
+                    .task(id: Int(context.date.timeIntervalSinceReferenceDate)) {
+                        ExternalDisplayController.shared.update(
+                            .init(
+                                primaryText: StopwatchEngine.formattedClock(elapsed: engine.elapsed(at: context.date)),
+                                statusLabel: status.label,
+                                statusColor: status.color,
+                                secondaryText: nil
+                            )
+                        )
+                    }
                 }
 
                 HStack {
@@ -100,6 +111,12 @@ struct StopwatchView: View {
             }
             .navigationTitle("스톱워치")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    AirPlayButton()
+                        .frame(width: 28, height: 28)
+                }
+            }
         }
     }
 }

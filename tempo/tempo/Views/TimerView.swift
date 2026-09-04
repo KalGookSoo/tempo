@@ -60,6 +60,10 @@ struct TimerView: View {
                     }
                     .disabled(engine.state != .idle)
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    AirPlayButton()
+                        .frame(width: 28, height: 28)
+                }
             }
             .sheet(isPresented: $isEndSoundPickerPresented) {
                 EndSoundPickerView(
@@ -173,6 +177,17 @@ struct TimerView: View {
                 if engine.state == .running {
                     ScreenAwakeLease.renew()
                 }
+            }
+            // 외부 디스플레이(TV)에 지금 보이는 값을 그대로 반영한다. 이슈 #63 참고.
+            .task(id: TickKey(state: engine.state, seconds: seconds)) {
+                ExternalDisplayController.shared.update(
+                    .init(
+                        primaryText: formatted(seconds: seconds),
+                        statusLabel: status.label,
+                        statusColor: status.color,
+                        secondaryText: engine.state == .idle ? nil : effectiveLabel
+                    )
+                )
             }
         }
     }

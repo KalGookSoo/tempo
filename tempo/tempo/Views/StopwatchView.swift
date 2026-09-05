@@ -111,12 +111,6 @@ struct StopwatchView: View {
             }
             .navigationTitle("스톱워치")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    AirPlayButton()
-                        .frame(width: 28, height: 28)
-                }
-            }
         }
     }
 }

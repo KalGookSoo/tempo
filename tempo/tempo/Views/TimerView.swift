@@ -60,10 +60,6 @@ struct TimerView: View {
                     }
                     .disabled(engine.state != .idle)
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    AirPlayButton()
-                        .frame(width: 28, height: 28)
-                }
             }
             .sheet(isPresented: $isEndSoundPickerPresented) {
                 EndSoundPickerView(

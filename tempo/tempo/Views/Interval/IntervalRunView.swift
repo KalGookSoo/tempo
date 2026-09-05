@@ -67,10 +67,6 @@ struct IntervalRunView: View {
                     Image(systemName: "chevron.backward")
                 }
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                AirPlayButton()
-                    .frame(width: 28, height: 28)
-            }
         }
         // 스와이프 뒤로가기 제스처도 같은 조건으로 막는다 — 커스텀 버튼만 막으면
         // 스와이프로 확인 없이 빠져나갈 수 있다. 이슈 #74 참고.

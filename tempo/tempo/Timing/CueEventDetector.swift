@@ -1,12 +1,14 @@
 import Foundation
 
-/// `docs/timer-functional-spec.md` "알림 큐"가 정의한 8개 이벤트.
+/// `docs/timer-functional-spec.md` "알림 큐"가 정의한 이벤트들. `workEnd`는
+/// 이슈 #75에서 추가됐다.
 enum CueEventKind: Equatable {
     case prepareStart
     case countdownLead(secondsRemaining: Int)
     case workStart
     case restStart
     case segmentEnd
+    case workEnd
     case roundEnd
     case finalRoundEnter
     case finish
@@ -33,6 +35,9 @@ enum CueEventDetector {
         if didAdvanceToNewStep {
             if let previousStep {
                 events.append(.segmentEnd)
+                if previousStep.kind == .work {
+                    events.append(.workEnd)
+                }
                 if previousStep.round != currentStep.round, previousStep.round != 0 {
                     events.append(.roundEnd)
                 }
@@ -70,6 +75,7 @@ enum CueEventDetector {
         case .workStart: config.workStart
         case .restStart: config.restStart
         case .segmentEnd: config.segmentEnd
+        case .workEnd: config.workEnd
         case .roundEnd: config.roundEnd
         case .finalRoundEnter: config.finalRoundEnter
         case .finish: config.finish

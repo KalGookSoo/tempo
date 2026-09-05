@@ -49,7 +49,53 @@ nonisolated struct CueConfig: Codable, Hashable {
     var workStart: Event
     var restStart: Event
     var segmentEnd: Event
+    /// 운동 구간이 끝나는 시점 전용 이벤트. `segmentEnd`는 운동/휴식 구분 없이 항상
+    /// 발동하므로, 운동이 끝날 때만 다른(특히 직접 녹음한) 사운드를 쓰고 싶은 경우를
+    /// 위해 별도로 둔다. 이슈 #75 참고.
+    var workEnd: Event
     var roundEnd: Event
     var finalRoundEnter: Event
     var finish: Event
+
+    init(
+        countdownLeadSeconds: Int,
+        prepareStart: Event,
+        workStart: Event,
+        restStart: Event,
+        segmentEnd: Event,
+        workEnd: Event,
+        roundEnd: Event,
+        finalRoundEnter: Event,
+        finish: Event
+    ) {
+        self.countdownLeadSeconds = countdownLeadSeconds
+        self.prepareStart = prepareStart
+        self.workStart = workStart
+        self.restStart = restStart
+        self.segmentEnd = segmentEnd
+        self.workEnd = workEnd
+        self.roundEnd = roundEnd
+        self.finalRoundEnter = finalRoundEnter
+        self.finish = finish
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case countdownLeadSeconds, prepareStart, workStart, restStart, segmentEnd, workEnd, roundEnd, finalRoundEnter, finish
+    }
+
+    /// `workEnd`는 이슈 #75에서 추가됐다 — 그 전에 저장된 `CueProfile.config`에는 이
+    /// 키가 없으므로, 없으면 꺼짐(`.none`)으로 기본값을 줘서 기존 사용자 설정이
+    /// 바뀌지 않게 한다(디코딩 자체가 실패해서 앱이 크래시하는 것도 막는다).
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        countdownLeadSeconds = try container.decode(Int.self, forKey: .countdownLeadSeconds)
+        prepareStart = try container.decode(Event.self, forKey: .prepareStart)
+        workStart = try container.decode(Event.self, forKey: .workStart)
+        restStart = try container.decode(Event.self, forKey: .restStart)
+        segmentEnd = try container.decode(Event.self, forKey: .segmentEnd)
+        workEnd = try container.decodeIfPresent(Event.self, forKey: .workEnd) ?? Event(mode: .none, soundAssetID: nil)
+        roundEnd = try container.decode(Event.self, forKey: .roundEnd)
+        finalRoundEnter = try container.decode(Event.self, forKey: .finalRoundEnter)
+        finish = try container.decode(Event.self, forKey: .finish)
+    }
 }

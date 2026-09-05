@@ -67,11 +67,12 @@ struct CueEventDetectorTests {
 
         #expect(events.contains(.workStart))
         #expect(events.contains(.segmentEnd))
+        #expect(!events.contains(.workEnd)) // 끝난 건 준비 구간이지 운동 구간이 아니다
         #expect(!events.contains(.roundEnd))
         #expect(!events.contains(.finalRoundEnter)) // 2라운드 중 1라운드라 마지막 라운드가 아니다
     }
 
-    @Test("운동 구간에서 휴식 구간으로 넘어가면 구간 종료 + 휴식 시작이 발동한다")
+    @Test("운동 구간에서 휴식 구간으로 넘어가면 구간 종료 + 운동 종료 + 휴식 시작이 발동한다")
     func restStartAndSegmentEndFire() {
         let steps = makeSteps()
         let progress = IntervalRunner.Progress(stepIndex: 2, step: steps[2], remainingSeconds: 10, elapsedInStep: 0)
@@ -80,6 +81,7 @@ struct CueEventDetectorTests {
 
         #expect(events.contains(.restStart))
         #expect(events.contains(.segmentEnd))
+        #expect(events.contains(.workEnd)) // 끝난 게 운동 구간이라 이슈 #75의 전용 이벤트도 함께 발동한다
     }
 
     @Test("마지막 라운드로 넘어가면 라운드 종료 + 마지막 라운드 진입 + 운동 시작이 함께 발동한다")
@@ -125,6 +127,7 @@ struct CueEventDetectorTests {
             workStart: workEvent,
             restStart: .init(mode: .none, soundAssetID: nil),
             segmentEnd: .init(mode: .none, soundAssetID: nil),
+            workEnd: .init(mode: .none, soundAssetID: nil),
             roundEnd: .init(mode: .none, soundAssetID: nil),
             finalRoundEnter: .init(mode: .none, soundAssetID: nil),
             finish: finishEvent

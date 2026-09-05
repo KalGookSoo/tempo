@@ -28,6 +28,7 @@ struct SettingsCueView: View {
         ("운동 시작", \.workStart),
         ("휴식 시작", \.restStart),
         ("구간 종료", \.segmentEnd),
+        ("운동 종료", \.workEnd),
         ("라운드 종료", \.roundEnd),
         ("마지막 라운드 진입", \.finalRoundEnter),
         ("전체 종료", \.finish),

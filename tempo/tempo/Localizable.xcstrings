@@ -2,13 +2,33 @@
   "sourceLanguage" : "ko",
   "strings" : {
     "'%@' 주제를 찾을 수 없습니다." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Topic '%@' not found."
+          }
+        }
+      }
     },
     "%@ 프로그램을 삭제하면 되돌릴 수 없습니다." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleting “%@” can't be undone."
+          }
+        }
+      }
     },
     "%lld / %lld" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld / %2$lld"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "new",
@@ -18,10 +38,24 @@
       }
     },
     "%lld개 알림 큐 설정에서 사용 중입니다. 삭제하면 해당 설정은 기본 사운드로 바뀝니다." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used in %lld cue settings. Deleting it will reset those to the default sound."
+          }
+        }
+      }
     },
     "%lld초" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sec"
+          }
+        }
+      }
     },
     "Tabata, FGB, EMOM 같은 기본 프리셋은 목록에서 바로 실행할 수 있습니다." : {
       "extractionState" : "stale",
@@ -280,7 +314,14 @@
       }
     },
     "라운드 %lld" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Round %lld"
+          }
+        }
+      }
     },
     "라운드 종료" : {
       "extractionState" : "stale",
@@ -305,7 +346,14 @@
       }
     },
     "랩 %lld" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lap %lld"
+          }
+        }
+      }
     },
     "레이블" : {
       "localizations" : {
@@ -484,7 +532,14 @@
       }
     },
     "삭제하시겠어요?" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this?"
+          }
+        }
+      }
     },
     "새 프로그램" : {
       "localizations" : {
@@ -549,7 +604,14 @@
       }
     },
     "세트 %lld" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set %lld"
+          }
+        }
+      }
     },
     "세트 추가" : {
       "localizations" : {
@@ -1027,7 +1089,14 @@
       }
     },
     "준비 %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prepare %@"
+          }
+        }
+      }
     },
     "준비 시간" : {
       "localizations" : {
@@ -1220,7 +1289,14 @@
       }
     },
     "프로그램 ID: %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Program ID: %@"
+          }
+        }
+      }
     },
     "프로그램 목록" : {
       "localizations" : {

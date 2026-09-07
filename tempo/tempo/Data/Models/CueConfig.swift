@@ -83,6 +83,11 @@ nonisolated struct CueConfig: Codable, Hashable {
         case countdownLeadSeconds, prepareStart, workStart, restStart, segmentEnd, workEnd, roundEnd, finalRoundEnter, finish
     }
 
+    static let allEventKeyPaths: [WritableKeyPath<CueConfig, Event>] = [
+        \.prepareStart, \.workStart, \.restStart, \.segmentEnd,
+        \.workEnd, \.roundEnd, \.finalRoundEnter, \.finish,
+    ]
+
     /// `workEnd`는 이슈 #75에서 추가됐다 — 그 전에 저장된 `CueProfile.config`에는 이
     /// 키가 없으므로, 없으면 꺼짐(`.none`)으로 기본값을 줘서 기존 사용자 설정이
     /// 바뀌지 않게 한다(디코딩 자체가 실패해서 앱이 크래시하는 것도 막는다).

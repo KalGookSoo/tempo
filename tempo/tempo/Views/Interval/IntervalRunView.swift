@@ -313,7 +313,7 @@ struct IntervalRunView: View {
     private func resolvedSoundAsset(for event: CueConfig.Event, kind: CueEventKind) -> SoundAsset? {
         if let soundAssetID = event.soundAssetID {
             return try? modelContext.fetch(
-                FetchDescriptor<SoundAsset>(predicate: #Predicate { $0.id == soundAssetID })
+                FetchDescriptor<SoundAsset>(predicate: #Predicate { $0.id == soundAssetID && $0.deletedAt == nil })
             ).first
         }
 

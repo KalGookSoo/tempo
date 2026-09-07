@@ -140,7 +140,7 @@ struct TimerView: View {
     private func resolvedSoundAsset(soundAssetID: UUID?, defaultName: String) -> SoundAsset? {
         if let soundAssetID {
             return try? modelContext.fetch(
-                FetchDescriptor<SoundAsset>(predicate: #Predicate { $0.id == soundAssetID })
+                FetchDescriptor<SoundAsset>(predicate: #Predicate { $0.id == soundAssetID && $0.deletedAt == nil })
             ).first
         }
 

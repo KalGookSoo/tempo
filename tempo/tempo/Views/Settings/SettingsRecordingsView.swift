@@ -14,6 +14,7 @@ struct SettingsRecordingsView: View {
     @State private var renamingAsset: SoundAsset?
     @State private var renameText = ""
     @State private var isRecordSheetPresented = false
+    @State private var pendingDeletion: (asset: SoundAsset, usedBy: [CueProfile])?
 
     private var isValid: Bool {
         !renameText.isEmpty && renameText.count <= 20
@@ -24,90 +25,111 @@ struct SettingsRecordingsView: View {
     }
 
     var body: some View {
-        Group {
-            if recorder.permissionStatus == .denied {
-                ContentUnavailableView {
-                    Label("마이크 권한이 필요해요", systemImage: "mic.slash")
-                } description: {
-                    Text("설정 앱 > tempo에서 마이크 권한을 허용해주세요.")
-                }
-            } else if recordings.isEmpty {
-                ContentUnavailableView {
-                    Label("녹음한 사운드가 없어요", systemImage: "mic")
-                } description: {
-                    Text("마이크 버튼을 눌러 알림 큐로 쓸 소리를 녹음해보세요.")
-                }
-            } else {
-                List(recordings) { asset in
+        content
+            .navigationTitle("녹음한 사운드")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
                     Button {
-                        recorder.preview(asset)
+                        isRecordSheetPresented = true
                     } label: {
-                        recordingRow(for: asset)
+                        Image(systemName: "mic.circle")
                     }
-                    .buttonStyle(.plain)
-                    .swipeActions {
-                        Button(role: .destructive) {
-                            delete(asset)
-                        } label: {
-                            Label("삭제", systemImage: "trash")
-                        }
-                        Button {
-                            startRenaming(asset)
-                        } label: {
-                            Label("이름 변경", systemImage: "pencil")
-                        }
-                        .tint(.blue)
-                    }
+                    .disabled(recorder.permissionStatus == .denied)
+                    .accessibilityLabel("녹음하기")
                 }
             }
-        }
-        .navigationTitle("녹음한 사운드")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
+            .sheet(isPresented: $isRecordSheetPresented) {
+                RecordingSheetView(recorder: recorder) { id, durationMs, waveformSamples in
+                    saveRecording(id: id, durationMs: durationMs, waveformSamples: waveformSamples)
+                }
+            }
+            .alert(
+                "실패했습니다",
+                isPresented: Binding(get: { errorMessage != nil }, set: {
+                    if !$0 {
+                        errorMessage = nil
+                    }
+                }),
+                actions: { Button("확인") {} },
+                message: { Text(errorMessage ?? "") }
+            )
+            .alert(
+                "이름 변경",
+                isPresented: Binding(get: { renamingAsset != nil }, set: {
+                    if !$0 {
+                        renamingAsset = nil
+                    }
+                })
+            ) {
+                TextField("이름", text: $renameText)
+                Button("취소", role: .cancel) {}
+                Button("저장") {
+                    confirmRenaming()
+                }
+                .disabled(!isValid)
+            }
+            .confirmationDialog(
+                "삭제하시겠어요?",
+                isPresented: Binding<Bool>(
+                    get: { pendingDeletion != nil },
+                    set: {
+                        if !$0 {
+                            pendingDeletion = nil
+                        }
+                    }
+                ),
+                presenting: pendingDeletion
+            ) { pending in
+                Button("삭제", role: .destructive) {
+                    confirmDelete(pending.asset, usedBy: pending.usedBy)
+                }
+            } message: { pending in
+                Text("\(pending.usedBy.count)개 알림 큐 설정에서 사용 중입니다. 삭제하면 해당 설정은 기본 사운드로 바뀝니다.")
+            }
+            .task {
+                recorder.refreshPermissionStatus()
+                if recorder.permissionStatus == .undetermined {
+                    await recorder.requestPermission()
+                }
+            }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if recorder.permissionStatus == .denied {
+            ContentUnavailableView {
+                Label("마이크 권한이 필요해요", systemImage: "mic.slash")
+            } description: {
+                Text("설정 앱 > tempo에서 마이크 권한을 허용해주세요.")
+            }
+        } else if recordings.isEmpty {
+            ContentUnavailableView {
+                Label("녹음한 사운드가 없어요", systemImage: "mic")
+            } description: {
+                Text("마이크 버튼을 눌러 알림 큐로 쓸 소리를 녹음해보세요.")
+            }
+        } else {
+            List(recordings) { asset in
                 Button {
-                    isRecordSheetPresented = true
+                    recorder.preview(asset)
                 } label: {
-                    Image(systemName: "mic.circle")
+                    recordingRow(for: asset)
                 }
-                .disabled(recorder.permissionStatus == .denied)
-                .accessibilityLabel("녹음하기")
-            }
-        }
-        .sheet(isPresented: $isRecordSheetPresented) {
-            RecordingSheetView(recorder: recorder) { id, durationMs, waveformSamples in
-                saveRecording(id: id, durationMs: durationMs, waveformSamples: waveformSamples)
-            }
-        }
-        .alert(
-            "실패했습니다",
-            isPresented: Binding(get: { errorMessage != nil }, set: {
-                if !$0 {
-                    errorMessage = nil
+                .buttonStyle(.plain)
+                .swipeActions(allowsFullSwipe: false) {
+                    Button(role: .destructive) {
+                        requestDelete(asset)
+                    } label: {
+                        Label("삭제", systemImage: "trash")
+                    }
+                    Button {
+                        startRenaming(asset)
+                    } label: {
+                        Label("이름 변경", systemImage: "pencil")
+                    }
+                    .tint(.blue)
                 }
-            }),
-            actions: { Button("확인") {} },
-            message: { Text(errorMessage ?? "") }
-        )
-        .alert(
-            "이름 변경",
-            isPresented: Binding(get: { renamingAsset != nil }, set: {
-                if !$0 {
-                    renamingAsset = nil
-                }
-            })
-        ) {
-            TextField("이름", text: $renameText)
-            Button("취소", role: .cancel) {}
-            Button("저장") {
-                confirmRenaming()
-            }
-            .disabled(!isValid)
-        }
-        .task {
-            recorder.refreshPermissionStatus()
-            if recorder.permissionStatus == .undetermined {
-                await recorder.requestPermission()
             }
         }
     }
@@ -142,6 +164,30 @@ struct SettingsRecordingsView: View {
     private func delete(_ asset: SoundAsset) {
         do {
             try SoundAssetRepository(modelContext: modelContext).delete(asset)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func requestDelete(_ asset: SoundAsset) {
+        do {
+            let usedBy = try SoundAssetRepository(modelContext: modelContext).profilesReferencing(asset)
+            if usedBy.isEmpty {
+                delete(asset)
+                return
+            }
+            pendingDeletion = (asset, usedBy)
+
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func confirmDelete(_ asset: SoundAsset, usedBy: [CueProfile]) {
+        do {
+            let repository = SoundAssetRepository(modelContext: modelContext)
+            try repository.clearReferences(to: asset, in: usedBy)
+            try repository.delete(asset)
         } catch {
             errorMessage = error.localizedDescription
         }

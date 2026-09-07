@@ -50,6 +50,29 @@ final class SoundAssetRepository {
         try modelContext.save()
     }
 
+    /// `asset`을 참조 중인 `CueProfile`을 모두 찾는다(사용 중인 녹음을 삭제하기 전 확인할 때 사용된다).
+    func profilesReferencing(_ asset: SoundAsset) throws -> [CueProfile] {
+        let profiles = try modelContext.fetch(FetchDescriptor<CueProfile>())
+        return profiles.filter { profile in
+            CueConfig.allEventKeyPaths.contains { keyPath in
+                profile.config[keyPath: keyPath].soundAssetID == asset.id
+            }
+        }
+    }
+
+    /// `asset`을 참조하는 모든 이벤트의 `soundAssetID`만 `nil`로 되돌린다(`mode`는 그대로
+    /// 유지 — 사운드만 기본값으로 돌아간다). 삭제 직전에 호출해 죽은 참조가 남지 않게 한다.
+    func clearReferences(to asset: SoundAsset, in profiles: [CueProfile]) throws {
+        for profile in profiles {
+            for keyPath in CueConfig.allEventKeyPaths {
+                if profile.config[keyPath: keyPath].soundAssetID == asset.id {
+                    profile.config[keyPath: keyPath].soundAssetID = nil
+                }
+            }
+        }
+        try modelContext.save()
+    }
+
     /// soft delete하고, 실제 파일 삭제도 시도한다(실패해도 앱이 죽지 않는다).
     func delete(_ asset: SoundAsset) throws {
         guard asset.kind == .recorded else {

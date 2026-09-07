@@ -67,6 +67,64 @@ struct SoundAssetRepositoryTests {
         #expect(asset.relativePath == originalPath)
     }
 
+    @Test("사용 중인 녹음은 참조하는 CueProfile을 찾아낸다")
+    func profilesReferencingFindsUsage() throws {
+        let store = try makeInMemoryStore()
+        let repository = SoundAssetRepository(modelContext: store.context)
+        let asset = try repository.createRecordedAsset(id: UUID(), name: "녹음 1", durationMs: nil)
+
+        let none = CueConfig.Event(mode: .none, soundAssetID: nil)
+        var config = CueConfig(
+            countdownLeadSeconds: 0,
+            prepareStart: none, workStart: none, restStart: none, segmentEnd: none,
+            workEnd: none, roundEnd: none, finalRoundEnter: none, finish: none
+        )
+        config.workEnd = CueConfig.Event(mode: .sound, soundAssetID: asset.id)
+        let profile = CueProfile(name: "기본", config: config, createdAt: Date(), updatedAt: Date())
+        store.context.insert(profile)
+
+        let result = try repository.profilesReferencing(asset)
+
+        #expect(result.count == 1)
+    }
+
+    @Test("사용하지 않는 녹음은 참조하는 CueProfile이 없다")
+    func profilesReferencingReturnsEmptyWhenUnused() throws {
+        let store = try makeInMemoryStore()
+        let repository = SoundAssetRepository(modelContext: store.context)
+        let asset = try repository.createRecordedAsset(id: UUID(), name: "녹음 1", durationMs: nil)
+
+        #expect(try repository.profilesReferencing(asset).isEmpty)
+    }
+
+    @Test("참조를 정리하면 soundAssetID만 nil이 되고 mode는 유지된다")
+    func clearReferencesResetsOnlySoundAssetID() throws {
+        let store = try makeInMemoryStore()
+        let repository = SoundAssetRepository(modelContext: store.context)
+        let asset = try repository.createRecordedAsset(id: UUID(), name: "녹음 1", durationMs: nil)
+
+        let none = CueConfig.Event(mode: .none, soundAssetID: nil)
+        var config = CueConfig(
+            countdownLeadSeconds: 0,
+            prepareStart: none,
+            workStart: none,
+            restStart: none,
+            segmentEnd: none,
+            workEnd: none,
+            roundEnd: none,
+            finalRoundEnter: none,
+            finish: none
+        )
+        config.workEnd = CueConfig.Event(mode: .sound, soundAssetID: asset.id)
+        let profile = CueProfile(name: "기본", config: config, createdAt: Date(), updatedAt: Date())
+        store.context.insert(profile)
+
+        try repository.clearReferences(to: asset, in: [profile])
+
+        #expect(profile.config.workEnd.soundAssetID == nil)
+        #expect(profile.config.workEnd.mode == .sound)
+    }
+
     @Test("soft delete된 녹음은 목록 조회에서 제외된다")
     func softDeletedRecordingIsExcludedFromList() throws {
         let store = try makeInMemoryStore()

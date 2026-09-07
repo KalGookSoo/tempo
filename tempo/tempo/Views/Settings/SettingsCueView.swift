@@ -23,16 +23,13 @@ struct SettingsCueView: View {
 
     private static let countdownLeadOptions = [0, 3, 5, 10]
 
-    private static let eventRows: [(title: String, keyPath: WritableKeyPath<CueConfig, CueConfig.Event>)] = [
-        ("준비 카운트다운 시작", \.prepareStart),
-        ("운동 시작", \.workStart),
-        ("휴식 시작", \.restStart),
-        ("구간 종료", \.segmentEnd),
-        ("운동 종료", \.workEnd),
-        ("라운드 종료", \.roundEnd),
-        ("마지막 라운드 진입", \.finalRoundEnter),
-        ("전체 종료", \.finish),
+    private static let eventTitles: [String] = [
+        "준비 카운트다운 시작", "운동 시작", "휴식 시작", "구간 종료",
+        "운동 종료", "라운드 종료", "마지막 라운드 진입", "전체 종료",
     ]
+
+    private static let eventRows: [(title: String, keyPath: WritableKeyPath<CueConfig, CueConfig.Event>)] =
+        Array(zip(eventTitles, CueConfig.allEventKeyPaths))
 
     private var profile: CueProfile? {
         profiles.first

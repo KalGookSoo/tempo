@@ -122,11 +122,52 @@ extension IntervalSegment: Hashable {}
 // MARK: - Actions
 ```
 
-- 조건에서 일찍 빠져나갈 때는 `if`보다 `guard`를 우선한다.
+- 조건에서 일찍 빠져나갈 때는 `if`보다 `guard`를 우선한다. 실패/예외 케이스를 먼저 처리하고 빠져나가면, 나머지 코드는 "성공한 경우"만 다루면 되어 인덴트가 한 단 줄어든다.
 
 ```swift
 guard let program = program else { return }
 ```
+
+```swift
+// 지양
+func requestDelete(_ asset: SoundAsset) {
+    if usedBy.isEmpty {
+        delete(asset)
+    } else {
+        pendingDeletion = (asset, usedBy)
+    }
+}
+
+// 권장
+func requestDelete(_ asset: SoundAsset) {
+    guard !usedBy.isEmpty else {
+        delete(asset)
+        return
+    }
+    pendingDeletion = (asset, usedBy)
+}
+```
+
+- 표현식이 깊게 중첩되면(특히 클로저 안에 클로저), modifier 인자 등에 바로 넘기지 말고 이름 있는 지역변수로 먼저 뽑아서 인덴트를 줄인다. 여러 곳에서 재사용하지 않는 한 프로퍼티(특히 계산 프로퍼티)로 끌어올리지 않는다 — 스코프는 필요한 만큼만 넓힌다. 한 곳에서만 쓰는 값은 프로퍼티로 미리 선언해두기보다, 쓰는 자리 바로 앞에 지역변수로 두거나 파라미터를 받는 순수 함수로 남겨서, 선언을 보려고 파일 위쪽으로 스크롤하지 않아도 되게 한다.
+
+```swift
+// 지양 — modifier 인자 안에 Binding(get:set:)가 그대로 중첩됨
+.confirmationDialog(
+    "...",
+    isPresented: Binding(get: { pendingDeletion != nil }, set: { if !$0 { pendingDeletion = nil } }),
+    presenting: pendingDeletion
+) { ... }
+
+// 권장 — 쓰는 자리 바로 위(예: body 안)에서 지역변수로 먼저 뽑는다
+let isPendingDeletionPresented = Binding<Bool>(
+    get: { pendingDeletion != nil },
+    set: { if !$0 { pendingDeletion = nil } }
+)
+...
+.confirmationDialog("...", isPresented: isPendingDeletionPresented, presenting: pendingDeletion) { ... }
+```
+
+이 프로젝트에서 `Binding(get:set:)`는 항상 이렇게 필요한 스코프(대부분 `body` 안)에 지역적으로 선언한다 — `private var`로 끌어올린 사례는 없다.
 
 ## 문서화 주석
 

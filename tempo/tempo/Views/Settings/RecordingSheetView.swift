@@ -19,12 +19,12 @@ struct RecordingSheetView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            Text(statusText)
+            statusText
                 .font(.headline)
                 .foregroundStyle(.secondary)
 
             if recorder.isRecording || isStopped {
-                Text(elapsedText)
+                elapsedText
                     .font(.title3.monospacedDigit())
                     .foregroundStyle(.secondary)
 
@@ -69,19 +69,20 @@ struct RecordingSheetView: View {
         )
     }
 
-    private var statusText: String {
+    @ViewBuilder
+    private var statusText: some View {
         if recorder.isRecording {
-            "녹음 중..."
+            Text("녹음 중...")
         } else if isStopped {
-            "녹음 완료 — 저장하시겠어요?"
+            Text("녹음 완료 — 저장하시겠어요?")
         } else {
-            "버튼을 눌러 녹음을 시작하세요(최대 \(Int(SoundRecorder.maxDuration))초)"
+            Text("버튼을 눌러 녹음을 시작하세요(최대 \(Int(SoundRecorder.maxDuration))초)")
         }
     }
 
-    private var elapsedText: String {
+    private var elapsedText: Text {
         let elapsed = recorder.isRecording ? recorder.elapsedTime : (Double(recorder.lastRecordingResult?.durationMs ?? 0) / 1000)
-        return String(format: "%.1f / %.0f초", elapsed, SoundRecorder.maxDuration)
+        return Text("\(elapsed, specifier: "%.1f") / \(SoundRecorder.maxDuration, specifier: "%.0f")초")
     }
 
     private func toggleRecording() {

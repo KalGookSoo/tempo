@@ -26,7 +26,7 @@ struct IntervalSetTimePickerView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.headline)
 
             CountdownWheelPicker(hours: $hours, minutes: $minutes, seconds: $secondsPart)

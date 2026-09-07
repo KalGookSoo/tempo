@@ -99,7 +99,7 @@ struct IntervalConfigFormFields: View {
     /// 맞춘다.
     private func timeRow(title: String, seconds: Binding<Int>, range: ClosedRange<Int>, idSuffix: String) -> some View {
         HStack {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .foregroundStyle(Color.accentColor)
             Spacer()
             // canOpenTimePicker가 false인 동안(화면 진입 전환 애니메이션 도중)은

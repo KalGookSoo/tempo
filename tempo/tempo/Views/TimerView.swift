@@ -160,7 +160,7 @@ struct TimerView: View {
                 primaryText: formatted(seconds: seconds),
                 statusLabel: status.label,
                 statusColor: status.color,
-                secondaryText: engine.state == .idle ? nil : effectiveLabel,
+                secondaryText: engine.state == .idle ? nil : Text(LocalizedStringKey(effectiveLabel)),
                 fontSize: timerFontSize
             )
             .task(id: TickKey(state: engine.state, seconds: seconds)) {
@@ -181,7 +181,7 @@ struct TimerView: View {
                         primaryText: formatted(seconds: seconds),
                         statusLabel: status.label,
                         statusColor: status.color,
-                        secondaryText: engine.state == .idle ? nil : effectiveLabel
+                        secondaryText: engine.state == .idle ? nil : Text(LocalizedStringKey(effectiveLabel))
                     )
                 )
             }

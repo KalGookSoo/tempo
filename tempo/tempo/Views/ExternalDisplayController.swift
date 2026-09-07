@@ -27,7 +27,7 @@ final class ExternalDisplayController: NSObject {
         let primaryText: String
         let statusLabel: String?
         let statusColor: Color
-        let secondaryText: String?
+        let secondaryText: Text?
     }
 
     private(set) var content: Content?

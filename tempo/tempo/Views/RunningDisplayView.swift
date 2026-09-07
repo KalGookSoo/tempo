@@ -27,11 +27,17 @@ func defaultRunningStatusInfo(for state: TimerState) -> (label: String?, color: 
 /// 컨트롤 버튼/픽커 같은 화면별 요소는 포함하지 않는다 — 화면마다 이 블록 아래에 이어붙인다.
 /// `docs/native-style-guide.md` "타이머 표시"(카드로 감싸지 않고 배경 위에 숫자만 크게 배치),
 /// `docs/use-cases/mirrored-timer-display.md`(멀리서도 읽혀야 함) 참고. 이슈 #17.
+///
+/// `secondaryText`는 `String?`이 아니라 `Text?`를 받는다 — 호출부가 이미 완성된 문자열을
+/// 만들어서 넘기면(예: 라운드 숫자가 박힌 "라운드 3 / 8") `LocalizedStringKey`로 감싸도
+/// 그 문자열 전체와 정확히 일치하는 카탈로그 키가 없어 절대 번역되지 않는다. 호출부가
+/// `Text("라운드 \(round) / \(total)")`처럼 리터럴 보간으로 직접 만들거나, 고정된 값 하나를
+/// `Text(LocalizedStringKey(fixedWord))`로 감싸서 넘기게 해서 이 문제를 원천적으로 막는다.
 struct RunningDisplayView: View {
     let primaryText: String
     let statusLabel: String?
     let statusColor: Color
-    let secondaryText: String?
+    let secondaryText: Text?
     let secondaryFont: Font
     let fontSize: CGFloat
 
@@ -39,7 +45,7 @@ struct RunningDisplayView: View {
         primaryText: String,
         statusLabel: String? = nil,
         statusColor: Color = .primary,
-        secondaryText: String? = nil,
+        secondaryText: Text? = nil,
         secondaryFont: Font = .headline,
         fontSize: CGFloat
     ) {
@@ -54,7 +60,7 @@ struct RunningDisplayView: View {
     var body: some View {
         VStack(spacing: 8) {
             if let secondaryText {
-                Text(LocalizedStringKey(secondaryText))
+                secondaryText
                     .font(secondaryFont)
                     .foregroundStyle(.secondary)
             }
@@ -83,7 +89,7 @@ struct RunningDisplayView: View {
         primaryText: "00:20",
         statusLabel: "운동",
         statusColor: .work,
-        secondaryText: "라운드 2 / 8",
+        secondaryText: Text("라운드 2 / 8"),
         fontSize: 64
     )
 }

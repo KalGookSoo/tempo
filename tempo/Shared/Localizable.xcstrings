@@ -323,6 +323,22 @@
         }
       }
     },
+    "라운드 %lld / %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Round %1$lld / %2$lld"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "라운드 %1$lld / %2$lld"
+          }
+        }
+      }
+    },
     "라운드 종료" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1419,6 +1435,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rest"
+          }
+        }
+      }
+    },
+    "휴식 시간" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rest Time"
           }
         }
       }

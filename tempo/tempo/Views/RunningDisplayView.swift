@@ -1,12 +1,35 @@
 import SwiftUI
+import UIKit
 
 /// 준비/운동/휴식/일시정지/완료 같은 상태 색상 토큰. `docs/native-style-guide.md` "상태 색상"
-/// 참고 — 커스텀 hex 대신 시스템 시맨틱 컬러에 매핑한다.
+/// 참고. 다크 모드에서는 시스템 색상(`.systemYellow` 등) 그대로가 검정 배경과 충분히
+/// 대비되지만, 라이트 모드에서는(특히 노랑) 채도가 너무 옅어 흰 배경 위 텍스트로 쓰였을 때
+/// 잘 안 보인다(직접 확인한 문제). 그래서 라이트/다크 모드별로 명도·채도를 다르게 지정한
+/// 동적 `UIColor`로 만든다 — `UITraitCollection`을 보고 자동으로 전환되므로, 시스템
+/// 시맨틱 컬러처럼 모드가 바뀔 때 별도 처리 없이 알아서 바뀐다.
 extension Color {
-    static let prepare = Color.yellow
-    static let work = Color.green
-    static let rest = Color.teal
-    static let danger = Color.red
+    static let prepare = Color.stateColor(
+        light: UIColor(red: 0.72, green: 0.53, blue: 0.00, alpha: 1),
+        dark: .systemYellow
+    )
+    static let work = Color.stateColor(
+        light: UIColor(red: 0.10, green: 0.55, blue: 0.20, alpha: 1),
+        dark: .systemGreen
+    )
+    static let rest = Color.stateColor(
+        light: UIColor(red: 0.00, green: 0.45, blue: 0.50, alpha: 1),
+        dark: .systemTeal
+    )
+    static let danger = Color.stateColor(
+        light: UIColor(red: 0.75, green: 0.10, blue: 0.10, alpha: 1),
+        dark: .systemRed
+    )
+
+    private static func stateColor(light: UIColor, dark: UIColor) -> Color {
+        Color(UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? dark : light
+        })
+    }
 }
 
 /// 준비/운동/휴식 구간이 없는 화면(타이머, 스톱워치)의 공통 상태->라벨/색상 매핑.

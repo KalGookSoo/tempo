@@ -10,7 +10,7 @@ struct IntervalCountdownRing: View {
     let color: Color
     let fontSize: CGFloat
 
-    private static let lineWidth: CGFloat = 10
+    private static let lineWidth: CGFloat = 14
 
     /// 정수 초 단위(`remainingSeconds`)가 아니라 실제 경과 시간(`elapsedInStep`)을 그대로
     /// 진행률로 쓴다. 예전엔 초당 한 번만 갱신되는 정수 값을 `.animation`으로 매끄럽게
@@ -40,7 +40,7 @@ struct IntervalCountdownRing: View {
                 .minimumScaleFactor(0.4)
                 .lineLimit(1)
         }
-        .frame(width: fontSize * 3.6, height: fontSize * 3.6)
+        .frame(width: fontSize * 3.8, height: fontSize * 3.8)
     }
 }
 

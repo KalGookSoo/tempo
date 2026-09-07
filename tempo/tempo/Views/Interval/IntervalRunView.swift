@@ -13,7 +13,7 @@ struct IntervalRunView: View {
 
     @Environment(Router.self) private var router
     @Environment(\.modelContext) private var modelContext
-    @ScaledMetric(relativeTo: .largeTitle) private var timerFontSize: CGFloat = 64
+    @ScaledMetric(relativeTo: .largeTitle) private var timerFontSize: CGFloat = 76
 
     @State private var runner: IntervalRunner?
     @State private var presetNotFound = false
@@ -112,7 +112,8 @@ struct IntervalRunView: View {
 
                 if let progress {
                     stepContent(
-                        roundLabel: roundLabel(for: progress.step),
+                        round: progress.step.round,
+                        totalRounds: progress.step.totalRounds,
                         statusLabel: statusLabel(for: progress.step),
                         statusColor: statusColor(for: progress.step, runnerState: runner.state),
                         remainingSeconds: progress.remainingSeconds,
@@ -124,7 +125,8 @@ struct IntervalRunView: View {
                     // 배지 + 링)을 그대로 쓰고, 라벨만 "완료"로 바꾼다 — 화면마다
                     // 레이아웃이 갑자기 달라지지 않도록.
                     stepContent(
-                        roundLabel: roundLabel(for: lastStep),
+                        round: lastStep.round,
+                        totalRounds: lastStep.totalRounds,
                         statusLabel: "완료",
                         statusColor: .danger,
                         remainingSeconds: 0,
@@ -196,8 +198,12 @@ struct IntervalRunView: View {
     }
 
     /// 대기/운동/휴식/완료 화면이 공유하는 "라운드 표시 + 상태 배지 + 링" 구성.
+    /// 라운드는 "라운드"라는 단어를 상태 배지와 같은 작은 알약 형태로, 실제 숫자
+    /// ("N / N")는 멀리서도 바로 읽히도록 크게 보여준다. 색상은 카운트다운 링과
+    /// 동일한 상태 색상(`statusColor`)을 그대로 쓴다.
     private func stepContent(
-        roundLabel: String?,
+        round: Int,
+        totalRounds: Int,
         statusLabel: String,
         statusColor: Color,
         remainingSeconds: Int,
@@ -205,10 +211,20 @@ struct IntervalRunView: View {
         totalSeconds: Int
     ) -> some View {
         VStack(spacing: 16) {
-            if let roundLabel {
-                Text(roundLabel)
-                    .font(.largeTitle.bold())
-                    .foregroundStyle(.secondary)
+            if totalRounds > 0 {
+                HStack(spacing: 10) {
+                    Text("라운드")
+                        .font(.title3.bold())
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 4)
+                        .background(statusColor.opacity(0.15), in: Capsule())
+                        .foregroundStyle(statusColor)
+
+                    Text("\(round) / \(totalRounds)")
+                        .font(.system(size: timerFontSize * 0.65, weight: .heavy, design: .rounded))
+                        .foregroundStyle(statusColor)
+                        .monospacedDigit()
+                }
             }
 
             Text(LocalizedStringKey(statusLabel))

@@ -190,7 +190,6 @@ struct TimerView: View {
 
     private var countdownPicker: some View {
         CountdownWheelPicker(
-            hours: Binding(get: { engine.hours }, set: { engine.hours = $0 }),
             minutes: Binding(get: { engine.minutes }, set: { engine.minutes = $0 }),
             seconds: Binding(get: { engine.seconds }, set: { engine.seconds = $0 })
         )

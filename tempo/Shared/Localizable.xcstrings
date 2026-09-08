@@ -487,7 +487,6 @@
       }
     },
     "분" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -671,7 +670,6 @@
       }
     },
     "시" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1221,7 +1219,6 @@
       }
     },
     "초" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

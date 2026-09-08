@@ -14,29 +14,25 @@ struct TimerEngineTests {
         abs(a - b) < 0.001
     }
 
-    // MARK: - hours / minutes / seconds
+    // MARK: - minutes / seconds
 
-    @Test("configuredSeconds를 시/분/초로 정확히 분해한다")
-    func decomposesConfiguredSecondsIntoHoursMinutesSeconds() {
-        let engine = TimerEngine(configuredSeconds: 3 * 3600 + 25 * 60 + 9)
+    @Test("configuredSeconds를 분/초로 정확히 분해한다")
+    func decomposesConfiguredSecondsIntoMinutesSeconds() {
+        let engine = TimerEngine(configuredSeconds: 25 * 60 + 9)
 
-        #expect(engine.hours == 3)
         #expect(engine.minutes == 25)
         #expect(engine.seconds == 9)
     }
 
-    @Test("시/분/초를 따로 설정해도 나머지 값이 유지된다")
+    @Test("분/초를 따로 설정해도 나머지 값이 유지된다")
     func settingOnePartPreservesTheOthers() {
-        let engine = TimerEngine(configuredSeconds: 3661) // 01:01:01
-
-        engine.hours = 5
-        #expect(engine.configuredSeconds == 5 * 3600 + 60 + 1)
+        let engine = TimerEngine(configuredSeconds: 61) // 01:01
 
         engine.minutes = 30
-        #expect(engine.configuredSeconds == 5 * 3600 + 30 * 60 + 1)
+        #expect(engine.configuredSeconds == 30 * 60 + 1)
 
         engine.seconds = 45
-        #expect(engine.configuredSeconds == 5 * 3600 + 30 * 60 + 45)
+        #expect(engine.configuredSeconds == 30 * 60 + 45)
     }
 
     // MARK: - elapsed(at:)
@@ -163,24 +159,24 @@ struct TimerEngineTests {
 
     // MARK: - formattedClock(seconds:)
 
-    @Test("0초는 00:00:00으로 표시된다")
+    @Test("0초는 00:00으로 표시된다")
     func formatsZeroSeconds() {
-        #expect(TimerEngine.formattedClock(seconds: 0) == "00:00:00")
+        #expect(TimerEngine.formattedClock(seconds: 0) == "00:00")
     }
 
-    @Test("최댓값(23:59:59)이 정확히 표시된다")
+    @Test("최댓값(99:59)이 정확히 표시된다")
     func formatsMaximumValue() {
-        #expect(TimerEngine.formattedClock(seconds: 23 * 3600 + 59 * 60 + 59) == "23:59:59")
+        #expect(TimerEngine.formattedClock(seconds: 99 * 60 + 59) == "99:59")
     }
 
-    @Test("한 자리 시/분/초도 0으로 채워서 두 자리로 표시된다")
+    @Test("한 자리 분/초도 0으로 채워서 두 자리로 표시된다")
     func padsSingleDigitComponents() {
-        #expect(TimerEngine.formattedClock(seconds: 3661) == "01:01:01") // 1시간 1분 1초
+        #expect(TimerEngine.formattedClock(seconds: 61) == "01:01") // 1분 1초
     }
 
-    @Test("표시 가능한 최대치(23:59:59)를 넘거나 음수인 값은 clamp된다")
+    @Test("표시 가능한 최대치(99:59)를 넘거나 음수인 값은 clamp된다")
     func formattedClockClampsOutOfRangeValues() {
-        #expect(TimerEngine.formattedClock(seconds: 90000) == "23:59:59")
-        #expect(TimerEngine.formattedClock(seconds: -5) == "00:00:00")
+        #expect(TimerEngine.formattedClock(seconds: 9999) == "99:59")
+        #expect(TimerEngine.formattedClock(seconds: -5) == "00:00")
     }
 }

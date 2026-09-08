@@ -106,6 +106,7 @@ struct RecordingSheetView: View {
 
     private func save() {
         guard let result = recorder.lastRecordingResult else { return }
+        print("[REC-DEBUG] RecordingSheetView.save id=\(result.id) durationMs=\(result.durationMs) levelSamples.count=\(recorder.levelSamples.count)")
         onSave(result.id, result.durationMs, recorder.levelSamples)
         dismiss()
     }

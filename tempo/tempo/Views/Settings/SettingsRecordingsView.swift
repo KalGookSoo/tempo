@@ -135,14 +135,17 @@ struct SettingsRecordingsView: View {
     }
 
     private func saveRecording(id: UUID, durationMs: Int, waveformSamples: [Float]) {
+        print("[REC-DEBUG] saveRecording id=\(id) durationMs=\(durationMs) waveformSamples.count=\(waveformSamples.count)")
         do {
-            try SoundAssetRepository(modelContext: modelContext).createRecordedAsset(
+            let asset = try SoundAssetRepository(modelContext: modelContext).createRecordedAsset(
                 id: id,
                 name: "녹음 \(recordings.count + 1)",
                 durationMs: durationMs,
                 waveformSamples: waveformSamples
             )
+            print("[REC-DEBUG] createRecordedAsset saved, asset.waveformSamples.count=\(asset.waveformSamples.count)")
         } catch {
+            print("[REC-DEBUG] createRecordedAsset FAILED: \(error)")
             errorMessage = error.localizedDescription
         }
     }

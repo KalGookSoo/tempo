@@ -21,3 +21,6 @@
 | `cue-settings.png` | 알림 큐 설정 — 이벤트별 사운드 큐 할당(`.cue`) |
 | `recording.png` | 내 목소리로 알림 큐 녹음하기 |
 | `recordings-list.png` | 녹음한 사운드 목록(`.recordings`) |
+| `screen-mirroring.png` | 화면 미러링 대응 |
+| `live-activity.png` | 잠금화면·다이나믹 아일랜드 실시간 표시 |
+| `localization.png` | 한국어·영어 지원 |

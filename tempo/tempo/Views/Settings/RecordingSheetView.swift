@@ -101,6 +101,7 @@ struct RecordingSheetView: View {
         if let result = recorder.lastRecordingResult {
             RecordedSoundFileStore.deleteFile(for: result.id)
         }
+        recorder.reset()
         dismiss()
     }
 
@@ -108,6 +109,7 @@ struct RecordingSheetView: View {
         guard let result = recorder.lastRecordingResult else { return }
         print("[REC-DEBUG] RecordingSheetView.save id=\(result.id) durationMs=\(result.durationMs) levelSamples.count=\(recorder.levelSamples.count)")
         onSave(result.id, result.durationMs, recorder.levelSamples)
+        recorder.reset()
         dismiss()
     }
 }

@@ -28,7 +28,8 @@ final class SoundRecorder: NSObject {
     /// 녹음 중 실시간으로 갱신되는 경과 시간(초). 녹음 중이 아니면 0이다.
     private(set) var elapsedTime: TimeInterval = 0
     /// 녹음 중 실시간으로 쌓이는 음량 레벨(0...1) 샘플 — 파형을 그리는 데 쓴다.
-    /// 정지 후에도 다음 녹음을 시작하기 전까지는 방금 녹음한 값이 그대로 남는다.
+    /// 정지 후에도 새 녹음을 시작하거나 `reset()`을 호출하기 전까지는 방금 녹음한
+    /// 값이 그대로 남는다.
     private(set) var levelSamples: [Float] = []
     /// 녹음이 끝나면(수동 정지든 최대 길이 도달로 자동 정지든) 채워지는 결과.
     private(set) var lastRecordingResult: (id: UUID, durationMs: Int)?
@@ -114,6 +115,15 @@ final class SoundRecorder: NSObject {
         lastRecordingResult = result
         print("[REC-DEBUG] stopRecording id=\(pendingID) durationMs=\(durationMs) levelSamples.count=\(levelSamples.count)")
         return result
+    }
+
+    /// 녹음 시트를 닫을 때(취소든 저장이든) 호출해서 방금 녹음한 결과를 지운다. 이걸
+    /// 안 하면 `lastRecordingResult`가 남아있는 채로 시트를 다시 열었을 때 `isStopped`가
+    /// 계속 참이라 녹음 버튼이 비활성 상태로 굳어버린다(이슈 #83).
+    func reset() {
+        elapsedTime = 0
+        levelSamples = []
+        lastRecordingResult = nil
     }
 
     /// 짧은 주기로 음량 레벨을 읽어 `levelSamples`에 쌓고, 경과 시간이 최대 길이에

@@ -12,9 +12,6 @@ enum MicrophonePermissionStatus {
 /// `AVAudioPlayer`의 얇은 래퍼. 화면(`SettingsRecordingsView`)은 이 클래스를 통해서만
 /// 오디오 하드웨어를 다룬다. 재생 종료를 감지해 `previewingAssetID`를 해제하려고
 /// `AVAudioPlayerDelegate`를 채택한다(이슈 #28).
-///
-/// `[REC-DEBUG]` 로그는 일부 녹음의 파형(`waveformSamples`)이 빈 배열로 저장되는
-/// 버그를 재현·조사하기 위한 임시 로그다. 원인이 확인되면 지운다.
 @Observable
 final class SoundRecorder: NSObject {
     /// 녹음 최대 길이. 알림음으로 쓰기엔 이보다 길면 운동에 방해된다는 판단으로
@@ -82,14 +79,13 @@ final class SoundRecorder: NSObject {
         ]
         let recorder = try AVAudioRecorder(url: url, settings: settings)
         recorder.isMeteringEnabled = true
-        let didStart = recorder.record()
+        recorder.record()
         self.recorder = recorder
         pendingID = id
         isRecording = true
         elapsedTime = 0
         levelSamples = []
         lastRecordingResult = nil
-        print("[REC-DEBUG] startRecording id=\(id) didStart=\(didStart) category=\(session.category.rawValue) isInputAvailable=\(session.isInputAvailable)")
         startMetering()
     }
 
@@ -100,12 +96,16 @@ final class SoundRecorder: NSObject {
     /// 반응형으로(버튼을 다시 누르지 않아도) 알아챌 수 있게 한다.
     @discardableResult
     func stopRecording() -> (id: UUID, durationMs: Int)? {
-        guard let recorder, let pendingID else {
-            print("[REC-DEBUG] stopRecording called with nothing to stop (recorder=\(recorder != nil), pendingID=\(pendingID != nil))")
-            return nil
-        }
+        guard let recorder, let pendingID else { return nil }
         meterTimer?.invalidate()
         meterTimer = nil
+        // 녹음이 0.05초(틱 주기) 미만으로 너무 짧으면 tick()이 한 번도 안 불려서
+        // levelSamples가 빈 채로 남는다 — 정지 시점에 마지막으로 한 번 더 읽어서
+        // 파형이 완전히 비어 저장되는 일이 없게 한다.
+        if levelSamples.isEmpty {
+            recorder.updateMeters()
+            levelSamples.append(normalizedLevel(from: recorder.averagePower(forChannel: 0)))
+        }
         let durationMs = Int(recorder.currentTime * 1000)
         recorder.stop()
         self.recorder = nil
@@ -113,7 +113,6 @@ final class SoundRecorder: NSObject {
         isRecording = false
         let result = (id: pendingID, durationMs: durationMs)
         lastRecordingResult = result
-        print("[REC-DEBUG] stopRecording id=\(pendingID) durationMs=\(durationMs) levelSamples.count=\(levelSamples.count)")
         return result
     }
 
@@ -130,26 +129,18 @@ final class SoundRecorder: NSObject {
     /// 도달하면 자동으로 정지한다.
     private func startMetering() {
         meterTimer?.invalidate()
-        print("[REC-DEBUG] startMetering scheduled at \(Date())")
         meterTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
             self?.tick()
         }
     }
 
     private func tick() {
-        guard let recorder else {
-            print("[REC-DEBUG] tick() fired but recorder is nil")
-            return
-        }
+        guard let recorder else { return }
         recorder.updateMeters()
         elapsedTime = recorder.currentTime
-        let db = recorder.averagePower(forChannel: 0)
-        let level = normalizedLevel(from: db)
-        levelSamples.append(level)
-        print("[REC-DEBUG] tick #\(levelSamples.count) elapsed=\(String(format: "%.3f", elapsedTime)) db=\(db) level=\(level)")
+        levelSamples.append(normalizedLevel(from: recorder.averagePower(forChannel: 0)))
 
         if elapsedTime >= Self.maxDuration {
-            print("[REC-DEBUG] maxDuration reached at elapsed=\(elapsedTime), auto-stopping")
             stopRecording()
         }
     }

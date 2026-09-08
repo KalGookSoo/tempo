@@ -11,6 +11,16 @@
         }
       }
     },
+    "%.1f / %.0f초" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$.1f / %2$.0f초"
+          }
+        }
+      }
+    },
     "%@ 프로그램을 삭제하면 되돌릴 수 없습니다." : {
       "localizations" : {
         "en" : {
@@ -210,7 +220,6 @@
       }
     },
     "녹음 완료 — 저장하시겠어요?" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -221,7 +230,6 @@
       }
     },
     "녹음 중..." : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -465,6 +473,9 @@
         }
       }
     },
+    "버튼을 눌러 녹음을 시작하세요(최대 %lld초)" : {
+
+    },
     "복제" : {
       "localizations" : {
         "en" : {
@@ -665,7 +676,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "hr"
+            "value" : "hours"
           }
         }
       }
@@ -845,6 +856,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Work"
+          }
+        }
+      }
+    },
+    "운동 %@ · 휴식 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work %@ · Rest %@"
           }
         }
       }

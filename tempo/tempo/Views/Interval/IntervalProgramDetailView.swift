@@ -73,10 +73,9 @@ struct IntervalProgramDetailView: View {
                 LabeledContent("라운드", value: "\(preset.config.rounds)")
                 LabeledContent("준비 시간", value: IntervalRunner.formattedClock(seconds: preset.config.prepareSeconds))
                 ForEach(Array(EditableIntervalSet.pairs(from: preset.config.segments).enumerated()), id: \.offset) { index, set in
-                    LabeledContent(
-                        "세트 \(index + 1)",
-                        value: "운동 \(IntervalRunner.formattedClock(seconds: set.workSeconds)) · 휴식 \(IntervalRunner.formattedClock(seconds: set.restSeconds))"
-                    )
+                    LabeledContent("세트 \(index + 1)") {
+                        Text("운동 \(IntervalRunner.formattedClock(seconds: set.workSeconds)) · 휴식 \(IntervalRunner.formattedClock(seconds: set.restSeconds))")
+                    }
                 }
             }
 

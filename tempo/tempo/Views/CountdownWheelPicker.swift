@@ -93,19 +93,19 @@ struct CountdownWheelPicker: UIViewRepresentable {
                 label.text = "\(row)"
                 label.textAlignment = .right
             case .hourUnit:
-                label.text = "시"
+                label.text = String(localized: "시")
                 label.textAlignment = .left
             case .minuteValue:
                 label.text = "\(row)"
                 label.textAlignment = .right
             case .minuteUnit:
-                label.text = "분"
+                label.text = String(localized: "분")
                 label.textAlignment = .left
             case .secondValue:
                 label.text = "\(row)"
                 label.textAlignment = .right
             case .secondUnit:
-                label.text = "초"
+                label.text = String(localized: "초")
                 label.textAlignment = .left
             case nil:
                 break

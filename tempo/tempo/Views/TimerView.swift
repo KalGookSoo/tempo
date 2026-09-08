@@ -121,6 +121,12 @@ struct TimerView: View {
     /// (다시) 시작한다. `referenceDate`는 카운트다운이면 종료 예정 시각, 카운트업이면
     /// 이미 지난 경과 시간만큼 과거로 당긴 시작 시각이다 — 두 경우 모두 위젯의
     /// `Text(_:style:.timer)`가 그 시각 기준으로 알아서 실시간 카운트를 그린다.
+    ///
+    /// 카운트다운은 종료 예정 시각을 `staleDate`로 함께 넘긴다 — 앱이 백그라운드거나
+    /// 화면이 꺼진 채로 카운트다운이 자연 종료되면, 그 순간 이 코드를 실행해줄 앱
+    /// 프로세스가 없어서 Live Activity가 정리되지 않고 그대로 남아 마치 다시 시작된
+    /// 것처럼 계속 시간을 세는 버그가 있었다(이슈 #87). `staleDate`를 넘겨두면 시스템이
+    /// 알아서 그 시각에 위젯을 완료 상태로 얼려준다.
     private func refreshLiveActivity(statusLabel: String) {
         let seconds = engine.remainingOrElapsedSeconds(at: .now)
         let displayMode: TimerActivityAttributes.ContentState.DisplayMode = engine.mode == .countdown ? .countdown : .countUp
@@ -132,6 +138,7 @@ struct TimerView: View {
             title: effectiveLabel,
             displayMode: displayMode,
             referenceDate: referenceDate,
+            staleDate: engine.mode == .countdown ? referenceDate : nil,
             staticText: formatted(seconds: seconds),
             statusLabel: statusLabel
         )

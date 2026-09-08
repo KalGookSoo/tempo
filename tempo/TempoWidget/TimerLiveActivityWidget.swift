@@ -7,6 +7,12 @@ import WidgetKit
 /// 갱신해주고, 실제 카운트다운/카운트업 숫자는 `Text(_:style:.timer)`가 시스템
 /// 차원에서 알아서 실시간으로 그려준다(이슈 #52).
 ///
+/// `context.isStale`은 앱 쪽이 넘긴 `staleDate`(카운트다운 종료 예정 시각)가 지나면
+/// 앱이 백그라운드거나 화면이 꺼져 있어도 시스템이 알아서 true로 바꿔준다. 이게 없으면
+/// 카운트다운이 자연 종료된 뒤에도 `Text(_:style:.timer)`가 과거 날짜를 계속 세어
+/// 올라가서, 마치 완료 즉시 다시 시작된 것처럼 보이는 버그가 있었다(이슈 #87). stale
+/// 상태에서는 라이브 카운트 대신 고정된 완료 표시로 얼린다.
+///
 /// `title`/`statusLabel`은 앱이 고정 어휘("스톱워치", "진행 중" 등)로 채워 넘기는
 /// `String`이라, `Text(LocalizedStringKey(...))`로 감싸야 String Catalog에서 찾아
 /// 번역한다 — 감싸지 않으면 기기 언어와 무관하게 항상 한국어 원문 그대로 보인다.
@@ -15,7 +21,7 @@ import WidgetKit
 struct TimerLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TimerActivityAttributes.self) { context in
-            LockScreenView(attributes: context.attributes, state: context.state)
+            LockScreenView(attributes: context.attributes, state: context.state, isStale: context.isStale)
                 .padding()
                 .activityBackgroundTint(Color.black.opacity(0.6))
                 .activitySystemActionForegroundColor(Color.white)
@@ -27,18 +33,18 @@ struct TimerLiveActivityWidget: Widget {
                         .lineLimit(1)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    TimeText(state: context.state)
+                    TimeText(state: context.state, isStale: context.isStale)
                         .font(.title3.monospacedDigit())
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text(LocalizedStringKey(context.state.statusLabel))
+                    StatusLabelText(state: context.state, isStale: context.isStale)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             } compactLeading: {
                 Image(systemName: "timer")
             } compactTrailing: {
-                TimeText(state: context.state)
+                TimeText(state: context.state, isStale: context.isStale)
                     .font(.caption2.monospacedDigit())
                     .frame(width: 44)
             } minimal: {
@@ -51,6 +57,7 @@ struct TimerLiveActivityWidget: Widget {
 private struct LockScreenView: View {
     let attributes: TimerActivityAttributes
     let state: TimerActivityAttributes.ContentState
+    let isStale: Bool
 
     var body: some View {
         HStack {
@@ -58,12 +65,12 @@ private struct LockScreenView: View {
                 Text(LocalizedStringKey(attributes.title))
                     .font(.headline)
                     .foregroundStyle(.white)
-                Text(LocalizedStringKey(state.statusLabel))
+                StatusLabelText(state: state, isStale: isStale)
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.7))
             }
             Spacer()
-            TimeText(state: state)
+            TimeText(state: state, isStale: isStale)
                 .font(.system(size: 34, weight: .bold, design: .monospaced))
                 .foregroundStyle(.white)
         }
@@ -72,16 +79,37 @@ private struct LockScreenView: View {
 
 /// 상태에 맞는 시간 텍스트. 카운트다운/카운트업은 `.timer` 스타일이 실시간으로
 /// 갱신해준다(미래 날짜면 카운트다운, 과거 날짜면 카운트업). 일시정지 중엔 멈춰있는
-/// 값을 그대로 보여준다.
+/// 값을 그대로 보여준다. stale 상태(카운트다운 종료 예정 시각을 지남)에서는 라이브
+/// 카운트를 멈추고 `00:00`으로 고정해서 보여준다.
 private struct TimeText: View {
     let state: TimerActivityAttributes.ContentState
+    let isStale: Bool
 
     var body: some View {
-        switch state.displayMode {
-        case .countdown, .countUp:
-            Text(state.referenceDate, style: .timer)
-        case .paused:
-            Text(state.staticText)
+        if isStale, state.displayMode == .countdown {
+            Text(verbatim: "00:00")
+        } else {
+            switch state.displayMode {
+            case .countdown, .countUp:
+                Text(state.referenceDate, style: .timer)
+            case .paused:
+                Text(state.staticText)
+            }
+        }
+    }
+}
+
+/// stale 상태에서는 앱이 마지막으로 넘겨준 `statusLabel`("진행 중" 등) 대신 "완료"로
+/// 고정해서 보여준다 — 앱이 백그라운드에 있는 동안은 이 값이 갱신되지 않기 때문이다.
+private struct StatusLabelText: View {
+    let state: TimerActivityAttributes.ContentState
+    let isStale: Bool
+
+    var body: some View {
+        if isStale, state.displayMode == .countdown {
+            Text("완료")
+        } else {
+            Text(LocalizedStringKey(state.statusLabel))
         }
     }
 }

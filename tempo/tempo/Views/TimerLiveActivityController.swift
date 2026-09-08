@@ -18,11 +18,18 @@ enum TimerLiveActivityController {
     private static var activities: [Kind: Activity<TimerActivityAttributes>] = [:]
 
     /// Live Activity가 없으면 새로 시작하고, 이미 있으면 상태만 갱신한다.
+    ///
+    /// `staleDate`를 넘기면, 그 시각이 지나는 순간 앱이 백그라운드거나 화면이 꺼져 있어도
+    /// 시스템이 알아서 위젯 쪽 `context.isStale`을 true로 바꿔준다 — 카운트다운 타이머처럼
+    /// "화면을 안 보고 있어도 스스로 끝나는" 경우, 그 순간에 코드를 실행해줄 앱 프로세스가
+    /// 없어도 위젯이 완료 상태로 얼어붙을 수 있게 하는 용도다(이슈 #87). 자연 종료 시점이
+    /// 없는 스톱워치·일시정지 상태는 `nil`로 둔다.
     static func start(
         kind: Kind,
         title: String,
         displayMode: TimerActivityAttributes.ContentState.DisplayMode,
         referenceDate: Date,
+        staleDate: Date? = nil,
         staticText: String,
         statusLabel: String
     ) {
@@ -35,7 +42,7 @@ enum TimerLiveActivityController {
 
         if let activity = activities[kind] {
             Task {
-                await activity.update(ActivityContent(state: state, staleDate: nil))
+                await activity.update(ActivityContent(state: state, staleDate: staleDate))
             }
             return
         }
@@ -44,7 +51,7 @@ enum TimerLiveActivityController {
 
         activities[kind] = try? Activity.request(
             attributes: TimerActivityAttributes(title: title),
-            content: ActivityContent(state: state, staleDate: nil)
+            content: ActivityContent(state: state, staleDate: staleDate)
         )
     }
 

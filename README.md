@@ -4,11 +4,25 @@
 
 ## 스크린샷
 
-| 타이머 | 스톱워치 | 인터벌 실행 | 내 목소리로 알림 큐 |
-| --- | --- | --- | --- |
-| ![타이머 화면](docs/screenshots/timer.png) | ![스톱워치 화면](docs/screenshots/stopwatch.png) | ![인터벌 실행 화면](docs/screenshots/interval-run.png) | ![녹음 알림 큐 화면](docs/screenshots/recording.png) |
+### 타이머 · 스톱워치
 
-<!-- 위 4개 경로(docs/screenshots/*.png)에 스크린샷 이미지를 넣으면 표에 그대로 표시된다. -->
+| 타이머 | 스톱워치 |
+| --- | --- |
+| ![타이머 화면](docs/screenshots/timer.png) | ![스톱워치 화면](docs/screenshots/stopwatch.png) |
+
+### 인터벌
+
+| 프로그램 목록 | 새 프로그램 만들기 | 프로그램 상세 | 프로그램 수정 | 실행 |
+| --- | --- | --- | --- | --- |
+| ![인터벌 프로그램 목록](docs/screenshots/interval-programs.png) | ![새 프로그램 만들기](docs/screenshots/interval-new.png) | ![프로그램 상세](docs/screenshots/interval-detail.png) | ![프로그램 수정](docs/screenshots/interval-edit.png) | ![인터벌 실행 화면](docs/screenshots/interval-run.png) |
+
+### 설정
+
+| 설정 홈 | 알림 큐 설정 | 내 목소리로 녹음하기 | 녹음한 사운드 목록 |
+| --- | --- | --- | --- |
+| ![설정 홈](docs/screenshots/settings.png) | ![알림 큐 설정](docs/screenshots/cue-settings.png) | ![녹음 화면](docs/screenshots/recording.png) | ![녹음한 사운드 목록](docs/screenshots/recordings-list.png) |
+
+<!-- docs/screenshots/*.png 경로에 스크린샷 이미지를 넣으면 위 표에 그대로 표시된다. 파일명 목록은 docs/screenshots/README.md 참고. -->
 
 ## 주요 기능
 

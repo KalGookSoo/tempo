@@ -54,6 +54,13 @@ struct tempoApp: App {
                 notificationDelegate.onTapTimer = { selectedTab = .timer }
                 notificationDelegate.onTapInterval = { selectedTab = .interval }
             }
+            // 기기의 라이트/다크 설정과 무관하게 앱 전체를 다크 모드로 고정한다. iOS 기본
+            // 시계 앱의 "타이머" 화면과 같은 정책이다 — 라이트 모드에서는 상태 색상(준비/운동/
+            // 휴식/완료)의 가독성이 떨어져 한 번 다뤘던 문제(커밋 032da36/460bde6)의 근본
+            // 원인이 색상 값이 아니라 라이트 모드라는 조건 자체였다고 판단했다. 이 모디파이어를
+            // 최상위(fullScreenCover 포함 전체)에 적용해야 온보딩 같은 모달 화면도 함께
+            // 다크 모드로 뜬다. 이슈 #85 참고.
+            .preferredColorScheme(.dark)
         }
         .modelContainer(modelContainer)
     }

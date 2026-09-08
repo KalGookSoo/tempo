@@ -1,9 +1,10 @@
 # 스크린샷
 
-이 폴더에 아래 파일명으로 이미지를 넣으면 최상위 [`README.md`](../../README.md)의 스크린샷 섹션에 자동으로 표시된다. 가이드/온보딩 화면은 제외하고, 실제 주요 화면 위주로 구성했다. 괄호 안은 `docs/navigation-structure.md` 기준 라우트다.
+이 폴더에 아래 파일명으로 이미지를 넣으면 최상위 [`README.md`](../../README.md)의 스크린샷 섹션에 자동으로 표시된다. 도움말 같은 세부 가이드 화면은 제외하고, 온보딩과 실제 주요 화면 위주로 구성했다. 괄호 안은 `docs/navigation-structure.md` 기준 라우트다.
 
 | 파일명 | 화면 |
 | --- | --- |
+| `onboarding.png` | 온보딩(최초 실행 시 소개 화면) |
 | `timer.png` | 타이머 |
 | `stopwatch.png` | 스톱워치 |
 | `interval-programs.png` | 인터벌 프로그램 목록(`.programs`) |

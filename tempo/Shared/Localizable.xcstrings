@@ -13,6 +13,12 @@
     },
     "%.1f / %.0f초" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$.1fs / %2$.0fs"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "new",
@@ -474,7 +480,20 @@
       }
     },
     "버튼을 눌러 녹음을 시작하세요(최대 %lld초)" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the button to start recording (up to %lld seconds)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "버튼을 눌러 녹음을 시작하세요(최대 %lld초)"
+          }
+        }
+      }
     },
     "복제" : {
       "localizations" : {

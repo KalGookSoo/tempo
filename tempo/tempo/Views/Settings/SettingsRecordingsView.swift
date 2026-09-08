@@ -144,9 +144,27 @@ struct SettingsRecordingsView: View {
                 waveformSamples: waveformSamples
             )
             print("[REC-DEBUG] createRecordedAsset saved, asset.waveformSamples.count=\(asset.waveformSamples.count)")
+            logAllRecordedAssetsFreshFetch(context: "after saving \(asset.name)")
         } catch {
             print("[REC-DEBUG] createRecordedAsset FAILED: \(error)")
             errorMessage = error.localizedDescription
+        }
+    }
+
+    /// [REC-DEBUG] 파형 소실 버그 조사용. `@Query` 캐시(`assets`)가 아니라 그 순간
+    /// `modelContext`에서 새로 fetch해서, 방금 저장한 것 말고 기존 녹음들의
+    /// waveformSamples가 이 시점에 실제로 몇 개인지 확인한다.
+    private func logAllRecordedAssetsFreshFetch(context: String) {
+        let descriptor = FetchDescriptor<SoundAsset>(
+            predicate: #Predicate<SoundAsset> { $0.deletedAt == nil },
+            sortBy: [SortDescriptor(\.createdAt)]
+        )
+        guard let fresh = try? modelContext.fetch(descriptor) else {
+            print("[REC-DEBUG] logAllRecordedAssetsFreshFetch(\(context)): fetch failed")
+            return
+        }
+        for a in fresh where a.kind == .recorded {
+            print("[REC-DEBUG] fresh fetch (\(context)): \(a.name) id=\(a.id) waveformSamples.count=\(a.waveformSamples.count)")
         }
     }
 
@@ -203,6 +221,7 @@ struct SettingsRecordingsView: View {
 
     private func recordingRow(for asset: SoundAsset) -> some View {
         let isPlaying = recorder.previewingAssetID == asset.id
+        print("[REC-DEBUG] recordingRow render: \(asset.name) id=\(asset.id) waveformSamples.count=\(asset.waveformSamples.count)")
         return HStack {
             Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
                 .foregroundStyle(Color.accentColor)

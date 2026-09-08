@@ -6,9 +6,9 @@
 
 ### 온보딩
 
-| 온보딩 |
-| --- |
-| ![온보딩 화면](docs/screenshots/onboarding.png) |
+| 하나의 앱, 세 가지 타이밍 | 바로 쓰는 기본 프리셋 | 내 목소리로 알림 큐 |
+| --- | --- | --- |
+| ![온보딩 - 하나의 앱, 세 가지 타이밍](docs/screenshots/onboarding-timing.png) | ![온보딩 - 바로 쓰는 기본 프리셋](docs/screenshots/onboarding-presets.png) | ![온보딩 - 내 목소리로 알림 큐](docs/screenshots/onboarding-voice.png) |
 
 ### 타이머 · 스톱워치
 

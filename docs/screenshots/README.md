@@ -4,7 +4,9 @@
 
 | 파일명 | 화면 |
 | --- | --- |
-| `onboarding.png` | 온보딩(최초 실행 시 소개 화면) |
+| `onboarding-timing.png` | 온보딩 1단계 — 하나의 앱, 세 가지 타이밍 |
+| `onboarding-presets.png` | 온보딩 2단계 — 바로 쓰는 기본 프리셋 |
+| `onboarding-voice.png` | 온보딩 3단계 — 내 목소리로 알림 큐 |
 | `timer.png` | 타이머 |
 | `stopwatch.png` | 스톱워치 |
 | `interval-programs.png` | 인터벌 프로그램 목록(`.programs`) |

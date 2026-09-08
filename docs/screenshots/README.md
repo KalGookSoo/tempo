@@ -13,7 +13,10 @@
 | `interval-new.png` | 새 프로그램 만들기(`.new`) |
 | `interval-detail.png` | 프로그램 상세(`.programDetail`) |
 | `interval-edit.png` | 프로그램 수정(`.programEdit`) |
-| `interval-run.png` | 인터벌 실행(`.run`) |
+| `interval-run-prepare.png` | 인터벌 실행(`.run`) — 준비 상태 |
+| `interval-run-work.png` | 인터벌 실행(`.run`) — 운동 상태 |
+| `interval-run-rest.png` | 인터벌 실행(`.run`) — 휴식 상태 |
+| `interval-run-complete.png` | 인터벌 실행(`.run`) — 완료 상태 |
 | `settings.png` | 설정 홈 |
 | `cue-settings.png` | 알림 큐 설정 — 이벤트별 사운드 큐 할당(`.cue`) |
 | `recording.png` | 내 목소리로 알림 큐 녹음하기 |

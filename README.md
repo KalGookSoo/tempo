@@ -22,9 +22,9 @@
 | --- | --- | --- | --- |
 | ![인터벌 프로그램 목록](docs/screenshots/interval-programs.png) | ![새 프로그램 만들기](docs/screenshots/interval-new.png) | ![프로그램 상세](docs/screenshots/interval-detail.png) | ![프로그램 수정](docs/screenshots/interval-edit.png) |
 
-| 인터벌 실행 |
-| --- |
-| ![인터벌 실행 화면](docs/screenshots/interval-run.png) |
+| 준비 | 운동 | 휴식 | 완료 |
+| --- | --- | --- | --- |
+| ![인터벌 실행 - 준비](docs/screenshots/interval-run-prepare.png) | ![인터벌 실행 - 운동](docs/screenshots/interval-run-work.png) | ![인터벌 실행 - 휴식](docs/screenshots/interval-run-rest.png) | ![인터벌 실행 - 완료](docs/screenshots/interval-run-complete.png) |
 
 ### 설정
 

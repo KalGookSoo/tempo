@@ -121,6 +121,13 @@
 			);
 			target = 9F0B541F304FF92600376D71 /* TempoWatch Watch App */;
 		};
+		9F1402303051356A0097137B /* Exceptions for "Shared" folder in "TempoWatch Watch App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Localizable.xcstrings,
+			);
+			target = 9F0B541F304FF92600376D71 /* TempoWatch Watch App */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -164,6 +171,9 @@
 		};
 		DA57310136B8E2FAFC9E788D /* Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				9F1402303051356A0097137B /* Exceptions for "Shared" folder in "TempoWatch Watch App" target */,
+			);
 			path = Shared;
 			sourceTree = "<group>";
 		};

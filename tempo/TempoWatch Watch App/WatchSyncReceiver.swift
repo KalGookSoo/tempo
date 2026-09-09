@@ -27,3 +27,17 @@ final class WatchSyncReceiver: NSObject, WCSessionDelegate, ObservableObject {
         }
     }
 }
+
+extension IntervalWatchSnapshot {
+    /// 이 스냅샷이 가리키는 지점 그대로 로컬 IntervalRunner를 재구성한다.
+    /// sentAt을 기준으로 역산하기 때문에, 실제 도착 시각(네트워크 지연)과 무관하게 항상 정확한 elapsedSeconds를 재현한다.
+    func makeRunner() -> IntervalRunner {
+        let runner = IntervalRunner(config: config)
+        let backdatedStart = sentAt.addingTimeInterval(-elapsedSeconds)
+        runner.start(at: backdatedStart)
+        if isPaused {
+            runner.pause(at: sentAt)
+        }
+        return runner
+    }
+}

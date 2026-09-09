@@ -21,6 +21,7 @@ struct IntervalRunView: View {
     @State private var previousStep: IntervalStep?
     @State private var programName = ""
     @State private var isLeaveConfirmationPresented = false
+    @State private var config: IntervalConfig?
     private static let notificationIdentifier = "interval.end"
 
     /// 준비/운동·휴식/일시정지 중에는 뒤로가기 시 잃을 진행 상황이 있어 확인이
@@ -66,6 +67,15 @@ struct IntervalRunView: View {
                 } label: {
                     Image(systemName: "chevron.backward")
                 }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    guard let runner, let config else { return }
+                    WatchSyncSender.shared.send(programName: programName, config: config, runner: runner)
+                } label: {
+                    Image(systemName: "applewatch")
+                }
+                .disabled(runner == nil || config == nil)
             }
         }
         // 스와이프 뒤로가기 제스처도 같은 조건으로 막는다 — 커스텀 버튼만 막으면
@@ -355,6 +365,7 @@ struct IntervalRunView: View {
 
         cueConfig = resolveCueConfig(cueProfileID: preset.cueProfileID)
         runner = IntervalRunner(config: preset.config)
+        config = preset.config
         programName = preset.name
     }
 

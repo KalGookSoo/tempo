@@ -1,10 +1,3 @@
-//
-//  TempoWatch_Watch_AppUITests.swift
-//  TempoWatch Watch AppUITests
-//
-//  Created by doyevskyi on 9/8/26.
-//
-
 import XCTest
 
 final class TempoWatch_Watch_AppUITests: XCTestCase {

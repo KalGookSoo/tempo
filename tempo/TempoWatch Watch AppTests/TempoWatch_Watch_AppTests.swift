@@ -1,10 +1,3 @@
-//
-//  TempoWatch_Watch_AppTests.swift
-//  TempoWatch Watch AppTests
-//
-//  Created by doyevskyi on 9/8/26.
-//
-
 @testable import TempoWatch_Watch_App
 import Testing
 

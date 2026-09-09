@@ -1,21 +1,15 @@
-//
-//  ContentView.swift
-//  TempoWatch Watch App
-//
-//  Created by doyevskyi on 9/8/26.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var receiver = WatchSyncReceiver.shared
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        if let snapshot = receiver.latestSnapshot {
+            Text(snapshot.programName)
+            Text("\(Int(snapshot.elapsedSeconds))초 경과")
+        } else {
+            Text("대기 중")
         }
-        .padding()
     }
 }
 

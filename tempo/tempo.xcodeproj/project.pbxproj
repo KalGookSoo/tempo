@@ -114,6 +114,7 @@
 			membershipExceptions = (
 				Data/Models/CueConfig.swift,
 				Data/Models/IntervalConfig.swift,
+				Resources/Sounds/beep.wav,
 				Timing/CueEventDetector.swift,
 				Timing/IntervalRunner.swift,
 				Timing/IntervalWatchSnapshot.swift,

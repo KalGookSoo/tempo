@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var receiver = WatchSyncReceiver.shared
     @State private var runner: IntervalRunner?
+    @State private var previousStep: IntervalStep?
 
     var body: some View {
         Group {
@@ -25,21 +26,32 @@ struct ContentView: View {
     }
 
     private func runningContent(runner: IntervalRunner) -> some View {
-        TimelineView(.periodic(from: .now, by: 1)) { context in
-            if let progress = runner.currentProgress(at: context.date) {
-                VStack(spacing: 8) {
-                    if progress.step.totalRounds > 0 {
-                        Text("\(progress.step.round) / \(progress.step.totalRounds)")
-                            .font(.headline)
+        TimelineView(.animation(minimumInterval: 1.0 / 10, paused: false)) { context in
+            let progress = runner.currentProgress(at: context.date)
+
+            Group {
+                if let progress {
+                    VStack(spacing: 8) {
+                        if progress.step.totalRounds > 0 {
+                            Text("\(progress.step.round) / \(progress.step.totalRounds)")
+                                .font(.headline)
+                        }
+                        Text(LocalizedStringKey(statusLabel(for: progress.step)))
+                            .font(.caption)
+                        Text(IntervalRunner.formattedClock(seconds: progress.remainingSeconds))
+                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .monospacedDigit()
                     }
-                    Text(LocalizedStringKey(statusLabel(for: progress.step)))
-                        .font(.caption)
-                    Text(IntervalRunner.formattedClock(seconds: progress.remainingSeconds))
-                        .font(.system(size: 34, weight: .bold, design: .rounded))
-                        .monospacedDigit()
+                } else {
+                    Text("완료")
                 }
-            } else {
-                Text("완료")
+            }
+            .task(id: progress?.step.id) {
+                let events = CueEventDetector.events(previousStep: previousStep, currentProgress: progress, countdownLeadSeconds: 0) // 시작 전 미리 알림은 이번 범위에서 제외
+                if !events.isEmpty {
+                    WatchCueTriggerPlayer.play()
+                }
+                previousStep = progress?.step
             }
         }
     }

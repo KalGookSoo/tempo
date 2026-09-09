@@ -14,9 +14,7 @@ final class WatchSyncReceiver: NSObject, WCSessionDelegate, ObservableObject {
         WCSession.default.activate()
     }
 
-    func session(_: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {
-        print("[WATCH-DEBUG] activation completed: \(state.rawValue), error=\(String(describing: error))")
-    }
+    func session(_: WCSession, activationDidCompleteWith _: WCSessionActivationState, error _: Error?) {}
 
     /// 아이폰이 백그라운드여도, 워치 앱을 열면 마지막 컨텍스트를 여기로 받는다.
     func session(_: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {

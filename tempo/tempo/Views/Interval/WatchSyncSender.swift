@@ -15,11 +15,7 @@ final class WatchSyncSender: NSObject, WCSessionDelegate {
     }
 
     func send(programName: String, config: IntervalConfig, runner: IntervalRunner) {
-        print("[WATCH-DEBUG] send called, activationState=\(WCSession.default.activationState.rawValue), isPaired=\(WCSession.default.isPaired), isWatchAppInstalled=\(WCSession.default.isWatchAppInstalled)")
-        guard WCSession.default.activationState == .activated else {
-            print("[WATCH-DEBUG] blocked: session not activated yet")
-            return
-        }
+        guard WCSession.default.activationState == .activated else { return }
 
         let snapshot = IntervalWatchSnapshot(
             programName: programName,
@@ -29,18 +25,11 @@ final class WatchSyncSender: NSObject, WCSessionDelegate {
             sentAt: .now
         )
 
-        do {
-            let data = try JSONEncoder().encode(snapshot)
-            try WCSession.default.updateApplicationContext(["snapshot": data])
-            print("[WATCH-DEBUG] updateApplicationContext succeeded")
-        } catch {
-            print("[WATCH-DEBUG] failed: \(error)")
-        }
+        guard let data = try? JSONEncoder().encode(snapshot) else { return }
+        try? WCSession.default.updateApplicationContext(["snapshot": data])
     }
 
-    func session(_: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {
-        print("[WATCH-DEBUG] activation completed: \(state.rawValue), error=\(String(describing: error))")
-    }
+    func session(_: WCSession, activationDidCompleteWith _: WCSessionActivationState, error _: Error?) {}
 
     func sessionDidBecomeInactive(_: WCSession) {}
 

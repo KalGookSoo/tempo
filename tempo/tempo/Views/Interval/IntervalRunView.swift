@@ -70,8 +70,8 @@ struct IntervalRunView: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    guard let runner, let config else { return }
-                    WatchSyncSender.shared.send(programName: programName, config: config, runner: runner)
+                    guard let runner else { return }
+                    syncToWatch(runner: runner)
                 } label: {
                     Image(systemName: "applewatch")
                 }
@@ -168,6 +168,7 @@ struct IntervalRunView: View {
                         RunningControlButton(title: "일시정지", style: .pause) {
                             runner.pause(at: .now)
                             NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
+                            syncToWatch(runner: runner)
                         }
                     } else if runner.state == .paused {
                         RunningControlButton(title: "재개", style: .start) {
@@ -178,11 +179,13 @@ struct IntervalRunView: View {
                                 title: programName,
                                 message: message
                             )
+                            syncToWatch(runner: runner)
                         }
                     } else {
                         RunningControlButton(title: "시작", style: .start) {
                             runner.start(at: .now)
                             NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: totalDuration, title: programName, message: message)
+                            syncToWatch(runner: runner)
                         }
                     }
                 }
@@ -350,6 +353,14 @@ struct IntervalRunView: View {
         return try? modelContext.fetch(
             FetchDescriptor<SoundAsset>(predicate: #Predicate { $0.name == defaultName })
         ).first
+    }
+
+    /// 지금 실행 상태를 페어링된 애플워치로 전송한다(#79). 시작/일시정지/재개
+    /// 시점마다 다시 불러서, 워치가 최신 상태로 스스로 로컬 카운트다운을 이어갈
+    /// 수 있게 한다.
+    private func syncToWatch(runner: IntervalRunner) {
+        guard let config else { return }
+        WatchSyncSender.shared.send(programName: programName, config: config, runner: runner)
     }
 
     private func load() {

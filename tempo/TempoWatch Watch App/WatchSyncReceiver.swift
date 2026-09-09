@@ -31,8 +31,14 @@ final class WatchSyncReceiver: NSObject, WCSessionDelegate, ObservableObject {
 extension IntervalWatchSnapshot {
     /// 이 스냅샷이 가리키는 지점 그대로 로컬 IntervalRunner를 재구성한다.
     /// sentAt을 기준으로 역산하기 때문에, 실제 도착 시각(네트워크 지연)과 무관하게 항상 정확한 elapsedSeconds를 재현한다.
+    /// isIdle이면(리셋 직후) start(at:)를 아예 안 불러서 IntervalRunner가 기본으로
+    /// 갖는 .idle 상태 그대로 둔다 — 안 그러면 elapsedSeconds == 0인 리셋 스냅샷이
+    /// "방금 시작함"과 구분이 안 돼서, 워치가 첫 구간을 곧바로 카운트다운하기
+    /// 시작해버린다(이슈 #91).
     func makeRunner() -> IntervalRunner {
         let runner = IntervalRunner(config: config)
+        guard !isIdle else { return runner }
+
         let backdatedStart = sentAt.addingTimeInterval(-elapsedSeconds)
         runner.start(at: backdatedStart)
         if isPaused {

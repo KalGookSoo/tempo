@@ -1024,6 +1024,9 @@
         }
       }
     },
+    "인터벌 프로그램이 종료되었습니다" : {
+
+    },
     "일시정지" : {
       "extractionState" : "stale",
       "localizations" : {

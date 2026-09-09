@@ -23,6 +23,7 @@ struct IntervalRunView: View {
     @State private var isLeaveConfirmationPresented = false
     @State private var config: IntervalConfig?
     private static let notificationIdentifier = "interval.end"
+    private static let notificationMessage = String(localized: "인터벌 프로그램이 종료되었습니다")
 
     /// 준비/운동·휴식/일시정지 중에는 뒤로가기 시 잃을 진행 상황이 있어 확인이
     /// 필요하다. 아직 시작 전이거나 이미 끝난 상태는 잃을 게 없어 바로 나갈 수
@@ -37,6 +38,37 @@ struct IntervalRunView: View {
     private struct TickKey: Equatable {
         let stepID: Int?
         let remainingSeconds: Int?
+    }
+
+    private func handleStart() {
+        guard let runner else { return }
+        let totalDuration = runner.steps.reduce(0) { $0 + $1.seconds }
+        runner.start(at: .now)
+        NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: totalDuration, title: programName, message: Self.notificationMessage)
+        syncToWatch(runner: runner)
+    }
+
+    private func handlePause() {
+        guard let runner else { return }
+        runner.pause(at: .now)
+        NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
+        syncToWatch(runner: runner)
+    }
+
+    private func handleResume() {
+        guard let runner else { return }
+        let totalDuration = runner.steps.reduce(0) { $0 + $1.seconds }
+        let remaining = totalDuration - Int(runner.totalElapsed(at: .now))
+        runner.resume(at: .now)
+        NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: remaining, title: programName, message: Self.notificationMessage)
+        syncToWatch(runner: runner)
+    }
+
+    private func handleReset() {
+        guard let runner else { return }
+        runner.reset()
+        NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
+        syncToWatch(runner: runner)
     }
 
     var body: some View {
@@ -100,6 +132,16 @@ struct IntervalRunView: View {
         .task {
             load()
         }
+        .task {
+            WatchSyncSender.shared.onReceiveControl = { [self] command in
+                switch command.action {
+                case .start: handleStart()
+                case .pause: handlePause()
+                case .resume: handleResume()
+                case .reset: handleReset()
+                }
+            }
+        }
     }
 
     private func runningContent(runner: IntervalRunner) -> some View {
@@ -108,10 +150,6 @@ struct IntervalRunView: View {
         // 진행 중이 아닐 때(대기/일시정지/완료)는 어차피 값이 안 바뀌므로 타임라인을
         // 멈춰 불필요한 갱신을 막는다.
         let isPaused = runner.state != .running && runner.state != .preparing
-
-        let totalDuration = runner.steps.reduce(0) { $0 + $1.seconds }
-        let remaining = totalDuration - Int(runner.totalElapsed(at: .now))
-        let message = "인터벌 프로그램이 종료되었습니다"
 
         return TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: isPaused)) { context in
             let progress = runner.currentProgress(at: context.date)
@@ -156,37 +194,15 @@ struct IntervalRunView: View {
 
                 HStack {
                     if runner.state == .paused || runner.state == .completed {
-                        RunningControlButton(title: "리셋", style: .reset) {
-                            runner.reset()
-                            NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
-                        }
+                        RunningControlButton(title: "리셋", style: .reset) { handleReset() }
                     }
-
                     Spacer()
-
                     if runner.state == .running || runner.state == .preparing {
-                        RunningControlButton(title: "일시정지", style: .pause) {
-                            runner.pause(at: .now)
-                            NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
-                            syncToWatch(runner: runner)
-                        }
+                        RunningControlButton(title: "일시정지", style: .pause) { handlePause() }
                     } else if runner.state == .paused {
-                        RunningControlButton(title: "재개", style: .start) {
-                            runner.resume(at: .now)
-                            NotificationScheduler.schedule(
-                                identifier: Self.notificationIdentifier,
-                                secondsRemaining: remaining,
-                                title: programName,
-                                message: message
-                            )
-                            syncToWatch(runner: runner)
-                        }
+                        RunningControlButton(title: "재개", style: .start) { handleResume() }
                     } else {
-                        RunningControlButton(title: "시작", style: .start) {
-                            runner.start(at: .now)
-                            NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: totalDuration, title: programName, message: message)
-                            syncToWatch(runner: runner)
-                        }
+                        RunningControlButton(title: "시작", style: .start) { handleStart() }
                     }
                 }
             }

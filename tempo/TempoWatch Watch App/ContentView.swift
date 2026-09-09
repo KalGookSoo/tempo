@@ -35,11 +35,12 @@ struct ContentView: View {
                         round: progress.step.round,
                         totalRounds: progress.step.totalRounds,
                         statusLabel: statusLabel(for: progress.step),
-                        statusColor: statusColor(for: progress.step),
+                        statusColor: statusColor(for: progress.step, runnerState: runner.state),
                         remainingSeconds: progress.remainingSeconds,
                         elapsedInStep: progress.elapsedInStep,
                         totalSeconds: progress.step.seconds
                     )
+                    controlButtons(runner: runner)
                 } else if let lastStep = runner.steps.last {
                     stepContent(
                         round: lastStep.round,
@@ -50,6 +51,7 @@ struct ContentView: View {
                         elapsedInStep: Double(lastStep.seconds),
                         totalSeconds: lastStep.seconds
                     )
+                    controlButtons(runner: runner)
                 } else {
                     Text("완료") // 라운드가 0인 극단적인 경우의 최후 폴백
                 }
@@ -72,11 +74,14 @@ struct ContentView: View {
         }
     }
 
-    private func statusColor(for step: IntervalStep) -> Color {
+    private func statusColor(for step: IntervalStep, runnerState: TimerState) -> Color {
+        if runnerState == .paused {
+            return .accentColor
+        }
         switch step.kind {
-        case .prepare: .prepare
-        case .work: .work
-        case .rest: .rest
+        case .prepare: return .prepare
+        case .work: return .work
+        case .rest: return .rest
         }
     }
 
@@ -109,6 +114,42 @@ struct ContentView: View {
                 fontSize: 24
             )
         }
+    }
+
+    /// 시작/일시정지/재개/리셋 조작 버튼 줄. 진행 중/완료 화면 둘 다 이 함수를
+    /// 공유한다(#91) — 아이폰의 조작 버튼 조건(HStack)과 동일한 상태별 노출 규칙.
+    @ViewBuilder
+    private func controlButtons(runner: IntervalRunner) -> some View {
+        HStack(spacing: 12) {
+            if runner.state == .paused || runner.state == .completed {
+                Button { handleReset() } label: { Image(systemName: "arrow.counterclockwise") }
+            }
+            if runner.state == .running || runner.state == .preparing {
+                Button { handlePause() } label: { Image(systemName: "pause.fill") }
+            } else if runner.state == .paused {
+                Button { handleResume() } label: { Image(systemName: "play.fill") }
+            } else {
+                Button { handleStart() } label: { Image(systemName: "play.fill") }
+            }
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+    }
+
+    private func handleStart() {
+        WatchControlSender.send(.start)
+    }
+
+    private func handlePause() {
+        WatchControlSender.send(.pause)
+    }
+
+    private func handleResume() {
+        WatchControlSender.send(.resume)
+    }
+
+    private func handleReset() {
+        WatchControlSender.send(.reset)
     }
 }
 

@@ -6,6 +6,7 @@ import WatchConnectivity
 /// updateApplicationContext는 최신 값만 유지하고 워치가 나중에 앱을 열어도 받을 수 있어 이 용도에 맞다(#79).
 final class WatchSyncSender: NSObject, WCSessionDelegate {
     static let shared = WatchSyncSender()
+    var onReceiveControl: ((WatchControlCommand) -> Void)?
 
     override private init() {
         super.init()
@@ -22,6 +23,7 @@ final class WatchSyncSender: NSObject, WCSessionDelegate {
             config: config,
             elapsedSeconds: runner.totalElapsed(at: .now),
             isPaused: runner.state == .paused,
+            isIdle: runner.state == .idle,
             sentAt: .now
         )
 
@@ -35,5 +37,14 @@ final class WatchSyncSender: NSObject, WCSessionDelegate {
 
     func sessionDidDeactivate(_: WCSession) {
         WCSession.default.activate()
+    }
+
+    func session(_: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        guard let data = applicationContext["control"] as? Data,
+              let command = try? JSONDecoder().decode(WatchControlCommand.self, from: data)
+        else { return }
+        Task { @MainActor in
+            onReceiveControl?(command)
+        }
     }
 }

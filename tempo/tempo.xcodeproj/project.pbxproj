@@ -119,6 +119,7 @@
 				Timing/IntervalRunner.swift,
 				Timing/IntervalWatchSnapshot.swift,
 				Timing/TimerState.swift,
+				Timing/WatchControlCommand.swift,
 				Views/Interval/IntervalCountdownRing.swift,
 				Views/RunningDisplayView.swift,
 			);

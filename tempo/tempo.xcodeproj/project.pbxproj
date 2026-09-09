@@ -119,6 +119,8 @@
 				Timing/IntervalRunner.swift,
 				Timing/IntervalWatchSnapshot.swift,
 				Timing/TimerState.swift,
+				Views/Interval/IntervalCountdownRing.swift,
+				Views/RunningDisplayView.swift,
 			);
 			target = 9F0B541F304FF92600376D71 /* TempoWatch Watch App */;
 		};

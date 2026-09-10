@@ -10,17 +10,20 @@ final class AppSettings {
     var bigTimerDigitsEnabled: Bool
     var hasCompletedOnboarding: Bool = false
     var updatedAt: Date
+    var hasDismissedWatchPairingNotice: Bool = false
 
     init(
         themeMode: ThemeMode = .system,
         bigTimerDigitsEnabled: Bool = false,
         hasCompletedOnboarding: Bool = false,
-        updatedAt: Date
+        updatedAt: Date,
+        hasDismissedWatchPairingNotice: Bool = false
     ) {
         self.themeMode = themeMode
         self.bigTimerDigitsEnabled = bigTimerDigitsEnabled
         self.hasCompletedOnboarding = hasCompletedOnboarding
         self.updatedAt = updatedAt
+        self.hasDismissedWatchPairingNotice = hasDismissedWatchPairingNotice
     }
 }
 

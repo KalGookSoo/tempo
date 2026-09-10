@@ -15,6 +15,12 @@ final class WatchSyncSender: NSObject, WCSessionDelegate {
         WCSession.default.activate()
     }
 
+    var isPairedButNotInstalled: Bool {
+        WCSession.default.activationState == .activated
+            && WCSession.default.isPaired
+            && !WCSession.default.isWatchAppInstalled
+    }
+
     func send(programName: String, config: IntervalConfig, runner: IntervalRunner) {
         guard WCSession.default.activationState == .activated else { return }
 

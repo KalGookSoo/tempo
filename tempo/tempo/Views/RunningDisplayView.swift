@@ -7,6 +7,9 @@ extension Color {
     static let work = Color.green
     static let rest = Color.teal
     static let danger = Color.red
+    /// 일시정지 상태색. `.accentColor`는 타겟(아이폰/애플워치)마다 에셋이 달라 아이폰은
+    /// 파란색, 워치는 회색으로 다르게 보였다(이슈 확인) — 고정된 회색으로 통일한다.
+    static let paused = Color.gray
 }
 
 /// 준비/운동/휴식 구간이 없는 화면(타이머, 스톱워치)의 공통 상태->라벨/색상 매핑.

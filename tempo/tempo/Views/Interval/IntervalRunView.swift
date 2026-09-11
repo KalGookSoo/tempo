@@ -21,6 +21,7 @@ struct IntervalRunView: View {
     @State private var previousStep: IntervalStep?
     @State private var programName = ""
     @State private var isLeaveConfirmationPresented = false
+    @State private var isWatchInstallAlertPresented = false
     @State private var config: IntervalConfig?
     private static let notificationIdentifier = "interval.end"
     private static let notificationMessage = String(localized: "인터벌 프로그램이 종료되었습니다")
@@ -103,7 +104,14 @@ struct IntervalRunView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     guard let runner else { return }
-                    syncToWatch(runner: runner)
+                    // 페어링된 애플워치는 있는데 tempo 앱이 없으면 동기화 대신 설치를
+                    // 안내한다 — 애플이 앱에서 워치 설치를 직접 트리거하는 공식 API를
+                    // 제공하지 않아서, 여기서 문구로 안내하는 선에서 그친다(#92).
+                    if WatchSyncSender.shared.isPairedButNotInstalled {
+                        isWatchInstallAlertPresented = true
+                    } else {
+                        syncToWatch(runner: runner)
+                    }
                 } label: {
                     Image(systemName: "applewatch")
                 }
@@ -123,6 +131,11 @@ struct IntervalRunView: View {
             }
         } message: {
             Text("지금 나가면 진행 중인 인터벌이 중단되고 처음부터 다시 시작해야 합니다.")
+        }
+        .alert("애플워치에 tempo 설치", isPresented: $isWatchInstallAlertPresented) {
+            Button("확인") {}
+        } message: {
+            Text("아이폰의 Watch 앱에서 tempo를 설치하면 손목에서 바로 확인할 수 있어요.")
         }
         .onDisappear {
             if runner?.state != .completed {

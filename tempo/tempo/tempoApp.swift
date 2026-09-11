@@ -53,12 +53,6 @@ struct tempoApp: App {
                 UNUserNotificationCenter.current().delegate = notificationDelegate
                 notificationDelegate.onTapTimer = { selectedTab = .timer }
                 notificationDelegate.onTapInterval = { selectedTab = .interval }
-                // WatchSyncSender는 IntervalRunView가 열릴 때만 lazy하게 생성돼서 WCSession이
-                // 늦게 활성화된다. 설정 탭의 "워치 페어링됐는데 앱 미설치" 안내(#92)가 앱 실행
-                // 직후에도 바로 동작하도록, 여기서 미리 접근해서 세션 활성화를 앞당긴다.
-                // (다만 activate()는 비동기라, 이 시점 직후 곧바로 설정 탭에 들어가면
-                // activationState가 아직 .activated가 아닐 수도 있음 — 완전히 해소된 건 아님)
-                _ = WatchSyncSender.shared
             }
             // 기기의 라이트/다크 설정과 무관하게 앱 전체를 다크 모드로 고정한다. iOS 기본
             // 시계 앱의 "타이머" 화면과 같은 정책이다 — 라이트 모드에서는 상태 색상(준비/운동/

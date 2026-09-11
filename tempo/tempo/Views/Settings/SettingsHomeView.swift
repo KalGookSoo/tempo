@@ -1,11 +1,7 @@
-import SwiftData
 import SwiftUI
 
 /// 설정 탭의 루트 화면. moov의 "관리" 탭처럼 도움말/온보딩/버전 정보를 모아 보여준다.
 struct SettingsHomeView: View {
-    @Environment(\.modelContext) private var modelContext
-    @State private var showsWatchPairingNotice = false
-
     var body: some View {
         List {
             NavigationLink(value: SettingsRoute.cue) {
@@ -25,23 +21,6 @@ struct SettingsHomeView: View {
             }
         }
         .navigationTitle("설정")
-        .task {
-            // tempoApp.swift가 WatchSyncSender.shared를 미리 건드려서 WCSession을 앞당겨
-            // 활성화하지만 activate()가 비동기라, 아주 드물게 앱 실행 직후 바로 여기 들어오면
-            // activationState가 아직 안 끝나 있어 안내가 이번 실행엔 안 뜰 수 있다(#92).
-            guard WatchSyncSender.shared.isPairedButNotInstalled else { return }
-            let repo = SettingsRepository(modelContext: modelContext)
-            if let settings = try? repo.find(), !settings.hasDismissedWatchPairingNotice {
-                showsWatchPairingNotice = true
-            }
-        }
-        .alert("애플워치에 tempo 설치", isPresented: $showsWatchPairingNotice) {
-            Button("확인") {
-                try? SettingsRepository(modelContext: modelContext).dismissWatchPairingNotice()
-            }
-        } message: {
-            Text("아이폰의 Watch 앱에서 tempo를 설치하면 손목에서 바로 확인할 수 있어요.")
-        }
     }
 }
 

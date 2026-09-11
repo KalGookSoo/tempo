@@ -33,11 +33,4 @@ final class SettingsRepository {
         settings.updatedAt = Date()
         try modelContext.save()
     }
-
-    func dismissWatchPairingNotice() throws {
-        guard let settings = try find() else { return }
-        settings.hasDismissedWatchPairingNotice = true
-        settings.updatedAt = Date()
-        try modelContext.save()
-    }
 }

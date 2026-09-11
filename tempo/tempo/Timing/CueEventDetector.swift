@@ -56,7 +56,12 @@ enum CueEventDetector {
             }
         }
 
-        if countdownLeadSeconds > 0,
+        // 구간이 막 시작된 틱에는 카운트다운 알림을 안 울린다. 구간 길이가 알림
+        // 시점(countdownLeadSeconds)보다 짧거나 같으면(예: 운동 5초 + 알림 시점 10초)
+        // 시작하자마자 remainingSeconds가 이미 그 범위 안에 들어와서 시작 알림
+        // (workStart/restStart)과 카운트다운 알림이 같은 틱에 겹쳐 울렸다.
+        if !didAdvanceToNewStep,
+           countdownLeadSeconds > 0,
            currentProgress.remainingSeconds > 0,
            currentProgress.remainingSeconds <= countdownLeadSeconds
         {

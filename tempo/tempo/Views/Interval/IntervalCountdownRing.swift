@@ -10,6 +10,9 @@ struct IntervalCountdownRing: View {
     let color: Color
     let statusLabel: String
     let fontSize: CGFloat
+    /// 상태 배지 글자 크기(statusFontSize)에 곱하는 배율. 아이폰은 기본값 1.0(변화
+    /// 없음), 워치 화면만 살짝 더 키우고 싶을 때 호출부에서 1보다 큰 값을 넘긴다.
+    var statusFontSizeScale: CGFloat = 1.0
 
     private var lineWidth: CGFloat {
         fontSize * 0.18
@@ -19,7 +22,7 @@ struct IntervalCountdownRing: View {
     /// title3 약 20pt를 fontSize 76 기준으로 역산한 0.26)로 스케일하되, 워치처럼
     /// fontSize가 훨씬 작을 때도 읽을 수 있도록 최소 11pt를 보장한다.
     private var statusFontSize: CGFloat {
-        max(fontSize * 0.26, 11)
+        max(fontSize * 0.26, 11) * statusFontSizeScale
     }
 
     /// 링 반지름. 배지를 중심(숫자)에서 12시 방향 링 쪽으로 얼마나 띄울지 계산하는 기준.

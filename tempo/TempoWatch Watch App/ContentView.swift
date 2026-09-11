@@ -125,7 +125,8 @@ struct ContentView: View {
                 totalSeconds: totalSeconds,
                 color: statusColor,
                 statusLabel: statusLabel,
-                fontSize: ringFontSize
+                fontSize: ringFontSize,
+                statusFontSizeScale: 1.15
             )
 
             // 라운드 표시(N / N)를 링 밖 별도 줄 대신 6시 방향 안쪽에 겹친다 — 별도

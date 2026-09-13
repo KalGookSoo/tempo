@@ -20,7 +20,12 @@ enum CueTriggerPlayer {
     /// 앱 시작 시 한 번 호출해서 오디오 세션을 미리 활성화한다. 첫 재생 시 발생하는
     /// 하드웨어 예열 지연(이슈 #30)을 앱 실행 초반으로 옮겨, 인터벌 실행 화면 진입
     /// 시점에는 이미 준비된 상태가 되게 한다.
+    /// 카테고리를 지정 안 하면 iOS 기본값인 `.soloAmbient`가 적용되는데, 이건 다른 앱
+    /// 오디오와 안 섞여서 세션을 활성화하는 순간 재생 중이던 음악이 정지됐다(이슈 #94).
+    /// `.playback`(무음 스위치와 무관하게 알림음이 들려야 함) + `.mixWithOthers`(다른 앱
+    /// 오디오를 끄지 않음)로 명시한다.
     static func prewarmAudioSession() {
+        try? AVAudioSession.sharedInstance().setCategory(.playback, options: [.mixWithOthers])
         try? AVAudioSession.sharedInstance().setActive(true)
     }
 

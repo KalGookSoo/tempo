@@ -154,7 +154,8 @@ final class SoundRecorder: NSObject {
     }
 
     /// 녹음을 미리듣기한다. 같은 항목을 다시 탭하면 멈춘다. 무음 스위치와 무관하게 항상
-    /// 스피커로 들리도록 재생 전용 세션으로 전환한다(이슈 #28).
+    /// 스피커로 들리도록 재생 전용 세션으로 전환한다(이슈 #28). `.mixWithOthers`가 없으면
+    /// 미리듣기 중에도 다른 앱 음악이 끊겼다(이슈 #94).
     func preview(_ asset: SoundAsset) {
         if previewingAssetID == asset.id {
             player?.stop()
@@ -164,7 +165,7 @@ final class SoundRecorder: NSObject {
         }
 
         guard let url = try? RecordedSoundFileStore.fileURL(for: asset.id) else { return }
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
         try? AVAudioSession.sharedInstance().setActive(true)
 
         guard let newPlayer = try? AVAudioPlayer(contentsOf: url) else { return }

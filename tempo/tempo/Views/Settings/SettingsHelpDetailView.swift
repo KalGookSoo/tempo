@@ -10,15 +10,30 @@ struct SettingsHelpDetailView: View {
         Group {
             if let topic = HelpLibrary.topic(id: id) {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 20) {
                         if let image = Self.screenshot(for: topic.id) {
+                            // 실제 화면이 아니라 스크린샷이라는 걸 한눈에 구분할 수 있도록
+                            // 얇은 테두리를 두른다(장식이 아니라 이미지/실제 화면 구분용).
                             image
                                 .resizable()
                                 .scaledToFit()
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .strokeBorder(Color(.separator), lineWidth: 1)
+                                )
                         }
-                        ForEach(Array(topic.paragraphs.enumerated()), id: \.offset) { _, paragraph in
-                            Text(LocalizedStringKey(paragraph))
+
+                        Text(LocalizedStringKey(topic.summary))
+                            .font(.title3.bold())
+
+                        Divider()
+
+                        VStack(alignment: .leading, spacing: 12) {
+                            ForEach(Array(topic.paragraphs.enumerated()), id: \.offset) { _, paragraph in
+                                Text(LocalizedStringKey(paragraph))
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                     .padding()

@@ -1,9 +1,13 @@
 import Combine
 import Foundation
+import OSLog
 import WatchConnectivity
 
 final class WatchSyncReceiver: NSObject, WCSessionDelegate, ObservableObject {
     static let shared = WatchSyncReceiver()
+
+    /// 배포된 빌드에서도 워치 실기기 콘솔로 확인할 수 있는 로그(이슈 #89).
+    private static let logger = Logger(subsystem: "kr.me.seesaw.tempo.watchkitapp", category: "WatchSync")
 
     @Published private(set) var latestSnapshot: IntervalWatchSnapshot?
 
@@ -18,9 +22,11 @@ final class WatchSyncReceiver: NSObject, WCSessionDelegate, ObservableObject {
 
     /// 아이폰이 백그라운드여도, 워치 앱을 열면 마지막 컨텍스트를 여기로 받는다.
     func session(_: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        guard let data = applicationContext["snapshot"] as? Data,
-              let snapshot = try? JSONDecoder().decode(IntervalWatchSnapshot.self, from: data)
-        else { return }
+        guard let data = applicationContext["snapshot"] as? Data else { return }
+        guard let snapshot = try? JSONDecoder().decode(IntervalWatchSnapshot.self, from: data) else {
+            Self.logger.error("아이폰에서 받은 snapshot 페이로드 디코딩 실패")
+            return
+        }
 
         Task { @MainActor in
             self.latestSnapshot = snapshot

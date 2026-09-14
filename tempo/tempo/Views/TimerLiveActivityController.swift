@@ -1,5 +1,6 @@
 import ActivityKit
 import Foundation
+import OSLog
 
 /// 타이머/스톱워치 실행 상태를 Live Activity(잠금화면·알림센터·다이나믹 아일랜드)로
 /// 내보낸다(이슈 #52). `TimerEngine`/`StopwatchEngine`과 마찬가지로 Date 기반이라,
@@ -16,6 +17,10 @@ enum TimerLiveActivityController {
     }
 
     private static var activities: [Kind: Activity<TimerActivityAttributes>] = [:]
+    /// 배포된 빌드에서도 실기기 콘솔로 확인할 수 있는 로그(이슈 #89). Live Activity
+    /// 시작/종료는 시스템 권한·정책에 따라 조용히 실패할 수 있어(예: `Activity.request`가
+    /// `try?`로 에러를 삼킴) 실패했을 때 원인을 남겨야 진단할 수 있다.
+    private static let logger = Logger(subsystem: "kr.me.seesaw.tempo", category: "LiveActivity")
 
     /// Live Activity가 없으면 새로 시작하고, 이미 있으면 상태만 갱신한다.
     ///
@@ -47,12 +52,19 @@ enum TimerLiveActivityController {
             return
         }
 
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+            logger.notice("Live Activity 비활성화 상태(시스템 설정)라 시작 안 함: \(String(describing: kind))")
+            return
+        }
 
-        activities[kind] = try? Activity.request(
-            attributes: TimerActivityAttributes(title: title),
-            content: ActivityContent(state: state, staleDate: staleDate)
-        )
+        do {
+            activities[kind] = try Activity.request(
+                attributes: TimerActivityAttributes(title: title),
+                content: ActivityContent(state: state, staleDate: staleDate)
+            )
+        } catch {
+            logger.error("Activity.request 실패(\(String(describing: kind))): \(error.localizedDescription)")
+        }
     }
 
     static func end(kind: Kind) {

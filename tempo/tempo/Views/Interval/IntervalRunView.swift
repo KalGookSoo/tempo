@@ -1,3 +1,4 @@
+import OSLog
 import SwiftData
 import SwiftUI
 import UIKit
@@ -23,6 +24,10 @@ struct IntervalRunView: View {
     @State private var isLeaveConfirmationPresented = false
     @State private var isWatchInstallAlertPresented = false
     @State private var config: IntervalConfig?
+    /// 워치 동기화 버튼이 눌렸는지 자체가, 눌렸다면 어느 분기로 갔는지가 실기기
+    /// 콘솔로 안 남아서 "버튼 눌러도 반응 없음" 제보를 진단할 수 없었다(이슈 참고:
+    /// 워치 동기화 버튼 무반응). WatchSync 로그와 같은 subsystem/category로 남긴다.
+    private static let watchSyncLogger = Logger(subsystem: "kr.me.seesaw.tempo", category: "WatchSync")
     private static let notificationIdentifier = "interval.end"
     private static let notificationMessage = String(localized: "인터벌 프로그램이 종료되었습니다")
 
@@ -103,11 +108,15 @@ struct IntervalRunView: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    guard let runner else { return }
+                    guard let runner else {
+                        Self.watchSyncLogger.error("워치 동기화 버튼: runner가 nil이라 취소")
+                        return
+                    }
                     // 페어링된 애플워치는 있는데 tempo 앱이 없으면 동기화 대신 설치를
                     // 안내한다 — 애플이 앱에서 워치 설치를 직접 트리거하는 공식 API를
                     // 제공하지 않아서, 여기서 문구로 안내하는 선에서 그친다(#92).
                     if WatchSyncSender.shared.isPairedButNotInstalled {
+                        Self.watchSyncLogger.notice("워치 동기화 버튼: 설치 안내 alert 표시")
                         isWatchInstallAlertPresented = true
                     } else {
                         syncToWatch(runner: runner)

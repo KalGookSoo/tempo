@@ -27,7 +27,19 @@ final class WatchSyncSender: NSObject, WCSessionDelegate {
     }
 
     func send(programName: String, config: IntervalConfig, runner: IntervalRunner) {
-        guard WCSession.default.activationState == .activated else { return }
+        // updateApplicationContext는 페어링/설치 상태가 안 맞아도 에러 없이 그냥
+        // 전달이 안 될 때가 있다 — 그러면 catch에도 안 걸려서 버튼을 눌러도 왜
+        // 반응이 없는지 로그로 구분이 안 됐다. 매 호출마다 이 세 값을 무조건 남겨서,
+        // 어느 분기를 탔는지 나중에라도 알 수 있게 한다.
+        let session = WCSession.default
+        Self.logger.notice(
+            "send 호출: activationState=\(session.activationState.rawValue, privacy: .public) isPaired=\(session.isPaired, privacy: .public) isWatchAppInstalled=\(session.isWatchAppInstalled, privacy: .public)"
+        )
+
+        guard session.activationState == .activated else {
+            Self.logger.error("전송 취소: WCSession이 아직 activated 상태가 아님")
+            return
+        }
 
         let snapshot = IntervalWatchSnapshot(
             programName: programName,
@@ -43,9 +55,10 @@ final class WatchSyncSender: NSObject, WCSessionDelegate {
             return
         }
         do {
-            try WCSession.default.updateApplicationContext(["snapshot": data])
+            try session.updateApplicationContext(["snapshot": data])
+            Self.logger.notice("updateApplicationContext(snapshot) 호출 성공")
         } catch {
-            Self.logger.error("updateApplicationContext(snapshot) 실패: \(error.localizedDescription)")
+            Self.logger.error("updateApplicationContext(snapshot) 실패: \(error.localizedDescription, privacy: .public)")
         }
     }
 

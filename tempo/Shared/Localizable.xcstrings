@@ -436,6 +436,9 @@
         }
       }
     },
+    "문의하기" : {
+
+    },
     "미러링 실행 화면" : {
       "extractionState" : "stale",
       "localizations" : {

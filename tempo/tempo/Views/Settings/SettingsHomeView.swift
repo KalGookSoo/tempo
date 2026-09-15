@@ -25,6 +25,7 @@ struct SettingsHomeView: View {
             }
         }
         .navigationTitle("설정")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     /// 일반 사용자는 Xcode 콘솔을 볼 수 없어서(이슈 #89), 배포 후엔 이 경로가 유일한

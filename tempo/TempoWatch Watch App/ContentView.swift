@@ -4,6 +4,10 @@ struct ContentView: View {
     @StateObject private var receiver = WatchSyncReceiver.shared
     @State private var runner: IntervalRunner?
     @State private var previousStep: IntervalStep?
+    /// 워치가 마지막으로 로컬 버튼 조작 또는 아이폰 스냅샷 수신으로 반영한 시각.
+    /// 아이폰이 잠겨 있어 응답이 늦게 오는 동안 워치를 로컬로 먼저 움직인 뒤(#103),
+    /// 그보다 오래된 스냅샷이 뒤늦게 도착하면 무시하기 위한 기준이다.
+    @State private var lastLocalActionAt: Date?
 
     var body: some View {
         Group {
@@ -14,15 +18,20 @@ struct ContentView: View {
             }
         }
         .onChange(of: receiver.latestSnapshot?.sentAt) {
-            if let snapshot = receiver.latestSnapshot {
-                runner = snapshot.makeRunner()
-            }
+            adoptSnapshotIfNewer()
         }
         .task {
-            if let snapshot = receiver.latestSnapshot {
-                runner = snapshot.makeRunner()
-            }
+            adoptSnapshotIfNewer()
         }
+    }
+
+    /// 아이폰 스냅샷이 워치의 마지막 로컬 조작보다 오래됐으면(뒤늦게 도착한 낡은
+    /// 스냅샷) 무시하고, 아니면 그걸로 로컬 runner를 재구성한다.
+    private func adoptSnapshotIfNewer() {
+        guard let snapshot = receiver.latestSnapshot else { return }
+        guard snapshot.sentAt > (lastLocalActionAt ?? .distantPast) else { return }
+        runner = snapshot.makeRunner()
+        lastLocalActionAt = snapshot.sentAt
     }
 
     private func runningContent(runner: IntervalRunner) -> some View {
@@ -175,19 +184,37 @@ struct ContentView: View {
         }
     }
 
+    // 아이폰이 잠겨서 응답이 늦게 올 수 있으니, 아이폰 응답을 기다리지 않고 워치
+    // 자신의 runner를 먼저 낙관적으로 갱신한다(#103) — 그래야 워치 화면이 즉시 바뀐다.
+    // 아이폰에는 그대로 명령을 보내 나중에(잠금 해제 시) 따라잡게 한다.
     private func handleStart() {
+        guard let runner else { return }
+        let now = Date.now
+        runner.start(at: now)
+        lastLocalActionAt = now
         WatchControlSender.send(.start)
     }
 
     private func handlePause() {
+        guard let runner else { return }
+        let now = Date.now
+        runner.pause(at: now)
+        lastLocalActionAt = now
         WatchControlSender.send(.pause)
     }
 
     private func handleResume() {
+        guard let runner else { return }
+        let now = Date.now
+        runner.resume(at: now)
+        lastLocalActionAt = now
         WatchControlSender.send(.resume)
     }
 
     private func handleReset() {
+        guard let runner else { return }
+        runner.reset()
+        lastLocalActionAt = .now
         WatchControlSender.send(.reset)
     }
 }

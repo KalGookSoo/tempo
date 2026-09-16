@@ -24,6 +24,11 @@ struct IntervalRunView: View {
     @State private var isLeaveConfirmationPresented = false
     @State private var isWatchInstallAlertPresented = false
     @State private var config: IntervalConfig?
+    /// 아이폰이 마지막으로 반영한 조작이 언제 일어났는지(로컬 버튼이든 워치가 보낸
+    /// 명령이든). 워치가 오프라인(아이폰 잠금 등)이었다가 뒤늦게 조작 명령을 보내오면,
+    /// 그 사이 아이폰에서 이미 더 최근 조작이 있었을 수 있다 — 그럴 땐 뒤늦게 도착한
+    /// 낡은 명령을 무시해야 순서가 안 꼬인다(#103).
+    @State private var lastKnownActionAt: Date?
     /// 워치 동기화 버튼이 눌렸는지 자체가, 눌렸다면 어느 분기로 갔는지가 실기기
     /// 콘솔로 안 남아서 "버튼 눌러도 반응 없음" 제보를 진단할 수 없었다(이슈 참고:
     /// 워치 동기화 버튼 무반응). WatchSync 로그와 같은 subsystem/category로 남긴다.
@@ -48,30 +53,41 @@ struct IntervalRunView: View {
 
     // 시작/일시정지/재개/리셋은 더 이상 자동으로 워치에 전송하지 않는다(#102) — 툴바의
     // 워치 아이콘 버튼을 직접 눌렀을 때만 그 시점의 상태를 동기화한다.
-    private func handleStart() {
+    //
+    // `at`은 아이폰 자체 버튼이면 기본값(`.now`)을 쓰고, 워치가 보낸 명령을 적용할 때는
+    // 명령의 `sentAt`을 그대로 넘긴다(#103) — 아이폰이 잠겨 있던 동안 워치가 먼저 조작한
+    // 경우, 실제 조작 시각을 IntervalRunner에 넘겨야 뒤늦게 처리해도 경과 시간이 정확하다.
+    // 알림 예약은 반드시 `at` 처리 이후 실제 현재 시각(`.now`) 기준으로 남은 시간을 다시
+    // 계산한다 — 그래야 지연 배달된 만큼 알림 시점도 같이 당겨진다.
+    private func handleStart(at: Date = .now) {
         guard let runner else { return }
         let totalDuration = runner.steps.reduce(0) { $0 + $1.seconds }
-        runner.start(at: .now)
-        NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: totalDuration, title: programName, message: Self.notificationMessage)
-    }
-
-    private func handlePause() {
-        guard let runner else { return }
-        runner.pause(at: .now)
-        NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
-    }
-
-    private func handleResume() {
-        guard let runner else { return }
-        let totalDuration = runner.steps.reduce(0) { $0 + $1.seconds }
-        let remaining = totalDuration - Int(runner.totalElapsed(at: .now))
-        runner.resume(at: .now)
+        runner.start(at: at)
+        lastKnownActionAt = at
+        let remaining = max(0, totalDuration - Int(runner.totalElapsed(at: .now)))
         NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: remaining, title: programName, message: Self.notificationMessage)
     }
 
-    private func handleReset() {
+    private func handlePause(at: Date = .now) {
+        guard let runner else { return }
+        runner.pause(at: at)
+        lastKnownActionAt = at
+        NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
+    }
+
+    private func handleResume(at: Date = .now) {
+        guard let runner else { return }
+        let totalDuration = runner.steps.reduce(0) { $0 + $1.seconds }
+        runner.resume(at: at)
+        lastKnownActionAt = at
+        let remaining = max(0, totalDuration - Int(runner.totalElapsed(at: .now)))
+        NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: remaining, title: programName, message: Self.notificationMessage)
+    }
+
+    private func handleReset(at: Date = .now) {
         guard let runner else { return }
         runner.reset()
+        lastKnownActionAt = at
         NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
     }
 
@@ -162,11 +178,19 @@ struct IntervalRunView: View {
         }
         .task {
             WatchSyncSender.shared.onReceiveControl = { [self] command in
+                // 아이폰이 잠겨 있던 동안 워치에서 조작한 명령이 뒤늦게 도착할 수 있다.
+                // 그 사이 아이폰 쪽에서 이미 더 최근 조작이 있었다면(예: 다른 경로로
+                // 리셋), 뒤늦게 온 낡은 명령은 무시한다 — 항상 더 최근 시각의 조작이
+                // 이긴다(#103).
+                guard command.sentAt > (lastKnownActionAt ?? .distantPast) else {
+                    Self.watchSyncLogger.notice("워치 제어 명령 무시(더 최근 조작이 이미 있음): action=\(command.action.rawValue, privacy: .public)")
+                    return
+                }
                 switch command.action {
-                case .start: handleStart()
-                case .pause: handlePause()
-                case .resume: handleResume()
-                case .reset: handleReset()
+                case .start: handleStart(at: command.sentAt)
+                case .pause: handlePause(at: command.sentAt)
+                case .resume: handleResume(at: command.sentAt)
+                case .reset: handleReset(at: command.sentAt)
                 }
             }
         }

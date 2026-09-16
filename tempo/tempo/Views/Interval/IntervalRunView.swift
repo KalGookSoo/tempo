@@ -203,6 +203,19 @@ struct IntervalRunView: View {
         }
         .task {
             WatchSyncSender.shared.onReceiveControl = { [self] command in
+                // 연동은 오직 아이폰의 워치 아이콘 버튼을 탭했을 때만 성립한다(#104) —
+                // 워치가 먼저 명령을 보냈다고 자동으로 연동된 것으로 치지 않는다.
+                // disconnect는 상태 액션이 아니라 연동 자체를 끄라는 제어 신호라 이
+                // 가드보다 먼저 처리한다.
+                if command.action == .disconnect {
+                    Self.watchSyncLogger.notice("워치에서 연동 해제 요청 받음")
+                    isWatchSyncEnabled = false
+                    return
+                }
+                guard isWatchSyncEnabled else {
+                    Self.watchSyncLogger.notice("워치 제어 명령 무시(연동 안 된 상태): action=\(command.action.rawValue, privacy: .public)")
+                    return
+                }
                 // 아이폰이 잠겨 있던 동안 워치에서 조작한 명령이 뒤늦게 도착할 수 있다.
                 // 그 사이 아이폰 쪽에서 이미 더 최근 조작이 있었다면(예: 다른 경로로
                 // 리셋), 뒤늦게 온 낡은 명령은 무시한다 — 항상 더 최근 시각의 조작이
@@ -211,14 +224,12 @@ struct IntervalRunView: View {
                     Self.watchSyncLogger.notice("워치 제어 명령 무시(더 최근 조작이 이미 있음): action=\(command.action.rawValue, privacy: .public)")
                     return
                 }
-                // 워치가 먼저 명령을 보냈다는 것 자체가 이미 연결됐다는 뜻이니,
-                // 버튼을 아직 안 눌렀어도 이 시점부터는 양방향 자동 동기화를 켠다.
-                isWatchSyncEnabled = true
                 switch command.action {
                 case .start: handleStart(at: command.sentAt)
                 case .pause: handlePause(at: command.sentAt)
                 case .resume: handleResume(at: command.sentAt)
                 case .reset: handleReset(at: command.sentAt)
+                case .disconnect: break // 위에서 이미 처리함
                 }
             }
         }

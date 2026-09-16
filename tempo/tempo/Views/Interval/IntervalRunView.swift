@@ -57,15 +57,15 @@ struct IntervalRunView: View {
         let remainingSeconds: Int?
     }
 
-    // 워치와 연결된(isWatchSyncEnabled) 뒤로는 시작/일시정지/재개/리셋마다 다시
-    // 자동으로 워치에 전송한다 — 최초 연결 전까지는 조용히 있다가, 한 번 연결되면
-    // 그 뒤로는 양방향 자동 동기화로 동작한다는 게 원래 의도였다(#102 후속 수정).
-    //
-    // `at`은 아이폰 자체 버튼이면 기본값(`.now`)을 쓰고, 워치가 보낸 명령을 적용할 때는
-    // 명령의 `sentAt`을 그대로 넘긴다(#103) — 아이폰이 잠겨 있던 동안 워치가 먼저 조작한
-    // 경우, 실제 조작 시각을 IntervalRunner에 넘겨야 뒤늦게 처리해도 경과 시간이 정확하다.
-    // 알림 예약은 반드시 `at` 처리 이후 실제 현재 시각(`.now`) 기준으로 남은 시간을 다시
-    // 계산한다 — 그래야 지연 배달된 만큼 알림 시점도 같이 당겨진다.
+    /// 워치와 연결된(isWatchSyncEnabled) 뒤로는 시작/일시정지/재개/리셋마다 다시
+    /// 자동으로 워치에 전송한다 — 최초 연결 전까지는 조용히 있다가, 한 번 연결되면
+    /// 그 뒤로는 양방향 자동 동기화로 동작한다는 게 원래 의도였다(#102 후속 수정).
+    ///
+    /// `at`은 아이폰 자체 버튼이면 기본값(`.now`)을 쓰고, 워치가 보낸 명령을 적용할 때는
+    /// 명령의 `sentAt`을 그대로 넘긴다(#103) — 아이폰이 잠겨 있던 동안 워치가 먼저 조작한
+    /// 경우, 실제 조작 시각을 IntervalRunner에 넘겨야 뒤늦게 처리해도 경과 시간이 정확하다.
+    /// 알림 예약은 반드시 `at` 처리 이후 실제 현재 시각(`.now`) 기준으로 남은 시간을 다시
+    /// 계산한다 — 그래야 지연 배달된 만큼 알림 시점도 같이 당겨진다.
     private func handleStart(at: Date = .now) {
         guard let runner else { return }
         let totalDuration = runner.steps.reduce(0) { $0 + $1.seconds }
@@ -73,7 +73,9 @@ struct IntervalRunView: View {
         lastKnownActionAt = at
         let remaining = max(0, totalDuration - Int(runner.totalElapsed(at: .now)))
         NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: remaining, title: programName, message: Self.notificationMessage)
-        if isWatchSyncEnabled { syncToWatch(runner: runner) }
+        if isWatchSyncEnabled {
+            syncToWatch(runner: runner)
+        }
     }
 
     private func handlePause(at: Date = .now) {
@@ -81,7 +83,9 @@ struct IntervalRunView: View {
         runner.pause(at: at)
         lastKnownActionAt = at
         NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
-        if isWatchSyncEnabled { syncToWatch(runner: runner) }
+        if isWatchSyncEnabled {
+            syncToWatch(runner: runner)
+        }
     }
 
     private func handleResume(at: Date = .now) {
@@ -91,7 +95,9 @@ struct IntervalRunView: View {
         lastKnownActionAt = at
         let remaining = max(0, totalDuration - Int(runner.totalElapsed(at: .now)))
         NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: remaining, title: programName, message: Self.notificationMessage)
-        if isWatchSyncEnabled { syncToWatch(runner: runner) }
+        if isWatchSyncEnabled {
+            syncToWatch(runner: runner)
+        }
     }
 
     private func handleReset(at: Date = .now) {
@@ -99,7 +105,9 @@ struct IntervalRunView: View {
         runner.reset()
         lastKnownActionAt = at
         NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
-        if isWatchSyncEnabled { syncToWatch(runner: runner) }
+        if isWatchSyncEnabled {
+            syncToWatch(runner: runner)
+        }
     }
 
     var body: some View {

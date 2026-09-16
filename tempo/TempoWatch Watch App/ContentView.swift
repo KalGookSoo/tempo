@@ -6,12 +6,10 @@ struct ContentView: View {
     @State private var previousStep: IntervalStep?
 
     var body: some View {
-        Group {
-            if let runner {
-                runningContent(runner: runner)
-            } else {
-                presetListContent
-            }
+        if let runner {
+            runningContent(runner: runner)
+        } else {
+            presetListContent
         }
     }
 

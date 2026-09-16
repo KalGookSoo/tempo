@@ -53,6 +53,7 @@ struct tempoApp: App {
                 UNUserNotificationCenter.current().delegate = notificationDelegate
                 notificationDelegate.onTapTimer = { selectedTab = .timer }
                 notificationDelegate.onTapInterval = { selectedTab = .interval }
+                WatchSyncSender.shared.configure(modelContainer: modelContainer)
             }
             // 기기의 라이트/다크 설정과 무관하게 앱 전체를 다크 모드로 고정한다. iOS 기본
             // 시계 앱의 "타이머" 화면과 같은 정책이다 — 라이트 모드에서는 상태 색상(준비/운동/

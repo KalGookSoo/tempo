@@ -49,7 +49,7 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        receiver.refresh()
+                        receiver.requestRefresh()
                     } label: {
                         Image(systemName: "arrow.clockwise")
                     }
@@ -58,7 +58,7 @@ struct ContentView: View {
             }
         }
         .task {
-            receiver.refresh()
+            receiver.loadCachedContext()
         }
     }
 

@@ -136,7 +136,13 @@ final class IntervalRunner {
             let duration = TimeInterval(step.seconds)
             let elapsedInStep = elapsed - cursor
             if elapsedInStep < duration {
-                let remaining = step.seconds - Int(elapsedInStep)
+                // elapsedInStep이 음수일 때(예: 막 시작된 직후 아주 잠깐, 또는
+                // 원격 타임스탬프 기반 재구성 과정에서) Int()는 0쪽으로 자르기
+                // 때문에, -1.0 이하인 경우 remaining이 실제보다 1초 이상 더
+                // 크게 나온다 — 뒤의 max(remaining, 0)는 값이 여전히 양수라
+                // 이 오차를 걸러내지 못한다. Int()에 넘기기 전에 0으로 먼저
+                // 클램프해서 원천 차단한다.
+                let remaining = step.seconds - Int(max(elapsedInStep, 0))
                 return Progress(
                     stepIndex: index,
                     step: step,

@@ -4,41 +4,53 @@ struct ContentView: View {
     @StateObject private var receiver = WatchSyncReceiver.shared
     @State private var runner: IntervalRunner?
     @State private var previousStep: IntervalStep?
-    /// 워치가 마지막으로 로컬 버튼 조작 또는 아이폰 스냅샷 수신으로 반영한 시각.
-    /// 아이폰이 잠겨 있어 응답이 늦게 오는 동안 워치를 로컬로 먼저 움직인 뒤(#103),
-    /// 그보다 오래된 스냅샷이 뒤늦게 도착하면 무시하기 위한 기준이다.
-    @State private var lastLocalActionAt: Date?
 
     var body: some View {
         Group {
             if let runner {
                 runningContent(runner: runner)
             } else {
-                // 연동 전(또는 연동 해제 후) 상태다 — "대기 중"만으로는 사용자가
-                // 뭘 해야 하는지 알 수 없어서, 연동 방법을 안내하는 문구로 바꿨다
-                // (#104). 워치 화면이 작아 여러 줄로 접힐 걸 감안해 가운데 정렬한다.
-                Text("인터벌 실행 화면에서\n애플워치 아이콘을 탭해주세요")
-                    .font(.footnote)
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal)
+                presetListContent
             }
-        }
-        .onChange(of: receiver.latestSnapshot?.sentAt) {
-            adoptSnapshotIfNewer()
-        }
-        .task {
-            adoptSnapshotIfNewer()
         }
     }
 
-    /// 아이폰 스냅샷이 워치의 마지막 로컬 조작보다 오래됐으면(뒤늦게 도착한 낡은
-    /// 스냅샷) 무시하고, 아니면 그걸로 로컬 runner를 재구성한다.
-    private func adoptSnapshotIfNewer() {
-        guard let snapshot = receiver.latestSnapshot else { return }
-        guard snapshot.sentAt > (lastLocalActionAt ?? .distantPast) else { return }
-        runner = snapshot.makeRunner()
-        lastLocalActionAt = snapshot.sentAt
+    /// 아이폰 프로그램 목록 화면에서 "애플워치 연동" 버튼을 눌러야 이 목록이 채워진다.
+    /// 그 뒤로는 아이폰과 통신하지 않고, 고른 프로그램을 워치 안에서 완전히 로컬로
+    /// 실행한다.
+    private var presetListContent: some View {
+        NavigationStack {
+            Group {
+                if receiver.presets.isEmpty {
+                    ContentUnavailableView {
+                        Label("동기화된 프로그램 없음", systemImage: "applewatch.slash")
+                    } description: {
+                        Text("아이폰 프로그램 목록에서\n애플워치 연동 버튼을 눌러주세요")
+                            .multilineTextAlignment(.center)
+                    }
+                } else {
+                    List(receiver.presets) { preset in
+                        Button(preset.name) {
+                            runner = IntervalRunner(config: preset.config)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("프로그램")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        receiver.refresh()
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .accessibilityLabel("목록 갱신")
+                }
+            }
+        }
+        .task {
+            receiver.refresh()
+        }
     }
 
     private func runningContent(runner: IntervalRunner) -> some View {
@@ -170,11 +182,11 @@ struct ContentView: View {
         let distanceFromCenter = ringDiameter / 2 + buttonDiameter / 2 + gap
         let cornerOffset = distanceFromCenter / 1.41421356 // 대각선(45도) 성분
 
-        // 연동 해제(X) 버튼. 우측 상단은 시스템 시계가 차지하고 있어 좌측 상단에
-        // 놓는다 — 하단 버튼과 같은 대각선 오프셋 공식을 위쪽에 그대로 적용한
-        // 것뿐이라 링이나 다른 버튼과 겹치지 않는다(#104). 실행 상태와 무관하게
+        // 프로그램 목록으로 돌아가는 버튼. 우측 상단은 시스템 시계가 차지하고 있어
+        // 좌측 상단에 놓는다 — 하단 버튼과 같은 대각선 오프셋 공식을 위쪽에 그대로
+        // 적용한 것뿐이라 링이나 다른 버튼과 겹치지 않는다. 실행 상태와 무관하게
         // 항상 보인다.
-        WatchControlButton(systemImage: "xmark", style: .reset) { handleDisconnect() }
+        WatchControlButton(systemImage: "list.bullet", style: .reset) { self.runner = nil }
             .offset(x: -cornerOffset, y: -cornerOffset)
 
         if runner.state == .paused || runner.state == .completed {
@@ -193,48 +205,24 @@ struct ContentView: View {
         }
     }
 
-    /// 아이폰이 잠겨서 응답이 늦게 올 수 있으니, 아이폰 응답을 기다리지 않고 워치
-    /// 자신의 runner를 먼저 낙관적으로 갱신한다(#103) — 그래야 워치 화면이 즉시 바뀐다.
-    /// 아이폰에는 그대로 명령을 보내 나중에(잠금 해제 시) 따라잡게 한다.
     private func handleStart() {
         guard let runner else { return }
-        let now = Date.now
-        runner.start(at: now)
-        lastLocalActionAt = now
-        WatchControlSender.send(.start)
+        runner.start(at: .now)
     }
 
     private func handlePause() {
         guard let runner else { return }
-        let now = Date.now
-        runner.pause(at: now)
-        lastLocalActionAt = now
-        WatchControlSender.send(.pause)
+        runner.pause(at: .now)
     }
 
     private func handleResume() {
         guard let runner else { return }
-        let now = Date.now
-        runner.resume(at: now)
-        lastLocalActionAt = now
-        WatchControlSender.send(.resume)
+        runner.resume(at: .now)
     }
 
     private func handleReset() {
         guard let runner else { return }
         runner.reset()
-        lastLocalActionAt = .now
-        WatchControlSender.send(.reset)
-    }
-
-    /// 연동을 끊는다(#104). 아이폰 응답을 기다리지 않고 워치 화면부터 즉시 "대기
-    /// 중"으로 돌아가고, 아이폰에는 연동 플래그를 끄라는 신호(disconnect)를
-    /// 보낸다 — 이게 없으면 아이폰이 나중에 또 스냅샷을 보내서 워치가 도로
-    /// 살아난다.
-    private func handleDisconnect() {
-        runner = nil
-        lastLocalActionAt = .now
-        WatchControlSender.send(.disconnect)
     }
 }
 

@@ -1,4 +1,3 @@
-import OSLog
 import SwiftData
 import SwiftUI
 import UIKit
@@ -22,23 +21,6 @@ struct IntervalRunView: View {
     @State private var previousStep: IntervalStep?
     @State private var programName = ""
     @State private var isLeaveConfirmationPresented = false
-    @State private var isWatchInstallAlertPresented = false
-    @State private var config: IntervalConfig?
-    /// 아이폰이 마지막으로 반영한 조작이 언제 일어났는지(로컬 버튼이든 워치가 보낸
-    /// 명령이든). 워치가 오프라인(아이폰 잠금 등)이었다가 뒤늦게 조작 명령을 보내오면,
-    /// 그 사이 아이폰에서 이미 더 최근 조작이 있었을 수 있다 — 그럴 땐 뒤늦게 도착한
-    /// 낡은 명령을 무시해야 순서가 안 꼬인다(#103).
-    @State private var lastKnownActionAt: Date?
-    /// 워치 아이콘 버튼(또는 워치가 먼저 보낸 제어 명령)으로 이 실행 화면이 애플워치와
-    /// "연결"됐는지. 연결 전에는 시작/일시정지/재개/리셋이 자동으로 워치에 전송되지
-    /// 않는다 — 화면에 들어오자마자 조용히 워치로 트래픽을 보내지 않기 위해서다.
-    /// 한 번 연결되면(버튼을 눌렀거나 워치가 뭔가 보내왔으면) 그 뒤로는 양방향으로
-    /// 계속 자동 동기화된다.
-    @State private var isWatchSyncEnabled = false
-    /// 워치 동기화 버튼이 눌렸는지 자체가, 눌렸다면 어느 분기로 갔는지가 실기기
-    /// 콘솔로 안 남아서 "버튼 눌러도 반응 없음" 제보를 진단할 수 없었다(이슈 참고:
-    /// 워치 동기화 버튼 무반응). WatchSync 로그와 같은 subsystem/category로 남긴다.
-    private static let watchSyncLogger = Logger(subsystem: "kr.me.seesaw.tempo", category: "WatchSync")
     private static let notificationIdentifier = "interval.end"
     private static let notificationMessage = String(localized: "인터벌 프로그램이 종료되었습니다")
 
@@ -57,61 +39,32 @@ struct IntervalRunView: View {
         let remainingSeconds: Int?
     }
 
-    /// 워치와 연결된(isWatchSyncEnabled) 뒤로는 시작/일시정지/재개/리셋마다 다시
-    /// 자동으로 워치에 전송한다 — 최초 연결 전까지는 조용히 있다가, 한 번 연결되면
-    /// 그 뒤로는 양방향 자동 동기화로 동작한다는 게 원래 의도였다(#102 후속 수정).
-    ///
-    /// `actionAt`은 "어느 조작이 더 최근이냐"를 가리는 순서 판단(`lastKnownActionAt`)
-    /// 용도로만 쓴다 — 아이폰 자체 버튼이면 기본값(`.now`), 워치가 보낸 명령을 적용할
-    /// 때는 명령의 `sentAt`을 그대로 넘긴다(#103). 반면 IntervalRunner 자체의 시각
-    /// 계산(`runner.start/pause/resume`)은 항상 이 기기(아이폰) 자신의 `Date.now()`만
-    /// 쓴다 — 워치가 보낸 `sentAt`(워치 시계)을 그대로 앵커로 넘기면, 실행 중(RUNNING)
-    /// 상태는 이후 매 프레임 이 기기 자신의 시계와 다시 비교되면서 두 기기 시계가
-    /// 조금만 어긋나도 그 오차가 계속 화면에 드러난다 — "재개하면 어긋나고 안
-    /// 풀린다"는 제보의 원인이었다. 순서 비교는 이벤트 선후관계만 맞으면 되니
-    /// 원격 타임스탬프를 그대로 써도 안전하다.
-    private func handleStart(actionAt: Date = .now) {
+    private func handleStart() {
         guard let runner else { return }
         let totalDuration = runner.steps.reduce(0) { $0 + $1.seconds }
         runner.start(at: .now)
-        lastKnownActionAt = actionAt
         let remaining = max(0, totalDuration - Int(runner.totalElapsed(at: .now)))
         NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: remaining, title: programName, message: Self.notificationMessage)
-        if isWatchSyncEnabled {
-            syncToWatch(runner: runner)
-        }
     }
 
-    private func handlePause(actionAt: Date = .now) {
+    private func handlePause() {
         guard let runner else { return }
         runner.pause(at: .now)
-        lastKnownActionAt = actionAt
         NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
-        if isWatchSyncEnabled {
-            syncToWatch(runner: runner)
-        }
     }
 
-    private func handleResume(actionAt: Date = .now) {
+    private func handleResume() {
         guard let runner else { return }
         let totalDuration = runner.steps.reduce(0) { $0 + $1.seconds }
         runner.resume(at: .now)
-        lastKnownActionAt = actionAt
         let remaining = max(0, totalDuration - Int(runner.totalElapsed(at: .now)))
         NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: remaining, title: programName, message: Self.notificationMessage)
-        if isWatchSyncEnabled {
-            syncToWatch(runner: runner)
-        }
     }
 
-    private func handleReset(actionAt: Date = .now) {
+    private func handleReset() {
         guard let runner else { return }
         runner.reset()
-        lastKnownActionAt = actionAt
         NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
-        if isWatchSyncEnabled {
-            syncToWatch(runner: runner)
-        }
     }
 
     var body: some View {
@@ -143,40 +96,6 @@ struct IntervalRunView: View {
                     Image(systemName: "chevron.backward")
                 }
             }
-            // 애플워치는 아이폰하고만 페어링되는 구조라 아이패드에서는 이 버튼이
-            // 눌려도 기능적으로 아무 의미가 없다(WatchConnectivity 자체가 아이패드
-            // 미지원) — 눌러도 반응 없는 버튼으로 보이지 않도록 아예 숨긴다(#100).
-            if UIDevice.current.userInterfaceIdiom == .phone {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        guard let runner else {
-                            Self.watchSyncLogger.error("워치 동기화 버튼: runner가 nil이라 취소")
-                            return
-                        }
-                        // 페어링된 애플워치는 있는데 tempo 앱이 없으면 설치를 안내한다
-                        // — 애플이 앱에서 워치 설치를 직접 트리거하는 공식 API를 제공하지
-                        // 않아서, 여기서 문구로 안내하는 선에서 그친다(#92).
-                        // isWatchAppInstalled는 WCSession 활성화 시점에 캐시되는 값이라
-                        // 실제로는 설치돼 있어도 stale하게 false로 남을 수 있다(#99) —
-                        // 이 판정만 믿고 동기화 자체를 건너뛰면 최신 상태가 워치로 아예
-                        // 전송이 안 되니, 안내와 동기화를 항상 같이 시도한다.
-                        if WatchSyncSender.shared.isPairedButNotInstalled {
-                            Self.watchSyncLogger.notice("워치 동기화 버튼: 설치 안내 alert 표시(동기화는 계속 시도)")
-                            isWatchInstallAlertPresented = true
-                        }
-                        // 이 버튼은 "지금 이 실행 화면을 워치에 최초로 세팅"하는
-                        // 역할이다 — 그 이후로는 시작/일시정지/재개/리셋이 자동으로
-                        // 양방향 동기화된다. updateApplicationContext는 배달을
-                        // 확인해주는 API가 아니라서 성공 여부와 무관하게 사용자가
-                        // 버튼을 눌렀다는 의도 자체를 신뢰하고 켠다.
-                        isWatchSyncEnabled = true
-                        syncToWatch(runner: runner)
-                    } label: {
-                        Image(systemName: "applewatch")
-                    }
-                    .disabled(runner == nil || config == nil)
-                }
-            }
         }
         // 스와이프 뒤로가기 제스처도 같은 조건으로 막는다 — 커스텀 버튼만 막으면
         // 스와이프로 확인 없이 빠져나갈 수 있다. 이슈 #74 참고.
@@ -192,11 +111,6 @@ struct IntervalRunView: View {
         } message: {
             Text("지금 나가면 진행 중인 인터벌이 중단되고 처음부터 다시 시작해야 합니다.")
         }
-        .alert("애플워치에 tempo 설치", isPresented: $isWatchInstallAlertPresented) {
-            Button("확인") {}
-        } message: {
-            Text("아이폰의 Watch 앱에서 tempo를 설치하면 손목에서 바로 확인할 수 있어요.")
-        }
         .onDisappear {
             if runner?.state != .completed {
                 NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
@@ -204,38 +118,6 @@ struct IntervalRunView: View {
         }
         .task {
             load()
-        }
-        .task {
-            WatchSyncSender.shared.onReceiveControl = { [self] command in
-                // 연동은 오직 아이폰의 워치 아이콘 버튼을 탭했을 때만 성립한다(#104) —
-                // 워치가 먼저 명령을 보냈다고 자동으로 연동된 것으로 치지 않는다.
-                // disconnect는 상태 액션이 아니라 연동 자체를 끄라는 제어 신호라 이
-                // 가드보다 먼저 처리한다.
-                if command.action == .disconnect {
-                    Self.watchSyncLogger.notice("워치에서 연동 해제 요청 받음")
-                    isWatchSyncEnabled = false
-                    return
-                }
-                guard isWatchSyncEnabled else {
-                    Self.watchSyncLogger.notice("워치 제어 명령 무시(연동 안 된 상태): action=\(command.action.rawValue, privacy: .public)")
-                    return
-                }
-                // 아이폰이 잠겨 있던 동안 워치에서 조작한 명령이 뒤늦게 도착할 수 있다.
-                // 그 사이 아이폰 쪽에서 이미 더 최근 조작이 있었다면(예: 다른 경로로
-                // 리셋), 뒤늦게 온 낡은 명령은 무시한다 — 항상 더 최근 시각의 조작이
-                // 이긴다(#103).
-                guard command.sentAt > (lastKnownActionAt ?? .distantPast) else {
-                    Self.watchSyncLogger.notice("워치 제어 명령 무시(더 최근 조작이 이미 있음): action=\(command.action.rawValue, privacy: .public)")
-                    return
-                }
-                switch command.action {
-                case .start: handleStart(actionAt: command.sentAt)
-                case .pause: handlePause(actionAt: command.sentAt)
-                case .resume: handleResume(actionAt: command.sentAt)
-                case .reset: handleReset(actionAt: command.sentAt)
-                case .disconnect: break // 위에서 이미 처리함
-                }
-            }
         }
     }
 
@@ -461,14 +343,6 @@ struct IntervalRunView: View {
         ).first
     }
 
-    /// 지금 실행 상태를 페어링된 애플워치로 전송한다(#79). 시작/일시정지/재개
-    /// 시점마다 다시 불러서, 워치가 최신 상태로 스스로 로컬 카운트다운을 이어갈
-    /// 수 있게 한다.
-    private func syncToWatch(runner: IntervalRunner) {
-        guard let config else { return }
-        WatchSyncSender.shared.send(programName: programName, config: config, runner: runner)
-    }
-
     private func load() {
         guard runner == nil, !presetNotFound else { return }
 
@@ -482,7 +356,6 @@ struct IntervalRunView: View {
 
         cueConfig = resolveCueConfig(cueProfileID: preset.cueProfileID)
         runner = IntervalRunner(config: preset.config)
-        config = preset.config
         programName = preset.name
     }
 

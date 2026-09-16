@@ -33,6 +33,10 @@ struct ContentView: View {
             // 배지(12시), 조작 버튼(좌우 하단 코너)을 전부 링 위에 겹쳐서, 별도 줄이
             // 차지하는 공간 없이 화면 전체를 링에 그대로 쓴다 — 그래야 라운드 텍스트
             // 때문에 링이 아래로 처지지 않고 화면 정중앙에 온다.
+            // 시스템 시계(우측 상단)를 위한 세이프 에어리어가 위쪽에만 있어서, 이걸
+            // 존중하면 안전 영역 안에서는 가운데여도 화면 전체 기준으로는 아래로
+            // 쳐져 보인다. ignoresSafeArea로 전체 화면 기준 좌표를 받아 진짜 정중앙에
+            // 놓고, 시계는 그 위에 그냥 겹쳐서 보이게 둔다.
             GeometryReader { geo in
                 let computedRingFontSize = ringFontSize(for: geo.size)
 
@@ -67,6 +71,7 @@ struct ContentView: View {
                 }
                 .frame(width: geo.size.width, height: geo.size.height)
             }
+            .ignoresSafeArea()
             .task(id: progress?.step.id) {
                 let events = CueEventDetector.events(previousStep: previousStep, currentProgress: progress, countdownLeadSeconds: 0)
                 if !events.isEmpty {

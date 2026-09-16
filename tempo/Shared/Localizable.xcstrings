@@ -316,6 +316,16 @@
         }
       }
     },
+    "동기화된 프로그램 없음" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Synced Programs"
+          }
+        }
+      }
+    },
     "라운드" : {
       "localizations" : {
         "en" : {
@@ -432,6 +442,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Entering Final Round"
+          }
+        }
+      }
+    },
+    "목록 갱신" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh List"
           }
         }
       }
@@ -818,6 +838,16 @@
         }
       }
     },
+    "아이폰 프로그램 목록에서\n애플워치 연동 버튼을 눌러주세요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the Apple Watch sync button\non the iPhone program list"
+          }
+        }
+      }
+    },
     "아이폰의 Watch 앱에서 tempo를 설치하면 손목에서 바로 확인할 수 있어요." : {
 
     },
@@ -854,6 +884,16 @@
     },
     "애플워치에 tempo 설치" : {
 
+    },
+    "애플워치에 프로그램 목록 보내기" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send Program List to Apple Watch"
+          }
+        }
+      }
     },
     "없음" : {
       "localizations" : {
@@ -1007,16 +1047,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Interval Run"
-          }
-        }
-      }
-    },
-    "인터벌 실행 화면에서\n애플워치 아이콘을 탭해주세요" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap the Apple Watch icon\non the interval run screen"
           }
         }
       }
@@ -1359,6 +1389,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The timer opens in countdown mode — switch to count-up anytime with the toggle in the top right."
+          }
+        }
+      }
+    },
+    "프로그램" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programs"
           }
         }
       }

@@ -46,19 +46,19 @@ struct IntervalRunView: View {
         let remainingSeconds: Int?
     }
 
+    // 시작/일시정지/재개/리셋은 더 이상 자동으로 워치에 전송하지 않는다(#102) — 툴바의
+    // 워치 아이콘 버튼을 직접 눌렀을 때만 그 시점의 상태를 동기화한다.
     private func handleStart() {
         guard let runner else { return }
         let totalDuration = runner.steps.reduce(0) { $0 + $1.seconds }
         runner.start(at: .now)
         NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: totalDuration, title: programName, message: Self.notificationMessage)
-        syncToWatch(runner: runner)
     }
 
     private func handlePause() {
         guard let runner else { return }
         runner.pause(at: .now)
         NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
-        syncToWatch(runner: runner)
     }
 
     private func handleResume() {
@@ -67,14 +67,12 @@ struct IntervalRunView: View {
         let remaining = totalDuration - Int(runner.totalElapsed(at: .now))
         runner.resume(at: .now)
         NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: remaining, title: programName, message: Self.notificationMessage)
-        syncToWatch(runner: runner)
     }
 
     private func handleReset() {
         guard let runner else { return }
         runner.reset()
         NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
-        syncToWatch(runner: runner)
     }
 
     var body: some View {

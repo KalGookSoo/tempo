@@ -46,8 +46,16 @@ struct ContentView: View {
             // 존중하면 안전 영역 안에서는 가운데여도 화면 전체 기준으로는 아래로
             // 쳐져 보인다. ignoresSafeArea로 전체 화면 기준 좌표를 받아 진짜 정중앙에
             // 놓고, 시계는 그 위에 그냥 겹쳐서 보이게 둔다.
+            // 다만 크기 자체는 원래(세이프 에어리어 기준) 크기를 그대로 유지한다 —
+            // 화면 전체 크기로 채우면 조작 버튼이 둥근 테두리 밖으로 잘렸다. geo의
+            // safeAreaInsets로 세이프 에어리어를 뺀 크기를 따로 계산해 링/버튼 크기의
+            // 기준으로 쓰고, 배치(중앙 정렬)만 전체 화면 기준으로 한다.
             GeometryReader { geo in
-                let computedRingFontSize = ringFontSize(for: geo.size)
+                let safeSize = CGSize(
+                    width: geo.size.width - geo.safeAreaInsets.leading - geo.safeAreaInsets.trailing,
+                    height: geo.size.height - geo.safeAreaInsets.top - geo.safeAreaInsets.bottom
+                )
+                let computedRingFontSize = ringFontSize(for: safeSize)
 
                 Group {
                     if let progress {
@@ -91,16 +99,12 @@ struct ContentView: View {
         }
     }
 
-    /// 링 지름(`fontSize * 3.8`)이 화면을 최대한 채우도록 fontSize를 역산한다.
-    /// 라운드 표시, 상태 배지, 버튼 모두 링 위에 겹쳐서 놓이므로(stepContent,
-    /// controlButtons 참고) 화면 크기 자체를 기준으로 삼는다.
-    /// `.ignoresSafeArea()`로 화면 전체 크기를 받게 되면서(링 중앙 정렬 수정) 화면
-    /// 크기를 100% 그대로 쓰면 좌우 하단 코너의 조작 버튼이 둥근 화면 테두리
-    /// 밖으로 잘렸다 — `ringFillRatio`만큼 줄여서 버튼까지 화면 안에 들어오게 한다.
-    private let ringFillRatio: CGFloat = 0.8
-
+    /// 링 지름(`fontSize * 3.8`)이 (세이프 에어리어 기준) 화면을 최대한 채우도록
+    /// fontSize를 역산한다. 라운드 표시, 상태 배지, 버튼 모두 링 위에 겹쳐서
+    /// 놓이므로(stepContent, controlButtons 참고) 이 크기가 곧 버튼 크기/위치의
+    /// 기준이 된다.
     private func ringFontSize(for size: CGSize) -> CGFloat {
-        min(size.width, size.height) * ringFillRatio / 3.8
+        min(size.width, size.height) / 3.8
     }
 
     private func statusLabel(for step: IntervalStep) -> String {

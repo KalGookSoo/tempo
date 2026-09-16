@@ -117,9 +117,8 @@
 				Resources/Sounds/beep.wav,
 				Timing/CueEventDetector.swift,
 				Timing/IntervalRunner.swift,
-				Timing/IntervalWatchSnapshot.swift,
 				Timing/TimerState.swift,
-				Timing/WatchControlCommand.swift,
+				Timing/WatchPresetSnapshot.swift,
 				Views/Interval/IntervalCountdownRing.swift,
 				Views/RunningDisplayView.swift,
 			);

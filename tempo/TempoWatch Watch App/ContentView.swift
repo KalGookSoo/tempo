@@ -4,6 +4,17 @@ struct ContentView: View {
     @StateObject private var receiver = WatchSyncReceiver.shared
     @State private var runner: IntervalRunner?
     @State private var previousStep: IntervalStep?
+    @State private var isLeaveConfirmationPresented = false
+
+    /// 준비/운동·휴식/일시정지 중에는 목록으로 돌아가면 잃을 진행 상황이 있어 확인이
+    /// 필요하다. 아직 시작 전이거나 이미 끝난 상태는 잃을 게 없어 바로 나갈 수 있다.
+    /// 아이폰 실행 화면의 뒤로가기 확인(#74)과 같은 기준이다.
+    private var needsLeaveConfirmation: Bool {
+        switch runner?.state {
+        case .preparing?, .running?, .paused?: true
+        default: false
+        }
+    }
 
     var body: some View {
         if let runner {
@@ -101,6 +112,17 @@ struct ContentView: View {
                 previousStep = progress?.step
             }
         }
+        .alert(
+            "프로그램을 중단할까요?",
+            isPresented: $isLeaveConfirmationPresented
+        ) {
+            Button("계속하기", role: .cancel) {}
+            Button("중단하고 나가기", role: .destructive) {
+                self.runner = nil
+            }
+        } message: {
+            Text("지금 나가면 진행 중인 인터벌이 중단되고 처음부터 다시 시작해야 합니다.")
+        }
     }
 
     /// 링 지름(`fontSize * 3.8`)이 화면을 최대한 채우도록 fontSize를 역산한다.
@@ -183,8 +205,9 @@ struct ContentView: View {
         // 프로그램 목록으로 돌아가는 버튼. 우측 상단은 시스템 시계가 차지하고 있어
         // 좌측 상단에 놓는다 — 하단 버튼과 같은 대각선 오프셋 공식을 위쪽에 그대로
         // 적용한 것뿐이라 링이나 다른 버튼과 겹치지 않는다. 실행 상태와 무관하게
-        // 항상 보인다.
-        WatchControlButton(systemImage: "list.bullet", style: .reset) { self.runner = nil }
+        // 항상 보인다. 진행 중(준비/운동·휴식/일시정지)일 때는 바로 나가지 않고
+        // 확인을 먼저 받는다 — 안 그러면 실수로 눌러서 진행 상황을 잃기 쉽다.
+        WatchControlButton(systemImage: "list.bullet", style: .reset) { handleExit() }
             .offset(x: -cornerOffset, y: -cornerOffset)
 
         if runner.state == .paused || runner.state == .completed {
@@ -221,6 +244,14 @@ struct ContentView: View {
     private func handleReset() {
         guard let runner else { return }
         runner.reset()
+    }
+
+    private func handleExit() {
+        if needsLeaveConfirmation {
+            isLeaveConfirmationPresented = true
+        } else {
+            runner = nil
+        }
     }
 }
 

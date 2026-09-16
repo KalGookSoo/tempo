@@ -14,7 +14,14 @@ struct ContentView: View {
             if let runner {
                 runningContent(runner: runner)
             } else {
-                Text("대기 중")
+                // 연동 전(또는 연동 해제 후) 상태다 — "대기 중"만으로는 사용자가
+                // 뭘 해야 하는지 알 수 없어서, 연동 방법을 안내하는 문구로 바꿨다
+                // (#104). 워치 화면이 작아 여러 줄로 접힐 걸 감안해 가운데 정렬한다.
+                Text("인터벌 실행 화면에서\n애플워치 아이콘을 탭해주세요")
+                    .font(.footnote)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal)
             }
         }
         .onChange(of: receiver.latestSnapshot?.sentAt) {

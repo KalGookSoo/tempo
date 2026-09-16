@@ -36,7 +36,14 @@ final class WatchSyncReceiver: NSObject, WCSessionDelegate, ObservableObject {
 
 extension IntervalWatchSnapshot {
     /// 이 스냅샷이 가리키는 지점 그대로 로컬 IntervalRunner를 재구성한다.
-    /// sentAt을 기준으로 역산하기 때문에, 실제 도착 시각(네트워크 지연)과 무관하게 항상 정확한 elapsedSeconds를 재현한다.
+    /// 앵커는 sentAt(아이폰 시계)이 아니라 이 기기(워치) 자신의 시계로 잡는다 —
+    /// elapsedSeconds는 보낸 시점까지 이미 지난 시간(하나의 값)이라 어느 시계를
+    /// 기준으로 역산하든 그 값 자체는 그대로 쓸 수 있고, 이렇게 하면 실행 중
+    /// (RUNNING) 상태에서 이후 매 프레임 이 기기 자신의 Date.now()와 비교해도
+    /// 항상 자기 자신의 시계끼리만 비교하게 된다. 원래처럼 sentAt을 앵커로 쓰면
+    /// 일시정지처럼 그 순간 한 번만 계산하고 끝나는 경우는 괜찮지만, 실행 중
+    /// 상태는 두 기기 시계가 조금만 어긋나도 그 오차가 계속 화면에 드러난다
+    /// ("재개하면 어긋나고 안 풀린다"는 제보의 원인이었다).
     /// isIdle이면(리셋 직후) start(at:)를 아예 안 불러서 IntervalRunner가 기본으로
     /// 갖는 .idle 상태 그대로 둔다 — 안 그러면 elapsedSeconds == 0인 리셋 스냅샷이
     /// "방금 시작함"과 구분이 안 돼서, 워치가 첫 구간을 곧바로 카운트다운하기
@@ -45,10 +52,11 @@ extension IntervalWatchSnapshot {
         let runner = IntervalRunner(config: config)
         guard !isIdle else { return runner }
 
-        let backdatedStart = sentAt.addingTimeInterval(-elapsedSeconds)
+        let receivedAt = Date.now
+        let backdatedStart = receivedAt.addingTimeInterval(-elapsedSeconds)
         runner.start(at: backdatedStart)
         if isPaused {
-            runner.pause(at: sentAt)
+            runner.pause(at: receivedAt)
         }
         return runner
     }

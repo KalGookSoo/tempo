@@ -64,6 +64,17 @@ final class WatchSyncSender: NSObject, WCSessionDelegate {
 
     func session(_: WCSession, activationDidCompleteWith _: WCSessionActivationState, error _: Error?) {}
 
+    /// isPaired/isWatchAppInstalled/watchDirectoryURL이 바뀔 때 시스템이 호출해준다.
+    /// 이게 없으면 워치 앱이 설치/삭제되거나 페어링이 바뀌어도 앱이 그 사실을 알 방법이
+    /// 없어서, 세션 활성화 시점에 캐시된 값이 stale한 채로 계속 쓰였다(#99와 유사한
+    /// 워치 동기화 무반응 제보의 근본 원인으로 추정). 지금은 로그만 남기지만, 값이
+    /// 바뀌었다는 사실 자체가 진단에 중요하다.
+    func sessionWatchStateDidChange(_ session: WCSession) {
+        Self.logger.notice(
+            "sessionWatchStateDidChange: activationState=\(session.activationState.rawValue, privacy: .public) isPaired=\(session.isPaired, privacy: .public) isWatchAppInstalled=\(session.isWatchAppInstalled, privacy: .public)"
+        )
+    }
+
     func sessionDidBecomeInactive(_: WCSession) {}
 
     func sessionDidDeactivate(_: WCSession) {

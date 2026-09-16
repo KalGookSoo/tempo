@@ -7,8 +7,17 @@
     <key>destination</key>
     <string>upload</string>
     <key>signingStyle</key>
-    <string>automatic</string>
+    <string>manual</string>
     <key>teamID</key>
     <string>5BDB573D9N</string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>kr.me.seesaw.tempo</key>
+        <string>tempo AppStore</string>
+        <key>kr.me.seesaw.tempo.watchkitapp</key>
+        <string>TempoWatch AppStore</string>
+        <key>kr.me.seesaw.tempo.TempoWidget</key>
+        <string>TempoWidget AppStore</string>
+    </dict>
 </dict>
 </plist>

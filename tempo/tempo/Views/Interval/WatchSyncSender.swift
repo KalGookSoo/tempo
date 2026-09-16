@@ -2,16 +2,15 @@ import Foundation
 import OSLog
 import WatchConnectivity
 
-/// WCSession.updateApplicationContext로 인터벌 실행 상태를 워치로 보낸다.
-/// sendMessage는 양쪽 다 foreground여야 해서 부적합하다.
-/// updateApplicationContext는 최신 값만 유지하고 워치가 나중에 앱을 열어도 받을 수 있어 이 용도에 맞다(#79).
+/// WCSession.updateApplicationContext로 프로그램(프리셋) 목록을 애플워치에 보낸다.
+/// 워치는 이 목록을 받은 뒤로는 아이폰과 통신하지 않고 완전히 로컬로 실행하므로,
+/// 여기서는 목록 전송 외에 실행 상태를 주고받지 않는다.
 final class WatchSyncSender: NSObject, WCSessionDelegate {
     /// 배포된 빌드에서도 실기기 콘솔(Console.app)로 확인할 수 있는 로그(이슈 #89).
     /// 워치 연동은 실기기에서만 재현되는 문제가 잦았던 영역이라 진단 로그가 특히 중요하다.
     private static let logger = Logger(subsystem: "kr.me.seesaw.tempo", category: "WatchSync")
 
     static let shared = WatchSyncSender()
-    var onReceiveControl: ((WatchControlCommand) -> Void)?
 
     override private init() {
         super.init()
@@ -26,7 +25,7 @@ final class WatchSyncSender: NSObject, WCSessionDelegate {
             && !WCSession.default.isWatchAppInstalled
     }
 
-    func send(programName: String, config: IntervalConfig, runner: IntervalRunner) {
+    func send(presets: [WatchPresetSnapshot]) {
         // updateApplicationContext는 페어링/설치 상태가 안 맞아도 에러 없이 그냥
         // 전달이 안 될 때가 있다 — 그러면 catch에도 안 걸려서 버튼을 눌러도 왜
         // 반응이 없는지 로그로 구분이 안 됐다. 매 호출마다 이 세 값을 무조건 남겨서,
@@ -41,24 +40,15 @@ final class WatchSyncSender: NSObject, WCSessionDelegate {
             return
         }
 
-        let snapshot = IntervalWatchSnapshot(
-            programName: programName,
-            config: config,
-            elapsedSeconds: runner.totalElapsed(at: .now),
-            isPaused: runner.state == .paused,
-            isIdle: runner.state == .idle,
-            sentAt: .now
-        )
-
-        guard let data = try? JSONEncoder().encode(snapshot) else {
-            Self.logger.error("스냅샷 인코딩 실패")
+        guard let data = try? JSONEncoder().encode(presets) else {
+            Self.logger.error("프로그램 목록 인코딩 실패")
             return
         }
         do {
-            try session.updateApplicationContext(["snapshot": data])
-            Self.logger.notice("updateApplicationContext(snapshot) 호출 성공")
+            try session.updateApplicationContext(["presets": data])
+            Self.logger.notice("updateApplicationContext(presets) 호출 성공")
         } catch {
-            Self.logger.error("updateApplicationContext(snapshot) 실패: \(error.localizedDescription, privacy: .public)")
+            Self.logger.error("updateApplicationContext(presets) 실패: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -79,16 +69,5 @@ final class WatchSyncSender: NSObject, WCSessionDelegate {
 
     func sessionDidDeactivate(_: WCSession) {
         WCSession.default.activate()
-    }
-
-    func session(_: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        guard let data = applicationContext["control"] as? Data else { return }
-        guard let command = try? JSONDecoder().decode(WatchControlCommand.self, from: data) else {
-            Self.logger.error("워치에서 받은 control 페이로드 디코딩 실패")
-            return
-        }
-        Task { @MainActor in
-            onReceiveControl?(command)
-        }
     }
 }

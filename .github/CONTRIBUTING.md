@@ -104,7 +104,8 @@ git push origin v1.0.0
 1. `project.pbxproj`에서 `tempo`, `TempoWidget` 두 타겟 모두 `MARKETING_VERSION`을 올린다(빌드 업로드 때마다 `CURRENT_PROJECT_VERSION`도 1씩 올린다).
 2. `chore: 버전을 X.Y.Z로 올림` 커밋을 만든다.
 3. 위 규칙대로 태그를 만들어 push한다.
-4. [릴리스 템플릿](RELEASE_TEMPLATE.md)에 따라 릴리스 노트를 작성한다.
+4. [릴리스 템플릿](RELEASE_TEMPLATE.md)에 따라 GitHub 릴리스 노트를 작성한다.
+5. GitHub 릴리스 노트 중 사용자가 체감할 수 있는 부분만 추려서 [App Store 릴리스 노트 템플릿](../docs/app-store-release-notes-template.md) 형식으로 다시 써서, App Store Connect의 "새로운 기능" 필드에 채운다.
 
 ## 응답 언어
 

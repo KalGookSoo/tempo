@@ -106,25 +106,33 @@ struct IntervalRunView: View {
                     Image(systemName: "chevron.backward")
                 }
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    guard let runner else {
-                        Self.watchSyncLogger.error("워치 동기화 버튼: runner가 nil이라 취소")
-                        return
-                    }
-                    // 페어링된 애플워치는 있는데 tempo 앱이 없으면 동기화 대신 설치를
-                    // 안내한다 — 애플이 앱에서 워치 설치를 직접 트리거하는 공식 API를
-                    // 제공하지 않아서, 여기서 문구로 안내하는 선에서 그친다(#92).
-                    if WatchSyncSender.shared.isPairedButNotInstalled {
-                        Self.watchSyncLogger.notice("워치 동기화 버튼: 설치 안내 alert 표시")
-                        isWatchInstallAlertPresented = true
-                    } else {
+            // 애플워치는 아이폰하고만 페어링되는 구조라 아이패드에서는 이 버튼이
+            // 눌려도 기능적으로 아무 의미가 없다(WatchConnectivity 자체가 아이패드
+            // 미지원) — 눌러도 반응 없는 버튼으로 보이지 않도록 아예 숨긴다(#100).
+            if UIDevice.current.userInterfaceIdiom == .phone {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        guard let runner else {
+                            Self.watchSyncLogger.error("워치 동기화 버튼: runner가 nil이라 취소")
+                            return
+                        }
+                        // 페어링된 애플워치는 있는데 tempo 앱이 없으면 설치를 안내한다
+                        // — 애플이 앱에서 워치 설치를 직접 트리거하는 공식 API를 제공하지
+                        // 않아서, 여기서 문구로 안내하는 선에서 그친다(#92).
+                        // isWatchAppInstalled는 WCSession 활성화 시점에 캐시되는 값이라
+                        // 실제로는 설치돼 있어도 stale하게 false로 남을 수 있다(#99) —
+                        // 이 판정만 믿고 동기화 자체를 건너뛰면 최신 상태가 워치로 아예
+                        // 전송이 안 되니, 안내와 동기화를 항상 같이 시도한다.
+                        if WatchSyncSender.shared.isPairedButNotInstalled {
+                            Self.watchSyncLogger.notice("워치 동기화 버튼: 설치 안내 alert 표시(동기화는 계속 시도)")
+                            isWatchInstallAlertPresented = true
+                        }
                         syncToWatch(runner: runner)
+                    } label: {
+                        Image(systemName: "applewatch")
                     }
-                } label: {
-                    Image(systemName: "applewatch")
+                    .disabled(runner == nil || config == nil)
                 }
-                .disabled(runner == nil || config == nil)
             }
         }
         // 스와이프 뒤로가기 제스처도 같은 조건으로 막는다 — 커스텀 버튼만 막으면

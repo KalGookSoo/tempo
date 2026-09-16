@@ -163,6 +163,13 @@ struct ContentView: View {
         let distanceFromCenter = ringDiameter / 2 + buttonDiameter / 2 + gap
         let cornerOffset = distanceFromCenter / 1.41421356 // 대각선(45도) 성분
 
+        // 연동 해제(X) 버튼. 우측 상단은 시스템 시계가 차지하고 있어 좌측 상단에
+        // 놓는다 — 하단 버튼과 같은 대각선 오프셋 공식을 위쪽에 그대로 적용한
+        // 것뿐이라 링이나 다른 버튼과 겹치지 않는다(#104). 실행 상태와 무관하게
+        // 항상 보인다.
+        WatchControlButton(systemImage: "xmark", style: .reset) { handleDisconnect() }
+            .offset(x: -cornerOffset, y: -cornerOffset)
+
         if runner.state == .paused || runner.state == .completed {
             WatchControlButton(systemImage: "arrow.counterclockwise", style: .reset) { handleReset() }
                 .offset(x: -cornerOffset, y: cornerOffset)
@@ -211,6 +218,16 @@ struct ContentView: View {
         runner.reset()
         lastLocalActionAt = .now
         WatchControlSender.send(.reset)
+    }
+
+    /// 연동을 끊는다(#104). 아이폰 응답을 기다리지 않고 워치 화면부터 즉시 "대기
+    /// 중"으로 돌아가고, 아이폰에는 연동 플래그를 끄라는 신호(disconnect)를
+    /// 보낸다 — 이게 없으면 아이폰이 나중에 또 스냅샷을 보내서 워치가 도로
+    /// 살아난다.
+    private func handleDisconnect() {
+        runner = nil
+        lastLocalActionAt = .now
+        WatchControlSender.send(.disconnect)
     }
 }
 

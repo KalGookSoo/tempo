@@ -1011,6 +1011,16 @@
         }
       }
     },
+    "인터벌 실행 화면에서\n애플워치 아이콘을 탭해주세요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the Apple Watch icon\non the interval run screen"
+          }
+        }
+      }
+    },
     "인터벌 타이밍" : {
       "extractionState" : "stale",
       "localizations" : {

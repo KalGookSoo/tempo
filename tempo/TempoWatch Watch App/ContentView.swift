@@ -93,9 +93,14 @@ struct ContentView: View {
 
     /// 링 지름(`fontSize * 3.8`)이 화면을 최대한 채우도록 fontSize를 역산한다.
     /// 라운드 표시, 상태 배지, 버튼 모두 링 위에 겹쳐서 놓이므로(stepContent,
-    /// controlButtons 참고) 화면 크기 자체를 그대로 쓴다.
+    /// controlButtons 참고) 화면 크기 자체를 기준으로 삼는다.
+    /// `.ignoresSafeArea()`로 화면 전체 크기를 받게 되면서(링 중앙 정렬 수정) 화면
+    /// 크기를 100% 그대로 쓰면 좌우 하단 코너의 조작 버튼이 둥근 화면 테두리
+    /// 밖으로 잘렸다 — `ringFillRatio`만큼 줄여서 버튼까지 화면 안에 들어오게 한다.
+    private let ringFillRatio: CGFloat = 0.8
+
     private func ringFontSize(for size: CGSize) -> CGFloat {
-        min(size.width, size.height) / 3.8
+        min(size.width, size.height) * ringFillRatio / 3.8
     }
 
     private func statusLabel(for step: IntervalStep) -> String {

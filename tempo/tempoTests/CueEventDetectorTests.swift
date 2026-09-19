@@ -117,6 +117,61 @@ struct CueEventDetectorTests {
         #expect(events.contains(.finish))
     }
 
+    @Test("맨 처음(준비 구간)부터 시작하면 끝까지 발생할 모든 이벤트가 순서대로 계산된다")
+    func upcomingEventsFromVeryStart() {
+        let steps = makeSteps()
+        let progress = IntervalRunner.Progress(stepIndex: 0, step: steps[0], remainingSeconds: 5, elapsedInStep: 0)
+
+        let events = CueEventDetector.upcomingEvents(steps: steps, from: progress)
+
+        #expect(events == [
+            .init(kind: .segmentEnd, secondsUntil: 5),
+            .init(kind: .workStart, secondsUntil: 5),
+            .init(kind: .segmentEnd, secondsUntil: 25),
+            .init(kind: .workEnd, secondsUntil: 25),
+            .init(kind: .restStart, secondsUntil: 25),
+            .init(kind: .segmentEnd, secondsUntil: 35),
+            .init(kind: .roundEnd, secondsUntil: 35),
+            .init(kind: .workStart, secondsUntil: 35),
+            .init(kind: .finalRoundEnter, secondsUntil: 35),
+            .init(kind: .segmentEnd, secondsUntil: 55),
+            .init(kind: .workEnd, secondsUntil: 55),
+            .init(kind: .restStart, secondsUntil: 55),
+            .init(kind: .roundEnd, secondsUntil: 65),
+            .init(kind: .finish, secondsUntil: 65),
+        ])
+    }
+
+    @Test("도중에 재개해도 그 시점부터 남은 이벤트만 계산된다")
+    func upcomingEventsFromMidRun() {
+        let steps = makeSteps()
+        // steps[3] = 2라운드 F1(운동, 20초)인데 15초가 이미 지나 5초 남은 상태에서 재개.
+        let progress = IntervalRunner.Progress(stepIndex: 3, step: steps[3], remainingSeconds: 5, elapsedInStep: 15)
+
+        let events = CueEventDetector.upcomingEvents(steps: steps, from: progress)
+
+        #expect(events == [
+            .init(kind: .segmentEnd, secondsUntil: 5),
+            .init(kind: .workEnd, secondsUntil: 5),
+            .init(kind: .restStart, secondsUntil: 5),
+            .init(kind: .roundEnd, secondsUntil: 15),
+            .init(kind: .finish, secondsUntil: 15),
+        ])
+    }
+
+    @Test("마지막 구간 안에 있으면 남은 건 전체 종료 이벤트뿐이다")
+    func upcomingEventsFromLastStep() {
+        let steps = makeSteps()
+        let progress = IntervalRunner.Progress(stepIndex: 4, step: steps[4], remainingSeconds: 2, elapsedInStep: 8)
+
+        let events = CueEventDetector.upcomingEvents(steps: steps, from: progress)
+
+        #expect(events == [
+            .init(kind: .roundEnd, secondsUntil: 2),
+            .init(kind: .finish, secondsUntil: 2),
+        ])
+    }
+
     @Test("event(for:in:)는 이벤트 종류에 맞는 CueConfig.Event를 꺼내고, countdownLead는 nil을 반환한다")
     func eventForKindMapsToConfig() {
         let workEvent = CueConfig.Event(mode: .sound, soundAssetID: nil)

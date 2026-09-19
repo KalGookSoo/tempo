@@ -395,16 +395,38 @@ struct IntervalRunView: View {
         let events = CueEventDetector.upcomingEvents(steps: runner.steps, from: progress)
 
         return events.enumerated().compactMap { index, event -> NotificationRequest? in
-            let mode = cueConfig.flatMap { CueEventDetector.event(for: event.kind, in: $0)?.mode } ?? .soundAndVibration
+            let configEvent = cueConfig.flatMap { CueEventDetector.event(for: event.kind, in: $0) }
+            let mode = configEvent?.mode ?? .soundAndVibration
             guard mode != .none else { return nil } // "없음"으로 꺼둔 이벤트는 예약 안함
+
+            let sound: NotificationSound = mode.playsSound
+                ? notificationSound(for: resolvedSoundAsset(for: configEvent ?? CueConfig.Event(mode: mode, soundAssetID: nil), kind: event.kind))
+                : .none
 
             return NotificationRequest(
                 identifier: "interval.cue.\(index)",
                 secondsRemaining: event.secondsUntil,
                 title: programName,
                 message: cueMessage(for: event.kind),
-                playsSound: mode.playsSound
+                sound: sound
             )
+        }
+    }
+
+    /// 알림에 실제로 쓸 사운드를 구한다. 기본 제공 사운드는 이미 앱 번들의 `.wav`라 그대로
+    /// 쓰고, 녹음한 사운드는 로컬 알림이 지원하는 형식(`.caf`)으로 변환해 캐시해둔 파일을
+    /// 쓴다 — iOS 로컬 알림 커스텀 사운드는 앱 번들이나 앱 컨테이너의 `Library/Sounds`에
+    /// 있는 `.caf`/`.aiff`/`.wav`만 지원하고 녹음 형식(`.m4a`)은 지원하지 않는다(이슈
+    /// #113). 변환에 실패하면(원본이 지워졌거나 손상됨 등) 시스템 기본음으로 대체한다.
+    private func notificationSound(for asset: SoundAsset?) -> NotificationSound {
+        guard let asset else { return .default }
+        switch asset.kind {
+        case .builtin:
+            guard let fileName = asset.relativePath else { return .default }
+            return .named(fileName)
+        case .recorded, .imported:
+            guard let fileName = try? NotificationSoundFileStore.cachedCAFFileName(for: asset.id) else { return .default }
+            return .named(fileName)
         }
     }
 }

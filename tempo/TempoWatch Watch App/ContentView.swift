@@ -42,6 +42,12 @@ struct ContentView: View {
                 } else {
                     List(receiver.presets) { preset in
                         Button(preset.name) {
+                            // 이전 실행을 인앱 절차 없이(디지털 크라운 등으로) 벗어났다가
+                            // 다시 목록으로 돌아온 경우, 그 실행에서 예약해둔 알림이 아직
+                            // 남아있을 수 있다 — 새 프로그램을 고르기 전에 먼저 취소한다
+                            // (이슈 #117).
+                            NotificationScheduler.cancel(scheduledCueIdentifiers)
+                            scheduledCueIdentifiers.removeAll()
                             runner = IntervalRunner(config: preset.config)
                             programName = preset.name
                         }

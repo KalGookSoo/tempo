@@ -10,6 +10,9 @@ import UIKit
 /// (이슈 #15).
 struct IntervalRunView: View {
     let programID: String
+    /// 전체 종료 알림을 탭해서 들어온 경우 `true` — 실제로 실행해보지 않고 곧바로
+    /// "완료" 상태로 보여준다(#114).
+    let startsCompleted: Bool
 
     @Environment(Router.self) private var router
     @Environment(\.modelContext) private var modelContext
@@ -358,7 +361,11 @@ struct IntervalRunView: View {
         }
 
         cueConfig = resolveCueConfig(cueProfileID: preset.cueProfileID)
-        runner = IntervalRunner(config: preset.config)
+        let newRunner = IntervalRunner(config: preset.config)
+        if startsCompleted {
+            newRunner.markCompleted()
+        }
+        runner = newRunner
         programName = preset.name
     }
 
@@ -403,8 +410,16 @@ struct IntervalRunView: View {
                 ? notificationSound(for: resolvedSoundAsset(for: configEvent ?? CueConfig.Event(mode: mode, soundAssetID: nil), kind: event.kind))
                 : .none
 
+            // 전체 종료 알림만 별도 identifier를 쓴다 — 탭했을 때 이 프로그램의 실행
+            // 화면(완료 상태)으로 바로 이동시키기 위해서다(#114). 그 외 이벤트는 탭해도
+            // 어느 프로그램인지 특정할 필요가 없어(이미 앱이 살아있으면 그 화면이 그대로
+            // 보이므로) 기존 방식을 유지한다.
+            let identifier = event.kind == .finish
+                ? "interval.finish.\(programID)"
+                : "interval.cue.\(index)"
+
             return NotificationRequest(
-                identifier: "interval.cue.\(index)",
+                identifier: identifier,
                 secondsRemaining: event.secondsUntil,
                 title: programName,
                 message: cueMessage(for: event.kind),
@@ -449,7 +464,7 @@ private struct SwipeBackGestureControl: UIViewControllerRepresentable {
 
 #Preview {
     NavigationStack {
-        IntervalRunView(programID: "preview")
+        IntervalRunView(programID: "preview", startsCompleted: false)
     }
     .environment(Router())
 }

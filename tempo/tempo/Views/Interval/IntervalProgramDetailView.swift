@@ -80,7 +80,7 @@ struct IntervalProgramDetailView: View {
             }
 
             Section {
-                NavigationLink(value: IntervalRoute.run(programID: id)) {
+                NavigationLink(value: IntervalRoute.run(programID: id, startsCompleted: false)) {
                     Label("실행", systemImage: "play.fill")
                 }
 

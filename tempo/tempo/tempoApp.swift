@@ -52,7 +52,13 @@ struct tempoApp: App {
                 CueTriggerPlayer.prewarmAudioSession()
                 UNUserNotificationCenter.current().delegate = notificationDelegate
                 notificationDelegate.onTapTimer = { selectedTab = .timer }
-                notificationDelegate.onTapInterval = { selectedTab = .interval }
+                notificationDelegate.onTapInterval = { programID in
+                    selectedTab = .interval
+                    if let programID {
+                        intervalRouter.path = NavigationPath()
+                        intervalRouter.push(IntervalRoute.run(programID: programID, startsCompleted: true))
+                    }
+                }
                 WatchSyncSender.shared.configure(modelContainer: modelContainer)
             }
             // 기기의 라이트/다크 설정과 무관하게 앱 전체를 다크 모드로 고정한다. iOS 기본
@@ -88,8 +94,8 @@ struct tempoApp: App {
             IntervalProgramDetailView(id: id)
         case let .programEdit(id):
             IntervalProgramEditView(id: id)
-        case let .run(programID):
-            IntervalRunView(programID: programID)
+        case let .run(programID, startsCompleted):
+            IntervalRunView(programID: programID, startsCompleted: startsCompleted)
         }
     }
 
@@ -114,20 +120,23 @@ struct tempoApp: App {
 
 final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     var onTapTimer: (() -> Void)?
-    var onTapInterval: (() -> Void)?
+    /// 인터벌 알림을 탭했을 때 호출된다. "전체 종료" 알림이면 그 프로그램 ID를 넘겨
+    /// 완료 상태인 실행 화면으로 바로 이동시킬 수 있게 하고, 그 외 이벤트는 nil을
+    /// 넘겨 탭 전환만 하게 한다(#114).
+    var onTapInterval: ((String?) -> Void)?
 
     func userNotificationCenter(
         _: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        switch response.notification.request.identifier {
-        case "timer.end":
+        let identifier = response.notification.request.identifier
+        if identifier == "timer.end" {
             onTapTimer?()
-        case "interval.end":
-            onTapInterval?()
-        default:
-            break
+        } else if identifier.hasPrefix("interval.finish.") {
+            onTapInterval?(String(identifier.dropFirst("interval.finish.".count)))
+        } else if identifier.hasPrefix("interval.cue.") {
+            onTapInterval?(nil)
         }
         completionHandler()
     }

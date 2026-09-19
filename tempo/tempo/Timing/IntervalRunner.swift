@@ -186,6 +186,13 @@ final class IntervalRunner {
         pausedElapsed = 0
     }
 
+    /// 실제로 실행해보지 않고, 곧바로 "완료" 상태로 만든다. 전체 종료 알림을 탭해서
+    /// 화면에 막 진입했을 때처럼, 이미 끝났다는 사실만 확실한 경우에 쓴다.
+    func markCompleted() {
+        state = .completed
+        startedAt = nil
+    }
+
     /// `MM:SS` 문자열로 표시한다 (인터벌 구간은 `HH:MM:SS`가 아니라 `Fn MM:SS` 형식을 쓴다).
     /// 화면에 표시 가능한 최대치(99:59)로 clamp한 뒤 포맷한다. 호출부가 항상 유효한
     /// 범위의 값을 넘겨주지만, 그 보장이 깨지는 경우(데이터 임포트, 마이그레이션 등)에도

@@ -5,6 +5,8 @@ struct ContentView: View {
     @State private var runner: IntervalRunner?
     @State private var previousStep: IntervalStep?
     @State private var isLeaveConfirmationPresented = false
+    @State private var programName = ""
+    @State private var scheduledCueIdentifiers: [String] = []
 
     /// 준비/운동·휴식/일시정지 중에는 목록으로 돌아가면 잃을 진행 상황이 있어 확인이
     /// 필요하다. 아직 시작 전이거나 이미 끝난 상태는 잃을 게 없어 바로 나갈 수 있다.
@@ -41,6 +43,7 @@ struct ContentView: View {
                     List(receiver.presets) { preset in
                         Button(preset.name) {
                             runner = IntervalRunner(config: preset.config)
+                            programName = preset.name
                         }
                     }
                 }
@@ -118,7 +121,7 @@ struct ContentView: View {
         ) {
             Button("계속하기", role: .cancel) {}
             Button("중단하고 나가기", role: .destructive) {
-                self.runner = nil
+                exitToList()
             }
         } message: {
             Text("지금 나가면 진행 중인 인터벌이 중단되고 처음부터 다시 시작해야 합니다.")
@@ -229,29 +232,74 @@ struct ContentView: View {
     private func handleStart() {
         guard let runner else { return }
         runner.start(at: .now)
+        let requests = buildNotificationRequests(for: runner)
+        scheduledCueIdentifiers = requests.map(\.identifier)
+        NotificationScheduler.schedule(requests)
     }
 
     private func handlePause() {
         guard let runner else { return }
         runner.pause(at: .now)
+        NotificationScheduler.cancel(scheduledCueIdentifiers)
+        scheduledCueIdentifiers.removeAll()
     }
 
     private func handleResume() {
         guard let runner else { return }
         runner.resume(at: .now)
+        let requests = buildNotificationRequests(for: runner)
+        scheduledCueIdentifiers = requests.map(\.identifier)
+        NotificationScheduler.schedule(requests)
     }
 
     private func handleReset() {
         guard let runner else { return }
         runner.reset()
+        NotificationScheduler.cancel(scheduledCueIdentifiers)
+        scheduledCueIdentifiers.removeAll()
     }
 
     private func handleExit() {
         if needsLeaveConfirmation {
             isLeaveConfirmationPresented = true
         } else {
-            runner = nil
+            exitToList()
         }
+    }
+
+    private func cueMessage(for kind: CueEventKind) -> String {
+        switch kind {
+        case .prepareStart: String(localized: "준비를 시작합니다")
+        case .workStart: String(localized: "운동을 시작합니다")
+        case .restStart: String(localized: "휴식을 시작합니다")
+        case .segmentEnd: String(localized: "구간이 종료되었습니다")
+        case .workEnd: String(localized: "운동 구간이 종료되었습니다")
+        case .roundEnd: String(localized: "라운드가 종료되었습니다")
+        case .finalRoundEnter: String(localized: "마지막 라운드입니다")
+        case .finish: String(localized: "인터벌 프로그램이 종료되었습니다")
+        case .countdownLead: ""
+        }
+    }
+
+    private func buildNotificationRequests(for runner: IntervalRunner) -> [NotificationRequest] {
+        guard let progress = runner.currentProgress(at: .now) else { return [] }
+        let events = CueEventDetector.upcomingEvents(steps: runner.steps, from: progress)
+
+        return events.enumerated().map { index, event in
+            NotificationRequest(
+                identifier: "watch.interval.cue.\(index)",
+                secondsRemaining: event.secondsUntil,
+                title: programName,
+                message: cueMessage(for: event.kind),
+                playsSound: true
+            )
+        }
+    }
+
+    private func exitToList() {
+        NotificationScheduler.cancel(scheduledCueIdentifiers)
+        scheduledCueIdentifiers.removeAll()
+        runner = nil
     }
 }
 

@@ -120,6 +120,7 @@
 				Timing/TimerState.swift,
 				Timing/WatchPresetSnapshot.swift,
 				Views/Interval/IntervalCountdownRing.swift,
+				Views/NotificationScheduler.swift,
 				Views/RunningDisplayView.swift,
 			);
 			target = 9F0B541F304FF92600376D71 /* TempoWatch Watch App */;

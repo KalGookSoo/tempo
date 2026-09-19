@@ -21,7 +21,7 @@ struct IntervalRunView: View {
     @State private var previousStep: IntervalStep?
     @State private var programName = ""
     @State private var isLeaveConfirmationPresented = false
-    private static let notificationIdentifier = "interval.end"
+    @State private var scheduledCueIdentifiers: [String] = []
     private static let notificationMessage = String(localized: "인터벌 프로그램이 종료되었습니다")
 
     /// 준비/운동·휴식/일시정지 중에는 뒤로가기 시 잃을 진행 상황이 있어 확인이
@@ -41,30 +41,33 @@ struct IntervalRunView: View {
 
     private func handleStart() {
         guard let runner else { return }
-        let totalDuration = runner.steps.reduce(0) { $0 + $1.seconds }
         runner.start(at: .now)
-        let remaining = max(0, totalDuration - Int(runner.totalElapsed(at: .now)))
-        NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: remaining, title: programName, message: Self.notificationMessage)
+        let requests = buildNotificationRequests(for: runner)
+        scheduledCueIdentifiers = requests.map(\.identifier)
+        NotificationScheduler.schedule(requests)
     }
 
     private func handlePause() {
         guard let runner else { return }
         runner.pause(at: .now)
-        NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
+        NotificationScheduler.cancel(scheduledCueIdentifiers)
+        scheduledCueIdentifiers.removeAll()
     }
 
+    /// handleStart랑 결국 로직이 같아졌다. 이 중복 소스코드를 하나로 합칠 수 있지만 잠시 보류한다.
     private func handleResume() {
         guard let runner else { return }
-        let totalDuration = runner.steps.reduce(0) { $0 + $1.seconds }
         runner.resume(at: .now)
-        let remaining = max(0, totalDuration - Int(runner.totalElapsed(at: .now)))
-        NotificationScheduler.schedule(identifier: Self.notificationIdentifier, secondsRemaining: remaining, title: programName, message: Self.notificationMessage)
+        let requests = buildNotificationRequests(for: runner)
+        scheduledCueIdentifiers = requests.map(\.identifier)
+        NotificationScheduler.schedule(requests)
     }
 
     private func handleReset() {
         guard let runner else { return }
         runner.reset()
-        NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
+        NotificationScheduler.cancel(scheduledCueIdentifiers)
+        scheduledCueIdentifiers.removeAll()
     }
 
     var body: some View {
@@ -113,7 +116,7 @@ struct IntervalRunView: View {
         }
         .onDisappear {
             if runner?.state != .completed {
-                NotificationScheduler.cancel(identifier: Self.notificationIdentifier)
+                NotificationScheduler.cancel(scheduledCueIdentifiers)
             }
         }
         .task {
@@ -371,6 +374,38 @@ struct IntervalRunView: View {
         return try? modelContext.fetch(
             FetchDescriptor<CueProfile>(predicate: #Predicate { $0.isDefault })
         ).first?.config
+    }
+
+    private func cueMessage(for kind: CueEventKind) -> String {
+        switch kind {
+        case .prepareStart: String(localized: "준비를 시작합니다")
+        case .workStart: String(localized: "운동을 시작합니다")
+        case .restStart: String(localized: "휴식을 시작합니다")
+        case .segmentEnd: String(localized: "구간이 종료되었습니다")
+        case .workEnd: String(localized: "운동 구간이 종료되었습니다")
+        case .roundEnd: String(localized: "라운드가 종료되었습니다")
+        case .finalRoundEnter: String(localized: "마지막 라운드입니다")
+        case .finish: Self.notificationMessage
+        case .countdownLead: "" // upcomingEvents가 이 케이스는 안 만드니 실제로는 쓰이지 않는다.
+        }
+    }
+
+    private func buildNotificationRequests(for runner: IntervalRunner) -> [NotificationRequest] {
+        guard let progress = runner.currentProgress(at: .now) else { return [] }
+        let events = CueEventDetector.upcomingEvents(steps: runner.steps, from: progress)
+
+        return events.enumerated().compactMap { index, event -> NotificationRequest? in
+            let mode = cueConfig.flatMap { CueEventDetector.event(for: event.kind, in: $0)?.mode } ?? .soundAndVibration
+            guard mode != .none else { return nil } // "없음"으로 꺼둔 이벤트는 예약 안함
+
+            return NotificationRequest(
+                identifier: "interval.cue.\(index)",
+                secondsRemaining: event.secondsUntil,
+                title: programName,
+                message: cueMessage(for: event.kind),
+                playsSound: mode.playsSound
+            )
+        }
     }
 }
 

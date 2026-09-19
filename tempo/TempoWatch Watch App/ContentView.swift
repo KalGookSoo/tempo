@@ -291,7 +291,7 @@ struct ContentView: View {
                 secondsRemaining: event.secondsUntil,
                 title: programName,
                 message: cueMessage(for: event.kind),
-                playsSound: true
+                sound: .default
             )
         }
     }

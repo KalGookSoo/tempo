@@ -69,6 +69,8 @@
 
    (기기 이름은 로컬에 설치된 시뮬레이터 중 하나로 바꿔서 실행하세요.)
 
+4. 새 UI 문자열(`Text("...")`, `String(localized:)` 등)을 추가했다면, Xcode(IDE)로 최소 한 번 빌드해 `Shared/Localizable.xcstrings`에 그 키가 실제로 병합됐는지 확인한 뒤 커밋하세요. `xcodebuild` 커맨드라인 빌드(CI 포함)는 대상 타겟과 무관하게 String Catalog에 새 키를 자동으로 병합하지 않습니다 — 이는 Xcode IDE 빌드 시스템에서만 일어나는 동작입니다(이슈 #105에서 메인 앱/애플워치 두 타겟 모두로 직접 확인). CI는 이 누락을 잡아주지 않으므로, 병합을 놓치면 그 문자열은 영영 번역 없이 남을 수 있습니다.
+
 ## 릴리스 프로세스
 
 tempo는 [시맨틱 버전 관리](http://semver.org)(`MAJOR.MINOR.PATCH`)를 따릅니다. 릴리스 노트는 [릴리스 템플릿](RELEASE_TEMPLATE.md)을 따라 작성됩니다.

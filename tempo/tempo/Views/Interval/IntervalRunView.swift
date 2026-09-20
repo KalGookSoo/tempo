@@ -397,32 +397,44 @@ struct IntervalRunView: View {
         }
     }
 
+    /// 같은 순간에 겹치는 이벤트(예: 라운드가 바뀌는 순간의 구간 종료+라운드 종료+운동
+    /// 시작)를 알림 하나로 합쳐서 예약한다 — 같은 순간에 별개의 알림을 여러 개 예약하면,
+    /// 잠금화면에서 iOS가 그중 일부의 사운드·진동을 조용히 누락시키는 문제가 있었다
+    /// (#119).
     private func buildNotificationRequests(for runner: IntervalRunner) -> [NotificationRequest] {
         guard let progress = runner.currentProgress(at: .now) else { return [] }
-        let events = CueEventDetector.upcomingEvents(steps: runner.steps, from: progress)
+        let groups = CueEventDetector.upcomingEvents(steps: runner.steps, from: progress)
 
-        return events.enumerated().compactMap { index, event -> NotificationRequest? in
-            let configEvent = cueConfig.flatMap { CueEventDetector.event(for: event.kind, in: $0) }
-            let mode = configEvent?.mode ?? .soundAndVibration
-            guard mode != .none else { return nil } // "없음"으로 꺼둔 이벤트는 예약 안함
+        return groups.enumerated().compactMap { index, group -> NotificationRequest? in
+            // "없음"으로 꺼둔 이벤트는 제외한다 — 그룹 안의 이벤트가 전부 꺼져 있으면
+            // 이 순간엔 아예 알림을 예약하지 않는다.
+            let survivingKinds = group.kinds.filter { kind in
+                let configEvent = cueConfig.flatMap { CueEventDetector.event(for: kind, in: $0) }
+                let mode = configEvent?.mode ?? .soundAndVibration
+                return mode != .none
+            }
+            guard !survivingKinds.isEmpty else { return nil }
 
-            let sound: NotificationSound = mode.playsSound
-                ? notificationSound(for: resolvedSoundAsset(for: configEvent ?? CueConfig.Event(mode: mode, soundAssetID: nil), kind: event.kind))
-                : .none
+            let sound: NotificationSound = survivingKinds.lazy.compactMap { kind -> NotificationSound? in
+                let configEvent = cueConfig.flatMap { CueEventDetector.event(for: kind, in: $0) }
+                let mode = configEvent?.mode ?? .soundAndVibration
+                guard mode.playsSound else { return nil }
+                return notificationSound(for: resolvedSoundAsset(for: configEvent ?? CueConfig.Event(mode: mode, soundAssetID: nil), kind: kind))
+            }.first ?? .none
 
-            // 전체 종료 알림만 별도 identifier를 쓴다 — 탭했을 때 이 프로그램의 실행
-            // 화면(완료 상태)으로 바로 이동시키기 위해서다(#114). 그 외 이벤트는 탭해도
-            // 어느 프로그램인지 특정할 필요가 없어(이미 앱이 살아있으면 그 화면이 그대로
-            // 보이므로) 기존 방식을 유지한다.
-            let identifier = event.kind == .finish
+            // 전체 종료가 포함된 알림만 별도 identifier를 쓴다 — 탭했을 때 이 프로그램의
+            // 실행 화면(완료 상태)으로 바로 이동시키기 위해서다(#114). 그 외 이벤트는
+            // 탭해도 어느 프로그램인지 특정할 필요가 없어(이미 앱이 살아있으면 그
+            // 화면이 그대로 보이므로) 기존 방식을 유지한다.
+            let identifier = survivingKinds.contains(.finish)
                 ? "interval.finish.\(programID)"
                 : "interval.cue.\(index)"
 
             return NotificationRequest(
                 identifier: identifier,
-                secondsRemaining: event.secondsUntil,
+                secondsRemaining: group.secondsUntil,
                 title: programName,
-                message: cueMessage(for: event.kind),
+                message: survivingKinds.map(cueMessage(for:)).joined(separator: " · "),
                 sound: sound
             )
         }

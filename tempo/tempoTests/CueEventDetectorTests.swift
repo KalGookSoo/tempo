@@ -125,20 +125,11 @@ struct CueEventDetectorTests {
         let events = CueEventDetector.upcomingEvents(steps: steps, from: progress)
 
         #expect(events == [
-            .init(kind: .segmentEnd, secondsUntil: 5),
-            .init(kind: .workStart, secondsUntil: 5),
-            .init(kind: .segmentEnd, secondsUntil: 25),
-            .init(kind: .workEnd, secondsUntil: 25),
-            .init(kind: .restStart, secondsUntil: 25),
-            .init(kind: .segmentEnd, secondsUntil: 35),
-            .init(kind: .roundEnd, secondsUntil: 35),
-            .init(kind: .workStart, secondsUntil: 35),
-            .init(kind: .finalRoundEnter, secondsUntil: 35),
-            .init(kind: .segmentEnd, secondsUntil: 55),
-            .init(kind: .workEnd, secondsUntil: 55),
-            .init(kind: .restStart, secondsUntil: 55),
-            .init(kind: .roundEnd, secondsUntil: 65),
-            .init(kind: .finish, secondsUntil: 65),
+            .init(kinds: [.segmentEnd, .workStart], secondsUntil: 5),
+            .init(kinds: [.segmentEnd, .workEnd, .restStart], secondsUntil: 25),
+            .init(kinds: [.segmentEnd, .roundEnd, .workStart, .finalRoundEnter], secondsUntil: 35),
+            .init(kinds: [.segmentEnd, .workEnd, .restStart], secondsUntil: 55),
+            .init(kinds: [.roundEnd, .finish], secondsUntil: 65),
         ])
     }
 
@@ -151,11 +142,8 @@ struct CueEventDetectorTests {
         let events = CueEventDetector.upcomingEvents(steps: steps, from: progress)
 
         #expect(events == [
-            .init(kind: .segmentEnd, secondsUntil: 5),
-            .init(kind: .workEnd, secondsUntil: 5),
-            .init(kind: .restStart, secondsUntil: 5),
-            .init(kind: .roundEnd, secondsUntil: 15),
-            .init(kind: .finish, secondsUntil: 15),
+            .init(kinds: [.segmentEnd, .workEnd, .restStart], secondsUntil: 5),
+            .init(kinds: [.roundEnd, .finish], secondsUntil: 15),
         ])
     }
 
@@ -167,8 +155,7 @@ struct CueEventDetectorTests {
         let events = CueEventDetector.upcomingEvents(steps: steps, from: progress)
 
         #expect(events == [
-            .init(kind: .roundEnd, secondsUntil: 2),
-            .init(kind: .finish, secondsUntil: 2),
+            .init(kinds: [.roundEnd, .finish], secondsUntil: 2),
         ])
     }
 

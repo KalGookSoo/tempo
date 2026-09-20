@@ -89,9 +89,13 @@ enum CueEventDetector {
         return events
     }
 
-    /// 알림 큐 이벤트 하나와, 지금부터 몇 초 뒤에 발생하는지를 함께 담는다.
+    /// 같은 순간(`secondsUntil`)에 함께 발생하는 이벤트 종류들을 한데 묶어서 담는다.
+    /// 예를 들어 라운드가 바뀌는 순간엔 구간 종료+라운드 종료+운동 시작이 동시에
+    /// 발생한다 — 이걸 각각 별개의 로컬 알림으로 예약하면, 잠금화면에서 iOS가 같은
+    /// 순간에 몰려온 여러 알림 중 일부의 사운드·진동을 조용히 누락시키는 문제가
+    /// 있었다(#119). 그래서 한 그룹은 항상 알림 하나로만 예약되어야 한다.
     struct ScheduledCueEvent: Equatable {
-        let kind: CueEventKind
+        let kinds: [CueEventKind]
         let secondsUntil: Int
     }
 
@@ -106,16 +110,13 @@ enum CueEventDetector {
         var previousStep = progress.step
 
         for currentStep in steps[(progress.stepIndex + 1)...] {
-            for kind in transitionEvents(from: previousStep, to: currentStep) {
-                results.append(ScheduledCueEvent(kind: kind, secondsUntil: cursor))
-            }
+            let kinds = transitionEvents(from: previousStep, to: currentStep)
+            results.append(ScheduledCueEvent(kinds: kinds, secondsUntil: cursor))
             cursor += currentStep.seconds
             previousStep = currentStep
         }
 
-        for kind in finishEvents(lastStep: previousStep) {
-            results.append(ScheduledCueEvent(kind: kind, secondsUntil: cursor))
-        }
+        results.append(ScheduledCueEvent(kinds: finishEvents(lastStep: previousStep), secondsUntil: cursor))
 
         return results
     }

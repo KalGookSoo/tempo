@@ -287,16 +287,21 @@ struct ContentView: View {
         }
     }
 
+    /// 같은 순간에 겹치는 이벤트(예: 라운드가 바뀌는 순간의 구간 종료+라운드 종료+운동
+    /// 시작)를 알림 하나로 합쳐서 예약한다 — 같은 순간에 별개의 알림을 여러 개 예약하면,
+    /// 잠금화면에서 iOS가 그중 일부의 사운드·진동을 조용히 누락시키는 문제가 있었다
+    /// (#119).
     private func buildNotificationRequests(for runner: IntervalRunner) -> [NotificationRequest] {
         guard let progress = runner.currentProgress(at: .now) else { return [] }
-        let events = CueEventDetector.upcomingEvents(steps: runner.steps, from: progress)
+        let groups = CueEventDetector.upcomingEvents(steps: runner.steps, from: progress)
 
-        return events.enumerated().map { index, event in
-            NotificationRequest(
-                identifier: "watch.interval.cue.\(index)",
-                secondsRemaining: event.secondsUntil,
+        return groups.enumerated().map { index, group in
+            let identifier = group.kinds.contains(.finish) ? "watch.interval.finish" : "watch.interval.cue.\(index)"
+            return NotificationRequest(
+                identifier: identifier,
+                secondsRemaining: group.secondsUntil,
                 title: programName,
-                message: cueMessage(for: event.kind),
+                message: group.kinds.map(cueMessage(for:)).joined(separator: " · "),
                 sound: .default
             )
         }

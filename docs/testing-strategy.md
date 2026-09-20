@@ -1,12 +1,12 @@
 # Tempo 테스트 전략
 
-`tempoTests`(유닛)/`tempoUITests`(UI)가 Xcode 템플릿 상태 그대로 비어 있다. moov 프로젝트에서는 "집계·계산 로직을 View 안에 그대로 두면 나중에 View를 인스턴스화하지 않고는 테스트할 수 없다"는 문제를 구현 이후에야 발견해 되돌아가 리팩터링했다. tempo는 아직 코드가 없는 시점이므로, 같은 실수를 반복하지 않도록 구현 시작 전에 원칙을 먼저 세운다.
+moov 프로젝트에서는 "집계·계산 로직을 View 안에 그대로 두면 나중에 View를 인스턴스화하지 않고는 테스트할 수 없다"는 문제를 구현 이후에야 발견해 되돌아가 리팩터링했다. tempo는 이 문서의 원칙을 구현 시작 시점부터 지켜, 같은 실수를 반복하지 않았다.
 
 ## 현재 상태
 
-- 코드는 Xcode 기본 템플릿 그대로다(`Item.swift`/`ContentView.swift`는 실제 기능과 무관한 스캐폴딩).
-- `tempoTests/tempoTests.swift`는 **Swift Testing**(`import Testing`, `@Test`)으로 스캐폴딩되어 있다 — 그대로 유지한다.
-- `tempoUITests/tempoUITests.swift`는 **XCTest**로 스캐폴딩되어 있다 — 그대로 유지한다.
+- `tempoTests`에 순수 로직(엔진/디텍터/리포지토리) 유닛 테스트가 여럿 있다(`IntervalRunnerTests`, `CueEventDetectorTests`, `TimerEngineTests`, `StopwatchEngineTests`, `PresetRepositoryTests` 등) — 전부 **Swift Testing**(`import Testing`, `@Test`, `#expect`)으로 작성한다.
+- `tempoUITests/tempoUITests.swift`는 Xcode 템플릿 스캐폴딩 그대로 **XCTest**로 남아있다 — 아래 "UI 테스트" 절의 핵심 플로우는 아직 자동화되지 않았다.
+- CI(`.github/workflows/ci.yml`)는 빌드/포맷만 자동 확인한다 — GitHub 호스팅 러너의 시뮬레이터 런타임 구성 문제로 유닛/UI 테스트는 CI에 자동화돼 있지 않다. PR을 올리기 전에 로컬에서 `xcodebuild test`로 직접 돌려서 통과를 확인한다(`.github/CONTRIBUTING.md` "풀 리퀘스트 제출" 참고).
 
 ## 원칙: 시간 계산/스케줄링 로직은 View 밖의 순수 타입으로 분리한다
 
@@ -19,7 +19,7 @@
 1. **인터벌 실행 시퀀스 계산** — `IntervalConfig(rounds, prepareSeconds, segments)` → 실행할 구간을 순서대로 펼친 배열(`Fn`/`Cn` 라벨, 라운드 반복 포함). `docs/timer-functional-spec.md`의 "피라미드 인터벌" 예시(`F1 01:30`/`C1 00:30`/`F2 01:00`/`C2 00:20`/`F3 00:30`/`C3 00:10`을 8라운드 반복)와 "EMOM" 예시(휴식 `00:00` 구간은 건너뜀)를 그대로 테스트 케이스로 옮긴다.
 2. **기본 프리셋 값 고정(회귀 테스트)** — seed되는 `tabata`(20초/10초/8라운드), `fgb_3r`(5분/1분/3라운드), `emom`(휴식 0초, 최대 99회)이 스펙 수치와 정확히 일치하는지. 나중에 실수로 숫자가 바뀌는 것을 막는다.
 3. **시간 표시 포맷팅** — 타이머 `MM:SS`(`00:00`~`99:59`), 스톱워치 `MM:SS.CS`(`00:00.00`~`99:59.99`), 인터벌 `Fn`/`Cn` 라벨. 최댓값·0 근접 경계값을 포함한다.
-4. **알림 큐 트리거 판정** — 경과/잔여 시간과 `CueConfig`(`countdownLeadSeconds: 3` 등)를 입력받아 "지금 어떤 이벤트가 발동해야 하는가"를 판정하는 순수 함수. 준비 카운트다운 시작/시작 전 카운트다운/운동 시작/휴식 시작/구간 종료/라운드 종료/마지막 라운드 진입/전체 종료, 8개 이벤트 각각 최소 1개 케이스를 둔다.
+4. **알림 큐 트리거 판정** — 경과/잔여 시간과 `CueConfig`(`countdownLeadSeconds: 3` 등)를 입력받아 "지금 어떤 이벤트가 발동해야 하는가"를 판정하는 순수 함수. 준비 카운트다운 시작/시작 전 카운트다운/운동 시작/휴식 시작/구간 종료/운동 종료/라운드 종료/마지막 라운드 진입/전체 종료, 9개 이벤트 각각 최소 1개 케이스를 둔다.
 5. **프리셋 입력값 검증** — 인터벌 세트 수(1~9), 라운드 수(1~99), 구간 시간(`00:00`~`99:59`) 범위를 벗어난 입력을 거부하는지.
 6. **SwiftData 통합 테스트**(in-memory `ModelContainer`) — 앱 최초 실행 시 기본 프리셋 3개가 seed되는지, 프리셋(기본/커스텀 구분 없이) 생성·수정·삭제가 정상 동작하는지, 기본 프리셋을 복제해 만든 `custom` 프리셋을 수정해도 원본이 그대로인지, `SoundAsset`/`TimerPreset`을 soft delete(`deletedAt` 설정)한 뒤 목록 조회에서 제외되는지, soft delete된 기본 프리셋이 앱 재실행 시 다시 시드되지 않는지.
 7. **사운드 파일 경로 생성 규칙** — `SoundAsset.id` 기반으로 `sounds/imported/`·`sounds/recorded/` 아래 파일명이 생성되고, 사용자가 입력한 이름을 파일명으로 그대로 쓰지 않는지.
@@ -43,4 +43,4 @@
 
 ## 다음 단계
 
-이 문서의 원칙(계산/스케줄링 로직을 View 밖으로 분리)은 화면을 만들기 전, 즉 인터벌 실행 엔진과 SwiftData 모델을 구현하는 시점부터 지켜야 나중에 되돌아가 리팩터링하지 않는다. `이슈 #5`(SwiftData 모델 구현)와 동시에 위 6·7번 테스트를, 인터벌 실행 엔진을 구현하는 시점에 1·3·4번 테스트를 함께 작성하는 것을 권장한다.
+남은 건 "UI 테스트" 절에 나열한 핵심 플로우 4가지를 `tempoUITests`에 실제로 작성하는 것이다. 그 전까지는 회귀를 사람이 직접 확인해야 한다.

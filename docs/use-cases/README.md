@@ -22,7 +22,7 @@ Mermaid 다이어그램은 라이트 모드와 다크 모드에서 모두 읽기
 
 ## 앱 내 도움말과의 관계
 
-설정 탭 "도움말"(`tempo/tempo/Views/Help/HelpTopic.swift`의 `HelpLibrary`)은 이 문서들의
+설정 탭 "도움말"(`tempo/tempo/Views/Help/SettingsHelpTopic.swift`의 `HelpLibrary`)은 이 문서들의
 "목적"/"기본 흐름"을 화면에 맞게 요약·각색한 것이다. 이 디렉터리의 문서가 원본(source of
 truth)이므로, 기능이 바뀌면 여기 문서를 먼저 갱신하고 `HelpLibrary`의 해당 주제도 같이
 갱신한다.

@@ -168,13 +168,14 @@ struct CueConfig: Codable, Hashable {
     var workStart: Event
     var restStart: Event
     var segmentEnd: Event
+    var workEnd: Event   // 운동 구간이 끝나는 시점 전용(이슈 #75) — segmentEnd와 별도로 다른(특히 녹음) 사운드를 쓰고 싶은 경우를 위함
     var roundEnd: Event
     var finalRoundEnter: Event
     var finish: Event
 }
 ```
 
-이벤트는 `docs/timer-functional-spec.md` "알림 큐"가 정의한 8개(시작 전 카운트다운은 `countdownLeadSeconds` 하나로 전역 처리, 나머지 7개는 이벤트별 `Mode`) 그대로 대응한다. `soundId: String`(항상 값이 있어야 하는 문자열) 대신 `soundAssetID: UUID?`로 바꿔서, "사운드 없음"을 컴파일 타임에 안전하게 표현하고 `SoundAsset` 테이블을 직접 참조한다 — 임의의 문자열 ID를 손으로 맞추는 대신 실제 존재하는 사운드 row만 가리킬 수 있다.
+이벤트는 `docs/timer-functional-spec.md` "알림 큐"가 정의한 9개(시작 전 카운트다운은 `countdownLeadSeconds` 하나로 전역 처리, 나머지 8개는 이벤트별 `Mode`) 그대로 대응한다. `soundId: String`(항상 값이 있어야 하는 문자열) 대신 `soundAssetID: UUID?`로 바꿔서, "사운드 없음"을 컴파일 타임에 안전하게 표현하고 `SoundAsset` 테이블을 직접 참조한다 — 임의의 문자열 ID를 손으로 맞추는 대신 실제 존재하는 사운드 row만 가리킬 수 있다.
 
 예시:
 
@@ -186,6 +187,7 @@ CueConfig(
     workStart: event,
     restStart: event,
     segmentEnd: event,
+    workEnd: event,
     roundEnd: event,
     finalRoundEnter: event,
     finish: event

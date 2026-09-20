@@ -11,7 +11,7 @@ enum IntervalRoute: Hashable {
     case programs
     case programDetail(id: String)
     case programEdit(id: String)
-    case run(programID: String)
+    case run(programID: String, startsCompleted: Bool)
 }
 
 enum SettingsRoute: Hashable {
@@ -67,7 +67,7 @@ flowchart TD
     I --> N[".new"]
     I --> P[".programs"]
 
-    N --> R[".run(programID:)"]
+    N --> R[".run(programID:startsCompleted:)"]
     N --> P
     P --> P2[".programDetail(id:)"]
     P --> N
@@ -176,7 +176,7 @@ flowchart TD
 
 주요 이동:
 
-- 실행: `.run(programID:)`
+- 실행: `.run(programID:startsCompleted: false)`
 - 수정: `.programEdit(id:)`
 - 목록으로가기: `.programs` (또는 `navigationPath.removeLast()`)
 
@@ -193,7 +193,7 @@ flowchart TD
 - 저장: `.programDetail(id:)`로 복귀 (`navigationPath.removeLast()`)
 - 취소 또는 뒤로가기: `.programDetail(id:)`로 복귀 (`navigationPath.removeLast()`)
 
-### 인터벌 실행 `.run(programID:)`
+### 인터벌 실행 `.run(programID:startsCompleted:)`
 
 목적:
 
@@ -203,7 +203,9 @@ flowchart TD
 
 주요 이동:
 
-- 뒤로가기: 표준 백 버튼으로 `.programDetail(id:)`로 복귀한다 (진입 경로가 항상 프로그램 상세이므로 popToRoot 대신 표준 back을 쓴다).
+- 뒤로가기: 표준 백 버튼으로 `.programDetail(id:)`로 복귀한다 (`.programDetail`에서 들어온 경우 `popToRoot` 대신 표준 back을 쓴다).
+
+`startsCompleted`가 `true`이면(전체 종료 로컬 알림을 탭해서 들어온 경우) 실제로 실행하지 않고 곧바로 완료 상태로 보여준다 — 이때는 `.programDetail`을 거치지 않고 인터벌 탭의 내비게이션 경로를 통째로 이 화면 하나로 교체해서 진입한다(`NotificationDelegate`가 `intervalRouter.path`를 초기화한 뒤 push).
 
 ## 설정 탭
 

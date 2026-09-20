@@ -79,7 +79,7 @@ tempo는 [시맨틱 버전 관리](http://semver.org)(`MAJOR.MINOR.PATCH`)를 �
 
 - **`MARKETING_VERSION`**(`project.pbxproj`) = 시맨틱 버전(`X.Y.Z`). 사람이 보는 릴리스 버전이자 App Store에 노출되는 버전이다.
 - **`CURRENT_PROJECT_VERSION`**(`project.pbxproj`) = 빌드 번호. App Store Connect에 업로드할 때마다 반드시 이전 값보다 커야 하므로, 같은 `MARKETING_VERSION` 안에서도 업로드할 때마다 1씩 올린다.
-- 메인 앱(`tempo`)과 위젯 익스텐션(`TempoWidget`) 타겟은 항상 같은 `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION`을 갖는다 — 둘을 따로 관리할 이유가 없어서, 버전을 올릴 때 두 타겟 모두 함께 바꾼다.
+- 메인 앱(`tempo`), 위젯 익스텐션(`TempoWidget`), 애플워치 앱(`TempoWatch Watch App`) 세 타겟은 항상 같은 `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION`을 갖는다 — 앱 안에 함께 담겨 배포되는 익스텐션은 버전이 메인 앱과 다르면 App Store Connect가 업로드를 거부한다. 버전을 올릴 때 세 타겟 모두 함께 바꾼다.
 
 ### 버전을 올리는 기준
 
@@ -92,22 +92,22 @@ tempo는 [시맨틱 버전 관리](http://semver.org)(`MAJOR.MINOR.PATCH`)를 �
 
 ### git 태그 규칙
 
-릴리스 시점에 `MARKETING_VERSION`과 정확히 일치하는 태그를 `v` 접두사로 만든다.
+릴리스 시점에 `MARKETING_VERSION`과 정확히 일치하는 태그를 `v` 접두사로 로컬에 남긴다(기록용).
 
 ```
 git tag v1.0.0
-git push origin v1.0.0
 ```
 
-이 태그 push가 CD 파이프라인의 트리거가 된다(이슈 #73).
+과거에는 이 태그를 push하면 GitHub Actions(`release.yml`)가 자동으로 아카이브·업로드했지만, 그 CD 파이프라인은 제거했다 — 지금은 Xcode Organizer로 직접 아카이브해서 App Store Connect에 업로드한다(아래 "릴리스 절차" 참고). 태그를 GitHub에도 남기고 싶으면 `git push origin v1.0.0`을 별도로 실행한다.
 
 ### 릴리스 절차
 
-1. `project.pbxproj`에서 `tempo`, `TempoWidget` 두 타겟 모두 `MARKETING_VERSION`을 올린다(빌드 업로드 때마다 `CURRENT_PROJECT_VERSION`도 1씩 올린다).
+1. `project.pbxproj`에서 `tempo`, `TempoWidget`, `TempoWatch Watch App` 세 타겟 모두 `MARKETING_VERSION`을 올린다(빌드 업로드 때마다 `CURRENT_PROJECT_VERSION`도 세 타겟 다 함께 1씩 올린다).
 2. `chore: 버전을 X.Y.Z로 올림` 커밋을 만든다.
-3. 위 규칙대로 태그를 만들어 push한다.
-4. [릴리스 템플릿](RELEASE_TEMPLATE.md)에 따라 GitHub 릴리스 노트를 작성한다.
-5. GitHub 릴리스 노트 중 사용자가 체감할 수 있는 부분만 추려서 [App Store 릴리스 노트 템플릿](../docs/app-store-release-notes-template.md) 형식으로 다시 써서, App Store Connect의 "새로운 기능" 필드에 채운다.
+3. 위 규칙대로 태그를 로컬에 만든다.
+4. Xcode에서 스킴 `tempo`, 대상 `Any iOS Device`로 `Product → Archive` 한 뒤, Organizer의 Distribute App → App Store Connect → Upload로 업로드한다.
+5. [릴리스 템플릿](RELEASE_TEMPLATE.md)에 따라 GitHub 릴리스 노트를 작성한다.
+6. GitHub 릴리스 노트 중 사용자가 체감할 수 있는 부분만 추려서 [App Store 릴리스 노트 템플릿](../docs/app-store-release-notes-template.md) 형식으로 다시 써서, App Store Connect의 "새로운 기능" 필드에 채운다.
 
 ## 응답 언어
 

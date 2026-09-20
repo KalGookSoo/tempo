@@ -21,9 +21,9 @@ enum NotificationScheduler {
                     // 이 케이스는 아이폰(커스텀 녹음 사운드, 이슈 #113)에서만 실제로
                     // 발생하고, 워치는 항상 .default만 쓰므로 여기 도달하지 않는다.
                     #if os(watchOS)
-                    content.sound = .default
+                        content.sound = .default
                     #else
-                    content.sound = UNNotificationSound(named: UNNotificationSoundName(fileName))
+                        content.sound = UNNotificationSound(named: UNNotificationSoundName(fileName))
                     #endif
                 }
 

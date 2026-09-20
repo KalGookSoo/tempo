@@ -37,7 +37,7 @@ struct NotificationSoundFileStoreTests {
 
         #expect(fileName == "cue_\(id.uuidString).caf")
 
-        let converted = try AVAudioFile(forReading: try cafURL(for: fileName))
+        let converted = try AVAudioFile(forReading: cafURL(for: fileName))
         #expect(converted.length > 0)
     }
 

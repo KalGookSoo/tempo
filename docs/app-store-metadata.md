@@ -1,3 +1,8 @@
+---
+title: App Store 메타데이터
+nav_order: 9
+---
+
 # App Store 메타데이터 초안
 
 `#69`(스토어 메타데이터 및 심사 노트 준비) 작업용 초안. App Store Connect에 그대로 옮겨 넣을 수 있도록 필드별로 정리했다. 글자수 제한은 Apple 기준.

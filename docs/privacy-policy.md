@@ -1,5 +1,6 @@
 ---
 title: tempo 개인정보처리방침
+nav_order: 2
 ---
 
 # tempo 개인정보처리방침

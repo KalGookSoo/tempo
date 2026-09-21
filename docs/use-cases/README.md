@@ -1,3 +1,9 @@
+---
+title: 유즈케이스
+nav_order: 11
+has_children: true
+---
+
 # Tempo 사용자 유즈케이스
 
 이 디렉터리는 tempo MVP의 기능별 사용자 유즈케이스를 정리한다.

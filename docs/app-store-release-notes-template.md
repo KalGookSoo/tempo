@@ -1,3 +1,8 @@
+---
+title: App Store 릴리스 노트 템플릿
+nav_order: 10
+---
+
 # App Store 릴리스 노트 템플릿
 
 App Store Connect > 배포 > iOS 앱 버전 > "새로운 기능(What's New in This Version)" 필드에

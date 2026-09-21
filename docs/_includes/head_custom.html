@@ -1,10 +1,6 @@
 <script type="module">
   import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
 
-  // Kramdown이 ```mermaid 코드블록을 <pre><code class="language-mermaid">로 렌더링한다 —
-  // mermaid.js는 class="mermaid"가 붙은 요소만 찾으므로, 렌더링 전에 감싸는 태그를
-  // 바꿔준다. type="module" 스크립트는 defer처럼 DOM 파싱이 끝난 뒤 실행되므로
-  // DOMContentLoaded를 따로 기다릴 필요가 없다.
   document.querySelectorAll("pre > code.language-mermaid").forEach((code) => {
     const div = document.createElement("div");
     div.className = "mermaid";

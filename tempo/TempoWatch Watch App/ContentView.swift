@@ -137,6 +137,18 @@ struct ContentView: View {
                 previousStep = progress?.step
             }
         }
+        // 목록 버튼 대신, 화면을 충분히 길게 좌측으로 쓸었을 때만 목록 복귀를
+        // 시도한다. `simultaneousGesture`를 써서 시작/일시정지/리셋 버튼 탭은
+        // 기존처럼 먼저 처리되게 한다(#127).
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 40)
+                .onEnded { gesture in
+                    guard gesture.translation.width < -40,
+                          abs(gesture.translation.width) > abs(gesture.translation.height)
+                    else { return }
+                    handleExit()
+                }
+        )
         .alert(
             "프로그램을 중단할까요?",
             isPresented: $isLeaveConfirmationPresented
@@ -226,14 +238,6 @@ struct ContentView: View {
         let gap: CGFloat = 8
         let distanceFromCenter = ringDiameter / 2 + buttonDiameter / 2 + gap
         let cornerOffset = distanceFromCenter / 1.41421356 // 대각선(45도) 성분
-
-        // 프로그램 목록으로 돌아가는 버튼. 우측 상단은 시스템 시계가 차지하고 있어
-        // 좌측 상단에 놓는다 — 하단 버튼과 같은 대각선 오프셋 공식을 위쪽에 그대로
-        // 적용한 것뿐이라 링이나 다른 버튼과 겹치지 않는다. 실행 상태와 무관하게
-        // 항상 보인다. 진행 중(준비/운동·휴식/일시정지)일 때는 바로 나가지 않고
-        // 확인을 먼저 받는다 — 안 그러면 실수로 눌러서 진행 상황을 잃기 쉽다.
-        WatchControlButton(systemImage: "list.bullet", style: .reset) { handleExit() }
-            .offset(x: -cornerOffset, y: -cornerOffset)
 
         if runner.state == .paused || runner.state == .completed {
             WatchControlButton(systemImage: "arrow.counterclockwise", style: .reset) { handleReset() }

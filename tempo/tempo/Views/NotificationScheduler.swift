@@ -42,11 +42,26 @@ enum NotificationScheduler {
     }
 
     static func cancel(_ identifiers: [String]) {
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: identifiers)
+        center.removeDeliveredNotifications(withIdentifiers: identifiers)
     }
 
     static func cancel(identifier: String) {
         cancel([identifier])
+    }
+
+    /// 앱이 다시 활성화됐을 때, 저전력 모드 중 밀려 있던 과거 로컬 알림을 제거한다.
+    /// `UNUserNotificationCenter`는 이미 전달된 알림 목록을 비동기로만 제공하므로,
+    /// 앱의 식별자 접두사에 한해서 조회 후 제거한다.
+    static func cancelDeliveredNotifications(withIdentifierPrefix prefix: String) {
+        let center = UNUserNotificationCenter.current()
+        center.getDeliveredNotifications { notifications in
+            let identifiers = notifications
+                .map(\.request.identifier)
+                .filter { $0.hasPrefix(prefix) }
+            center.removeDeliveredNotifications(withIdentifiers: identifiers)
+        }
     }
 }
 

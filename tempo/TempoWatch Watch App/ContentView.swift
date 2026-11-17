@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var receiver = WatchSyncReceiver.shared
     @State private var runner: IntervalRunner?
     @State private var previousStep: IntervalStep?
@@ -24,10 +25,16 @@ struct ContentView: View {
     }
 
     var body: some View {
-        if let runner {
-            runningContent(runner: runner)
-        } else {
-            presetListContent
+        Group {
+            if let runner {
+                runningContent(runner: runner)
+            } else {
+                presetListContent
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            rescheduleCuesAfterActivation()
         }
     }
 
@@ -262,6 +269,20 @@ struct ContentView: View {
     private func handleResume() {
         guard let runner else { return }
         runner.resume(at: .now)
+        let requests = buildNotificationRequests(for: runner)
+        scheduledCueIdentifiers = requests.map(\.identifier)
+        NotificationScheduler.schedule(requests)
+    }
+
+    /// 저전력 모드나 잠금 상태를 거친 뒤 워치 앱이 다시 활성화되면, 시스템이 늦게
+    /// 전달할 수 있는 이전 실행의 알림을 먼저 지운다. 그 후 현재 남은 구간만 새로
+    /// 예약해 과거 구간 알림이 뒤늦게 표시되지 않게 한다(#125).
+    private func rescheduleCuesAfterActivation() {
+        guard let runner, runner.state == .preparing || runner.state == .running else { return }
+
+        NotificationScheduler.cancel(scheduledCueIdentifiers)
+        NotificationScheduler.cancelDeliveredNotifications(withIdentifierPrefix: "watch.interval.")
+
         let requests = buildNotificationRequests(for: runner)
         scheduledCueIdentifiers = requests.map(\.identifier)
         NotificationScheduler.schedule(requests)

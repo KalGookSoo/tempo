@@ -8,6 +8,11 @@ struct ContentView: View {
     @State private var programName = ""
     @State private var scheduledCueIdentifiers: [String] = []
 
+    /// 워치에는 아이폰의 CueConfig를 동기화하지 않으므로, 모든 구간의 마지막 3초에
+    /// 동일한 기본 햅틱/비프를 낸다. 구간 전환 알림만으로는 카운트다운 중 알림이
+    /// 전혀 없어서 운동 중 다음 전환을 준비하기 어려웠다(#126).
+    private let countdownLeadSeconds = 3
+
     /// 준비/운동·휴식/일시정지 중에는 목록으로 돌아가면 잃을 진행 상황이 있어 확인이
     /// 필요하다. 아직 시작 전이거나 이미 끝난 상태는 잃을 게 없어 바로 나갈 수 있다.
     /// 아이폰 실행 화면의 뒤로가기 확인(#74)과 같은 기준이다.
@@ -114,7 +119,11 @@ struct ContentView: View {
                 .frame(width: geo.size.width, height: geo.size.height)
             }
             .task(id: progress?.step.id) {
-                let events = CueEventDetector.events(previousStep: previousStep, currentProgress: progress, countdownLeadSeconds: 0)
+                let events = CueEventDetector.events(
+                    previousStep: previousStep,
+                    currentProgress: progress,
+                    countdownLeadSeconds: countdownLeadSeconds
+                )
                 if !events.isEmpty {
                     WatchCueTriggerPlayer.play()
                 }
@@ -283,7 +292,7 @@ struct ContentView: View {
         case .roundEnd: String(localized: "라운드가 종료되었습니다")
         case .finalRoundEnter: String(localized: "마지막 라운드입니다")
         case .finish: String(localized: "인터벌 프로그램이 종료되었습니다")
-        case .countdownLead: ""
+        case let .countdownLead(secondsRemaining): String(localized: "\(secondsRemaining)초")
         }
     }
 

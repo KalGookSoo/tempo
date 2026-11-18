@@ -44,6 +44,16 @@ enum CueTriggerPlayer {
         }
     }
 
+    /// 설정 화면에서 시스템 미디어 음량을 확인할 때 쓰는 기본 비프. 선택된 알림 큐 설정을
+    /// 바꾸지 않고, 포그라운드에서 실제 큐와 같은 `AVAudioPlayer` 경로로 재생한다.
+    static func playTestBeep() {
+        guard let url = Bundle.main.url(forResource: "beep", withExtension: "wav") else {
+            AudioServicesPlaySystemSound(placeholderSystemSoundID)
+            return
+        }
+        playFile(at: url)
+    }
+
     private static func resolvedURL(for soundAsset: SoundAsset?) -> URL? {
         guard let soundAsset, let relativePath = soundAsset.relativePath else { return nil }
 

@@ -39,6 +39,27 @@ struct SettingsCueView: View {
         Group {
             if let profile {
                 Form {
+                    Section("앱 내 사운드") {
+                        SystemMediaVolumeSlider()
+                            .frame(height: 32)
+
+                        Button {
+                            CueTriggerPlayer.playTestBeep()
+                        } label: {
+                            Label("테스트 비프", systemImage: "speaker.wave.2")
+                        }
+
+                        Text("이 음량은 포그라운드 타이머·인터벌 큐와 녹음한 사운드 미리듣기에 적용됩니다.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Section("백그라운드 알림") {
+                        Text("백그라운드 알림음은 iPhone의 벨소리 및 알림 음량을 사용합니다. 설정 > 사운드 및 햅틱에서 조절할 수 있습니다.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     Section("시작 전 알림") {
                         Picker("알림 시점", selection: countdownLeadBinding(profile)) {
                             ForEach(Self.countdownLeadOptions, id: \.self) { seconds in

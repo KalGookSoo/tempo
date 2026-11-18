@@ -134,79 +134,91 @@ struct IntervalRunView: View {
         // 멈춰 불필요한 갱신을 막는다.
         let isPaused = runner.state != .running && runner.state != .preparing
 
-        return TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: isPaused)) { context in
-            let progress = runner.currentProgress(at: context.date)
-            let externalContent = externalDisplayContent(progress: progress, lastStep: runner.steps.last)
+        return GeometryReader { geometry in
+            TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: isPaused)) { context in
+                let progress = runner.currentProgress(at: context.date)
+                let externalContent = externalDisplayContent(progress: progress, lastStep: runner.steps.last)
+                let displayFontSize = intervalFontSize(for: geometry.size)
 
-            VStack(spacing: 24) {
-                Spacer()
-
-                if let progress {
-                    stepContent(
-                        round: progress.step.round,
-                        totalRounds: progress.step.totalRounds,
-                        statusLabel: statusLabel(for: progress.step),
-                        statusColor: statusColor(for: progress.step, runnerState: runner.state),
-                        remainingSeconds: progress.remainingSeconds,
-                        elapsedInStep: progress.elapsedInStep,
-                        totalSeconds: progress.step.seconds
-                    )
-                } else if let lastStep = runner.steps.last {
-                    // 완료 후에도 대기/운동/휴식 화면과 같은 구성(라운드 표시 + 상태
-                    // 배지 + 링)을 그대로 쓰고, 라벨만 "완료"로 바꾼다 — 화면마다
-                    // 레이아웃이 갑자기 달라지지 않도록.
-                    stepContent(
-                        round: lastStep.round,
-                        totalRounds: lastStep.totalRounds,
-                        statusLabel: "완료",
-                        statusColor: .danger,
-                        remainingSeconds: 0,
-                        elapsedInStep: Double(lastStep.seconds),
-                        totalSeconds: lastStep.seconds
-                    )
-                } else {
-                    // 라운드가 0이라 steps가 아예 비어있는 극단적인 경우의 최후 폴백.
-                    RunningDisplayView(
-                        primaryText: "완료",
-                        statusColor: .danger,
-                        fontSize: timerFontSize
-                    )
-                }
-
-                Spacer()
-
-                HStack {
-                    if runner.state == .paused || runner.state == .completed {
-                        RunningControlButton(title: "리셋", style: .reset) { handleReset() }
-                    }
+                VStack(spacing: 24) {
                     Spacer()
-                    if runner.state == .running || runner.state == .preparing {
-                        RunningControlButton(title: "일시정지", style: .pause) { handlePause() }
-                    } else if runner.state == .paused {
-                        RunningControlButton(title: "재개", style: .start) { handleResume() }
+
+                    if let progress {
+                        stepContent(
+                            round: progress.step.round,
+                            totalRounds: progress.step.totalRounds,
+                            statusLabel: statusLabel(for: progress.step),
+                            statusColor: statusColor(for: progress.step, runnerState: runner.state),
+                            remainingSeconds: progress.remainingSeconds,
+                            elapsedInStep: progress.elapsedInStep,
+                            totalSeconds: progress.step.seconds,
+                            fontSize: displayFontSize
+                        )
+                    } else if let lastStep = runner.steps.last {
+                        // 완료 후에도 대기/운동/휴식 화면과 같은 구성(라운드 표시 + 상태
+                        // 배지 + 링)을 그대로 쓰고, 라벨만 "완료"로 바꾼다 — 화면마다
+                        // 레이아웃이 갑자기 달라지지 않도록.
+                        stepContent(
+                            round: lastStep.round,
+                            totalRounds: lastStep.totalRounds,
+                            statusLabel: "완료",
+                            statusColor: .danger,
+                            remainingSeconds: 0,
+                            elapsedInStep: Double(lastStep.seconds),
+                            totalSeconds: lastStep.seconds,
+                            fontSize: displayFontSize
+                        )
                     } else {
-                        RunningControlButton(title: "시작", style: .start) { handleStart() }
+                        // 라운드가 0이라 steps가 아예 비어있는 극단적인 경우의 최후 폴백.
+                        RunningDisplayView(
+                            primaryText: "완료",
+                            statusColor: .danger,
+                            fontSize: displayFontSize
+                        )
+                    }
+
+                    Spacer()
+
+                    HStack {
+                        if runner.state == .paused || runner.state == .completed {
+                            RunningControlButton(title: "리셋", style: .reset) { handleReset() }
+                        }
+                        Spacer()
+                        if runner.state == .running || runner.state == .preparing {
+                            RunningControlButton(title: "일시정지", style: .pause) { handlePause() }
+                        } else if runner.state == .paused {
+                            RunningControlButton(title: "재개", style: .start) { handleResume() }
+                        } else {
+                            RunningControlButton(title: "시작", style: .start) { handleStart() }
+                        }
                     }
                 }
-            }
-            .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .task(id: TickKey(stepID: progress?.step.id, remainingSeconds: progress?.remainingSeconds)) {
-                triggerCuesIfNeeded(progress: progress, state: runner.state)
-            }
-            // 외부 디스플레이(TV)에 지금 보이는 값을 그대로 반영한다. 이슈 #63 참고.
-            .task(id: TickKey(stepID: progress?.step.id, remainingSeconds: progress?.remainingSeconds)) {
-                ExternalDisplayController.shared.update(externalContent)
-            }
-            // 화면 자동 잠금 방지 신호. 1초 단위로 묶어 보낸다(ScreenAwakeLease의 유예
-            // 시간 5초보다 훨씬 촘촘하다). 화면을 벗어나 이 TimelineView 틱이 멈추면
-            // 신호도 자연히 끊긴다. 이슈 #53 참고.
-            .task(id: Int(context.date.timeIntervalSinceReferenceDate)) {
-                if runner.state == .running || runner.state == .preparing {
-                    ScreenAwakeLease.renew()
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .task(id: TickKey(stepID: progress?.step.id, remainingSeconds: progress?.remainingSeconds)) {
+                    triggerCuesIfNeeded(progress: progress, state: runner.state)
+                }
+                // 외부 디스플레이(TV)에 지금 보이는 값을 그대로 반영한다. 이슈 #63 참고.
+                .task(id: TickKey(stepID: progress?.step.id, remainingSeconds: progress?.remainingSeconds)) {
+                    ExternalDisplayController.shared.update(externalContent)
+                }
+                // 화면 자동 잠금 방지 신호. 1초 단위로 묶어 보낸다(ScreenAwakeLease의 유예
+                // 시간 5초보다 훨씬 촘촘하다). 화면을 벗어나 이 TimelineView 틱이 멈추면
+                // 신호도 자연히 끊긴다. 이슈 #53 참고.
+                .task(id: Int(context.date.timeIntervalSinceReferenceDate)) {
+                    if runner.state == .running || runner.state == .preparing {
+                        ScreenAwakeLease.renew()
+                    }
                 }
             }
         }
+    }
+
+    private func intervalFontSize(for availableSize: CGSize) -> CGFloat {
+        guard UIDevice.current.userInterfaceIdiom == .pad else { return timerFontSize }
+
+        let targetFontSize = min(availableSize.width, availableSize.height) * 0.17
+        return min(max(targetFontSize, timerFontSize), max(timerFontSize, 128))
     }
 
     /// 대기/운동/휴식/완료 화면이 공유하는 "라운드 표시 + 링" 구성.
@@ -222,7 +234,8 @@ struct IntervalRunView: View {
         statusColor: Color,
         remainingSeconds: Int,
         elapsedInStep: TimeInterval,
-        totalSeconds: Int
+        totalSeconds: Int,
+        fontSize: CGFloat
     ) -> some View {
         VStack(spacing: 16) {
             if totalRounds > 0 {
@@ -235,7 +248,7 @@ struct IntervalRunView: View {
                         .foregroundStyle(statusColor)
 
                     Text("\(round) / \(totalRounds)")
-                        .font(.system(size: timerFontSize * 0.65, weight: .heavy, design: .rounded))
+                        .font(.system(size: fontSize * 0.65, weight: .heavy, design: .rounded))
                         .foregroundStyle(statusColor)
                         .monospacedDigit()
                 }
@@ -247,7 +260,7 @@ struct IntervalRunView: View {
                 totalSeconds: totalSeconds,
                 color: statusColor,
                 statusLabel: statusLabel,
-                fontSize: timerFontSize
+                fontSize: fontSize
             )
         }
     }

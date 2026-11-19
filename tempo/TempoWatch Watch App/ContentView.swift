@@ -68,6 +68,15 @@ struct ContentView: View {
             }
             .navigationTitle("프로그램")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationLink {
+                        versionInfoContent
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                    .accessibilityLabel("버전 정보")
+                    .accessibilityIdentifier("versionInfo")
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         receiver.requestRefresh()
@@ -81,6 +90,22 @@ struct ContentView: View {
         .task {
             receiver.loadCachedContext()
         }
+    }
+
+    /// 워치에 실제 설치되어 실행 중인 앱 번들의 버전이다. iPhone에서 전달한 값이 아니므로
+    /// TestFlight에서 워치 앱이 최신 빌드로 갱신됐는지 직접 확인할 수 있다(#130).
+    private var versionInfoContent: some View {
+        List {
+            LabeledContent(
+                "버전",
+                value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "-"
+            )
+            LabeledContent(
+                "빌드",
+                value: Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "-"
+            )
+        }
+        .navigationTitle("버전 정보")
     }
 
     private func runningContent(runner: IntervalRunner) -> some View {

@@ -26,6 +26,17 @@ final class TempoWatch_Watch_AppUITests: XCTestCase {
     }
 
     @MainActor
+    func testVersionInfoShowsInstalledBundleVersion() {
+        let app = XCUIApplication()
+        app.launch()
+
+        app.buttons["versionInfo"].tap()
+
+        XCTAssertTrue(app.staticTexts["1.2.1"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["14"].exists)
+    }
+
+    @MainActor
     func testLaunchPerformance() {
         // This measures how long it takes to launch your application.
         measure(metrics: [XCTApplicationLaunchMetric()]) {

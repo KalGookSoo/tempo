@@ -8,18 +8,20 @@ import Testing
 struct CueConfigTests {
     @Test("workEnd 키가 없는 옛 데이터를 디코딩하면 꺼짐(.none)으로 기본값이 채워진다")
     func decodingLegacyDataWithoutWorkEndFallsBackToNone() throws {
-        let legacyJSON = """
-        {
-            "countdownLeadSeconds": 3,
-            "prepareStart": { "mode": "none", "soundAssetID": null },
-            "workStart": { "mode": "soundAndVibration", "soundAssetID": null },
-            "restStart": { "mode": "none", "soundAssetID": null },
-            "segmentEnd": { "mode": "none", "soundAssetID": null },
-            "roundEnd": { "mode": "none", "soundAssetID": null },
-            "finalRoundEnter": { "mode": "none", "soundAssetID": null },
-            "finish": { "mode": "soundAndVibration", "soundAssetID": null }
-        }
-        """.data(using: .utf8)!
+        let legacyJSON = try #require(
+            """
+            {
+                "countdownLeadSeconds": 3,
+                "prepareStart": { "mode": "none", "soundAssetID": null },
+                "workStart": { "mode": "soundAndVibration", "soundAssetID": null },
+                "restStart": { "mode": "none", "soundAssetID": null },
+                "segmentEnd": { "mode": "none", "soundAssetID": null },
+                "roundEnd": { "mode": "none", "soundAssetID": null },
+                "finalRoundEnter": { "mode": "none", "soundAssetID": null },
+                "finish": { "mode": "soundAndVibration", "soundAssetID": null }
+            }
+            """.data(using: .utf8)
+        )
 
         let config = try JSONDecoder().decode(CueConfig.self, from: legacyJSON)
 

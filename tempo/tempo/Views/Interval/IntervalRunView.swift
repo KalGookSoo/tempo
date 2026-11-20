@@ -18,6 +18,8 @@ struct IntervalRunView: View {
     @Environment(\.modelContext) private var modelContext
     @ScaledMetric(relativeTo: .largeTitle) private var timerFontSize: CGFloat = 76
 
+    private let tabletProgressHorizontalInset: CGFloat = 32
+
     @State private var runner: IntervalRunner?
     @State private var presetNotFound = false
     @State private var cueConfig: CueConfig?
@@ -217,8 +219,8 @@ struct IntervalRunView: View {
     private func intervalFontSize(for availableSize: CGSize) -> CGFloat {
         guard UIDevice.current.userInterfaceIdiom == .pad else { return timerFontSize }
 
-        let targetFontSize = min(availableSize.width, availableSize.height) * 0.17
-        return min(max(targetFontSize, timerFontSize), max(timerFontSize, 128))
+        let ringDiameter = max(availableSize.width - tabletProgressHorizontalInset * 2, 0)
+        return ringDiameter / 3.8
     }
 
     /// 대기/운동/휴식/완료 화면이 공유하는 "라운드 표시 + 링" 구성.

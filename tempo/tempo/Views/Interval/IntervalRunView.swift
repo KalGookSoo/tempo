@@ -19,6 +19,8 @@ struct IntervalRunView: View {
     @ScaledMetric(relativeTo: .largeTitle) private var timerFontSize: CGFloat = 76
 
     private let tabletProgressHorizontalInset: CGFloat = 32
+    private let tabletReservedVerticalSpace: CGFloat = 240
+    private let roundContentHeightRatio: CGFloat = 1.21
 
     @State private var runner: IntervalRunner?
     @State private var presetNotFound = false
@@ -219,7 +221,12 @@ struct IntervalRunView: View {
     private func intervalFontSize(for availableSize: CGSize) -> CGFloat {
         guard UIDevice.current.userInterfaceIdiom == .pad else { return timerFontSize }
 
-        let ringDiameter = max(availableSize.width - tabletProgressHorizontalInset * 2, 0)
+        let widthBasedDiameter = max(availableSize.width - tabletProgressHorizontalInset * 2, 0)
+        let heightBasedDiameter = max(
+            (availableSize.height - tabletReservedVerticalSpace) / roundContentHeightRatio,
+            0
+        )
+        let ringDiameter = min(widthBasedDiameter, heightBasedDiameter)
         return ringDiameter / 3.8
     }
 

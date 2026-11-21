@@ -32,8 +32,8 @@ final class TempoWatch_Watch_AppUITests: XCTestCase {
 
         app.buttons["versionInfo"].tap()
 
-        XCTAssertTrue(app.staticTexts["1.2.3"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["17"].exists)
+        XCTAssertTrue(app.staticTexts["1.2.4"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["18"].exists)
     }
 
     @MainActor

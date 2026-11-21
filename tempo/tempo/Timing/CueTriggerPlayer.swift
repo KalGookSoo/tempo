@@ -25,6 +25,12 @@ enum CueTriggerPlayer {
     /// `.playback`(무음 스위치와 무관하게 알림음이 들려야 함) + `.mixWithOthers`(다른 앱
     /// 오디오를 끄지 않음)로 명시한다.
     static func prewarmAudioSession() {
+        activatePlaybackAudioSession()
+    }
+
+    /// 녹음 기능이 공용 세션을 `.playAndRecord`로 바꿀 수 있으므로, 포그라운드 큐를
+    /// 재생할 때마다 미디어 재생용 세션을 다시 보장한다.
+    static func activatePlaybackAudioSession() {
         try? AVAudioSession.sharedInstance().setCategory(.playback, options: [.mixWithOthers])
         try? AVAudioSession.sharedInstance().setActive(true)
     }
@@ -72,6 +78,7 @@ enum CueTriggerPlayer {
 
     private static func playFile(at url: URL) {
         do {
+            activatePlaybackAudioSession()
             let player = try AVAudioPlayer(contentsOf: url)
             player.prepareToPlay()
             player.play()

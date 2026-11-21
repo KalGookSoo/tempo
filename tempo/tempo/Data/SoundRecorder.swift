@@ -108,6 +108,9 @@ final class SoundRecorder: NSObject {
         }
         let durationMs = Int(recorder.currentTime * 1000)
         recorder.stop()
+        // 녹음에 쓴 `.playAndRecord` 세션이 이후 인터벌 큐까지 남지 않게, 즉시
+        // 포그라운드 큐의 공통 재생 세션으로 복구한다.
+        CueTriggerPlayer.activatePlaybackAudioSession()
         self.recorder = nil
         self.pendingID = nil
         isRecording = false
